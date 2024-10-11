@@ -1,0 +1,30 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="LGPL v3"
+issueTrackerURL="https://www.github.com/xfacthd/foup/issues"
+
+[[mods]]
+    modId="foup"
+    version="${mod_version}"
+    displayName="FOUP"
+    #displayURL="https://modrinth.com/mod/foup"
+    #logoFile="logo.png"
+    authors="XFactHD"
+    description=''''''
+
+#[[mixins]]
+#config="foup.mixins.json"
+
+[[dependencies.foup]]
+    modId="neoforge"
+    type="required"
+    versionRange="${neo_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.foup]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
