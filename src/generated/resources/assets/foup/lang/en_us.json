@@ -1,0 +1,12 @@
+{
+  "block.foup.overhead_rail": "Overhead Rail",
+  "block.foup.overhead_rail_curve": "Overhead Rail Curve",
+  "block.foup.overhead_rail_switch": "Overhead Rail Switch",
+  "desc.foup.component.held_foup.contents": "FOUP Contents: %s x %s",
+  "desc.foup.component.held_foup.contents.empty": "FOUP Contents: Empty",
+  "desc.foup.component.item_contents.contents": "Contains: %s x %s",
+  "foup.itemGroup.main": "FOUP",
+  "item.foup.foup": "FOUP",
+  "item.foup.foup.desc": "Front Opening Unified Pod",
+  "item.foup.overhead_cart": "Overhead Hoist Cart"
+}

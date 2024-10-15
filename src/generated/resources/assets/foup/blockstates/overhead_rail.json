@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "foup:block/overhead_rail",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "foup:block/overhead_rail"
+    },
+    "facing=south": {
+      "model": "foup:block/overhead_rail",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "foup:block/overhead_rail",
+      "y": 270
+    }
+  }
+}

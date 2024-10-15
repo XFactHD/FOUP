@@ -22,5 +22,6 @@ eclipse
 run
 run_gametest
 run_server
+.cache
 
 repo

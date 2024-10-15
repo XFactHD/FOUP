@@ -7,11 +7,11 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import org.slf4j.Logger;
 
-@Mod(Foup.MODID)
+@Mod(Foup.MOD_ID)
 @SuppressWarnings("UtilityClassWithPublicConstructor")
 public final class Foup
 {
-    public static final String MODID = "foup";
+    public static final String MOD_ID = "foup";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public Foup(IEventBus modBus)

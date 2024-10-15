@@ -1,0 +1,115 @@
+plugins {
+    id 'java-library'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.36-beta'
+}
+
+version = mod_version
+group = 'xfacthd.foup'
+
+base {
+    archivesName = 'foup'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = project.neo_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    runs {
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'foup'
+        }
+
+        server {
+            server()
+            gameDirectory = project.file('run_server')
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'foup'
+        }
+
+        gameTestServer {
+            type = "gameTestServer"
+            gameDirectory = project.file('run_gametest')
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'foup'
+        }
+
+        data {
+            data()
+            programArguments.addAll '--mod', 'foup', '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        foup {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+repositories {
+    maven {
+        url 'https://dogforce-games.com/maven'
+    }
+}
+
+dependencies {
+    jarJar(implementation "dev.gigaherz.graph:GraphLib3:${graphlib_version}") {
+        version {
+            strictly "[${graphlib_version}, ${graphlib_version_upper})"
+            prefer graphlib_version
+        }
+    }
+}
+
+tasks.withType(ProcessResources).configureEach {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_version            : mod_version
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand replaceProperties
+    }
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/repo"
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}

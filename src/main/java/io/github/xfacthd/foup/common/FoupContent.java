@@ -1,18 +1,39 @@
 package io.github.xfacthd.foup.common;
 
 import io.github.xfacthd.foup.Foup;
+import io.github.xfacthd.foup.common.block.OverheadRailBlock;
+import io.github.xfacthd.foup.common.block.OverheadRailCurveBlock;
+import io.github.xfacthd.foup.common.block.OverheadRailSwitchBlock;
+import io.github.xfacthd.foup.common.blockentity.OverheadRailBlockEntity;
+import io.github.xfacthd.foup.common.data.component.HeldFoup;
+import io.github.xfacthd.foup.common.data.component.ItemContents;
+import io.github.xfacthd.foup.common.entity.OverheadCartAction;
+import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
+import io.github.xfacthd.foup.common.item.FoupItem;
+import io.github.xfacthd.foup.common.item.OverheadCartItem;
 import io.github.xfacthd.foup.common.util.registration.DeferredBlockEntity;
 import io.github.xfacthd.foup.common.util.registration.DeferredBlockEntityRegister;
+import io.github.xfacthd.foup.common.util.registration.DeferredDataComponentType;
 import io.github.xfacthd.foup.common.util.registration.DeferredDataComponentTypeRegister;
+import io.github.xfacthd.foup.common.util.registration.DeferredEntity;
 import io.github.xfacthd.foup.common.util.registration.DeferredEntityRegister;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -20,30 +41,79 @@ import java.util.function.Supplier;
 
 public final class FoupContent
 {
-    private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Foup.MODID);
-    private static final DeferredDataComponentTypeRegister DATA_COMPONENTS = DeferredDataComponentTypeRegister.create(Foup.MODID);
-    private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Foup.MODID);
-    private static final DeferredBlockEntityRegister BLOCK_ENTITIES = DeferredBlockEntityRegister.create(Foup.MODID);
-    private static final DeferredEntityRegister ENTITIES = DeferredEntityRegister.create(Foup.MODID);
+    private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Foup.MOD_ID);
+    private static final DeferredDataComponentTypeRegister DATA_COMPONENTS = DeferredDataComponentTypeRegister.create(Foup.MOD_ID);
+    private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Foup.MOD_ID);
+    private static final DeferredBlockEntityRegister BLOCK_ENTITIES = DeferredBlockEntityRegister.create(Foup.MOD_ID);
+    private static final DeferredEntityRegister ENTITIES = DeferredEntityRegister.create(Foup.MOD_ID);
+    private static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Foup.MOD_ID);
+    private static final DeferredRegister<EntityDataSerializer<?>> ENTITY_DATA_SERIALIZERS = DeferredRegister.create(NeoForgeRegistries.ENTITY_DATA_SERIALIZERS, Foup.MOD_ID);
 
     // region Blocks
+    public static final Holder<Block> BLOCK_RAIL = registerBlock("overhead_rail", OverheadRailBlock::new);
+    public static final Holder<Block> BLOCK_RAIL_CURVE = registerBlock("overhead_rail_curve", OverheadRailCurveBlock::new);
+    public static final Holder<Block> BLOCK_RAIL_SWITCH = registerBlock("overhead_rail_switch", OverheadRailSwitchBlock::new);
+    //public static final Holder<Block> BLOCK_RAIL_STATION = registerBlock("overhead_rail_station", OverheadRailStationBlock::new);
+    //public static final Holder<Block> BLOCK_FOUP_LOADER = registerBlock("foup_loader", FoupLoaderBlock::new);
+    //public static final Holder<Block> BLOCK_FOUP_STORAGE = registerBlock("foup_storage", FoupStorageBlock::new);
     // endregion
 
     // region Data Components
+    public static final DeferredDataComponentType<HeldFoup> DC_TYPE_HELD_FOUP = DATA_COMPONENTS.registerComponentType(
+            "held_foup", builder -> builder.persistent(HeldFoup.CODEC).networkSynchronized(HeldFoup.STREAM_CODEC).cacheEncoding()
+    );
+    public static final DeferredDataComponentType<ItemContents> DC_TYPE_ITEM_CONTENTS = DATA_COMPONENTS.registerComponentType(
+            "item_contents", builder -> builder.persistent(ItemContents.CODEC).networkSynchronized(ItemContents.STREAM_CODEC).cacheEncoding()
+    );
     // endregion
 
     // region Items
+    public static final DeferredItem<Item> ITEM_FOUP = ITEMS.registerItem("foup", FoupItem::new);
+    public static final DeferredItem<Item> ITEM_CART = ITEMS.registerItem("overhead_cart", OverheadCartItem::new);
     // endregion
 
     // region Block Entities
+    public static final Holder<BlockEntityType<?>> BE_TYPE_RAIL = registerBlockEntity(
+            "overhead_rail", OverheadRailBlockEntity::new, BLOCK_RAIL, BLOCK_RAIL_CURVE, BLOCK_RAIL_SWITCH
+    );
+    //public static final Holder<BlockEntityType<?>> BE_TYPE_RAIL_STATION = registerBlockEntity(
+    //        "overhead_rail_station", OverheadRailStationBlockEntity::new, BLOCK_RAIL_STATION
+    //);
+    //public static final Holder<BlockEntityType<?>> BE_TYPE_FOUP_LOADER = registerBlockEntity(
+    //        "foup_loader", FoupLoaderBlockEntity::new, BLOCK_FOUP_LOADER
+    //);
+    //public static final Holder<BlockEntityType<?>> BE_TYPE_FOUP_STORAGE = registerBlockEntity(
+    //        "foup_storage", FoupStorageBlockEntity::new, BLOCK_FOUP_STORAGE
+    //);
     // endregion
 
     // region Entities
+    public static final DeferredEntity<OverheadCartEntity> ENTITY_TYPE_CART = ENTITIES.registerEntity(
+            "overhead_cart", OverheadCartEntity::new, MobCategory.MISC, builder -> builder.sized(1F, 1F)
+                    .setUpdateInterval(2)
+                    .noSummon()
+    );
+    // endregion
+
+    // region Creative Tabs
+    public static final Holder<CreativeModeTab> TAB_MAIN = CREATIVE_TABS.register("main", () -> CreativeModeTab.builder()
+            .title(Component.translatable("foup.itemGroup.main"))
+            .icon(ITEM_CART::toStack)
+            .displayItems((params, output) -> ITEMS.getEntries().stream().map(Holder::value).forEach(output::accept))
+            .build()
+    );
+    // endregion
+
+    // region Entity Data Serializers
+    public static final DeferredHolder<EntityDataSerializer<?>, EntityDataSerializer<OverheadCartAction>> ENTITY_DATA_SERIALIER_CART_ACTION =
+            ENTITY_DATA_SERIALIZERS.register("cart_action", () -> EntityDataSerializer.forValueType(OverheadCartAction.STREAM_CODEC));
     // endregion
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Function<BlockBehaviour.Properties, T> factory)
     {
-        return BLOCKS.registerBlock(name, factory, BlockBehaviour.Properties.of());
+        DeferredBlock<T> block = BLOCKS.registerBlock(name, factory, BlockBehaviour.Properties.of());
+        ITEMS.registerSimpleBlockItem(block);
+        return block;
     }
 
     @SafeVarargs
@@ -62,6 +132,8 @@ public final class FoupContent
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
         ENTITIES.register(modBus);
+        CREATIVE_TABS.register(modBus);
+        ENTITY_DATA_SERIALIZERS.register(modBus);
     }
 
     private FoupContent() { }
