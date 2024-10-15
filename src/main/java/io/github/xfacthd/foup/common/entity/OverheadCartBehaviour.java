@@ -69,7 +69,10 @@ final class OverheadCartBehaviour
         if (prevNodePos != null && (firstTick || cart.tickCount % 20 == 0))
         {
             prevNode = findTrackNode(prevNodePos, false);
-            prevNodePos = null;
+            if (prevNode != null)
+            {
+                prevNodePos = null;
+            }
         }
 
         switch (action.state())
