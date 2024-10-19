@@ -3,16 +3,14 @@ package io.github.xfacthd.foup.common.data.railnet;
 import com.google.common.base.Preconditions;
 import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
-import net.minecraft.core.BlockPos;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.Deque;
-import java.util.PriorityQueue;
+import java.util.Objects;
 import java.util.Queue;
 
 public final class Dijkstra
@@ -22,7 +20,6 @@ public final class Dijkstra
      * @param start The starting node (must be the cart's current position to handle single-step paths correctly)
      * @param target The target node intended to be reached
      * @return The shortest path between the nodes as a queue of nodes to travel along
-     * // FIXME: produces completely broken paths
      */
     public static TrackPath getShortestPath(Graph<RailNetwork> graph, TrackNode start, TrackNode target)
     {
@@ -38,33 +35,26 @@ public final class Dijkstra
         }
 
         int size = graph.getObjects().size();
-        Reference2IntMap<TrackNode> distances = new Reference2IntOpenHashMap<>(size);
-        distances.defaultReturnValue(Integer.MAX_VALUE);
-        distances.put(start, 0);
         Reference2ReferenceMap<TrackNode, TrackNode> predecessors = new Reference2ReferenceOpenHashMap<>(size);
-        Queue<GraphObject<?>> queue = new PriorityQueue<>(size, Comparator.comparingInt(distances::getInt));
-        queue.addAll(graph.getObjects());
+        SearchQueue queue = new SearchQueue(graph.getObjects());
+        Objects.requireNonNull(queue.findNode(start)).distance = 0;
 
         while (!queue.isEmpty())
         {
-            TrackNode node = (TrackNode) queue.remove();
-            if (node == target)
-            {
-                // FIXME: bad workaround for priority queue reordering in undesired ways
-                if (predecessors.containsKey(node)) break;
-                queue.offer(node);
-            }
+            SearchNode node = queue.remove();
+            if (node.node == target) break;
 
-            for (GraphObject<RailNetwork> neighbour : graph.getNeighbours(node))
+            for (GraphObject<RailNetwork> neighbour : graph.getNeighbours(node.node))
             {
                 TrackNode adjNode = (TrackNode) neighbour;
-                if (queue.contains(adjNode))
+                SearchNode adjSearchNode = queue.findNode(adjNode);
+                if (adjSearchNode != null)
                 {
-                    int altDist = distances.getInt(node) + adjNode.getPathingCost();
-                    if (altDist < distances.getInt(adjNode))
+                    int altDist = node.distance + adjNode.getPathingCost();
+                    if (altDist < adjSearchNode.distance)
                     {
-                        distances.put(adjNode, altDist);
-                        predecessors.put(adjNode, node);
+                        adjSearchNode.distance = altDist;
+                        predecessors.put(adjNode, node.node);
                     }
                 }
             }
@@ -82,43 +72,74 @@ public final class Dijkstra
         return createPath(graph, nodes);
     }
 
-    public static TrackPath getTestPath(Graph<RailNetwork> graph)
+    private static final class SearchNode
     {
-        RailNetwork network = graph.getContextData();
-        Queue<TrackPath.PathNode> nodes = new ArrayDeque<>();
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(19, 116, 62))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(19, 116, 63))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(19, 116, 64))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(19, 116, 65))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(20, 116, 65))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(21, 116, 65))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(22, 116, 65))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(23, 116, 65))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(23, 116, 64))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(23, 116, 63))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(23, 116, 62))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(23, 116, 61))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(23, 116, 60))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(23, 116, 59))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(23, 116, 58))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(23, 116, 57))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(23, 116, 56))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(23, 116, 55))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(23, 116, 54))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(23, 116, 53))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(22, 116, 53))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(21, 116, 53))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(20, 116, 53))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(19, 116, 53))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(19, 116, 54))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(19, 116, 55))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(19, 116, 56))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(19, 116, 57))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(19, 116, 58))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(19, 116, 59))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(19, 116, 60))));
-        nodes.offer(TrackPath.PathNode.of(network.getNode(new BlockPos(19, 116, 61))));
-        return createPath(graph, nodes);
+        private final TrackNode node;
+        private int distance = Integer.MAX_VALUE;
+
+        private SearchNode(TrackNode node)
+        {
+            this.node = node;
+        }
+    }
+
+    private static final class SearchQueue
+    {
+        private final SearchNode[] nodes;
+        private int size;
+
+        private SearchQueue(Collection<GraphObject<RailNetwork>> nodes)
+        {
+            this.nodes = new SearchNode[nodes.size()];
+            int i = 0;
+            for (GraphObject<RailNetwork> node : nodes)
+            {
+                this.nodes[i] = new SearchNode((TrackNode) node);
+                i++;
+            }
+            this.size = nodes.size();
+        }
+
+        SearchNode remove()
+        {
+            if (size == 0) throw new IllegalStateException("Queue is empty");
+
+            int minDist = Integer.MAX_VALUE;
+            SearchNode result = null;
+            int resultIdx = -1;
+            for (int i = 0; i < nodes.length; i++)
+            {
+                SearchNode node = nodes[i];
+                if (node != null && (result == null || node.distance < minDist))
+                {
+                    minDist = node.distance;
+                    result = node;
+                    resultIdx = i;
+                }
+            }
+            if (resultIdx == -1) throw new IllegalStateException("No node found");
+            nodes[resultIdx] = null;
+            size--;
+            return Objects.requireNonNull(result, "No node found");
+        }
+
+        @Nullable
+        SearchNode findNode(TrackNode node)
+        {
+            for (SearchNode searchNode : nodes)
+            {
+                if (searchNode != null && searchNode.node == node)
+                {
+                    return searchNode;
+                }
+            }
+            return null;
+        }
+
+        boolean isEmpty()
+        {
+            return size == 0;
+        }
     }
 
     private static TrackPath createPath(Graph<RailNetwork> graph, Queue<TrackPath.PathNode> nodes)

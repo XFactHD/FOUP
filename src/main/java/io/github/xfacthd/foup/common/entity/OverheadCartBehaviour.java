@@ -157,7 +157,7 @@ final class OverheadCartBehaviour
                 RailNetwork network = graph.getContextData();
                 //TrackNode targetNode = network.getStation(schedule.getNextStation());
                 //path = Dijkstra.getShortestPath(graph, currNode, targetNode);
-                path = Dijkstra.getTestPath(graph); // TODO: Replace with above lines when Dijkstra is fixed
+                path = Dijkstra.getShortestPath(graph, (TrackNode) currNode.getGraph().getNeighbours(currNode).iterator().next(), currNode); // TODO: Replace with above lines when schedules are implemented
                 if (path.peek(network) == currNode)
                 {
                     // Drop the first path node if it's the one the cart is on
