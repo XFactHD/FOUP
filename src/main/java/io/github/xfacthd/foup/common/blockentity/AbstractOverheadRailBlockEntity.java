@@ -5,18 +5,17 @@ import io.github.xfacthd.foup.common.block.AbstractOverheadRailBlock;
 import io.github.xfacthd.foup.common.data.railnet.RailNetwork;
 import io.github.xfacthd.foup.common.data.railnet.RailNetworkSavedData;
 import io.github.xfacthd.foup.common.data.railnet.TrackNode;
+import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public abstract class AbstractOverheadRailBlockEntity extends BlockEntity
+public abstract class AbstractOverheadRailBlockEntity extends BaseBlockEntity
 {
     private static final Direction[] HORIZONTAL_DIRECTIONS = Direction.Plane.HORIZONTAL.stream().toArray(Direction[]::new);
 
@@ -38,6 +37,11 @@ public abstract class AbstractOverheadRailBlockEntity extends BlockEntity
         return false;
     }
 
+    public int getStationHeightDifference()
+    {
+        return -1;
+    }
+
     public final void destroyNode()
     {
         Graph<RailNetwork> graph = Objects.requireNonNull(trackNode, "Track node missing").getGraph();
@@ -49,6 +53,8 @@ public abstract class AbstractOverheadRailBlockEntity extends BlockEntity
     {
         return trackNode;
     }
+
+    public void notifyArrival(OverheadCartEntity cart, AbstractCartInteractorBlockEntity.Action action) { }
 
     @Override
     public void setRemoved()
@@ -118,10 +124,5 @@ public abstract class AbstractOverheadRailBlockEntity extends BlockEntity
             return connected;
         }
         return false;
-    }
-
-    protected final Level level()
-    {
-        return Objects.requireNonNull(level, "Level missing");
     }
 }

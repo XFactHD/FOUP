@@ -54,7 +54,7 @@ public final class RailNetwork implements Mergeable<RailNetwork>
     void addNode(TrackNode node)
     {
         nodes.put(node.getPos().asLong(), node);
-        if (node.isStation())
+        if (node.isStation() && !node.getName().isBlank())
         {
             stations.put(node.getName(), node);
         }
@@ -89,6 +89,21 @@ public final class RailNetwork implements Mergeable<RailNetwork>
         return stations.get(name);
     }
 
+    void addStation(String name, TrackNode node)
+    {
+        stations.put(name, node);
+    }
+
+    void removeStation(String name)
+    {
+        stations.remove(name);
+    }
+
+    boolean isValidStationName(String name)
+    {
+        return !name.isBlank() && !stations.containsKey(name);
+    }
+
     public void registerPath(TrackPath path)
     {
         activePaths.add(path);
@@ -99,7 +114,7 @@ public final class RailNetwork implements Mergeable<RailNetwork>
         activePaths.remove(path);
     }
 
-    private void invalidatePaths()
+    void invalidatePaths()
     {
         if (!activePaths.isEmpty())
         {

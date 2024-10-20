@@ -56,6 +56,25 @@ public final class RailNetworkSavedData extends SavedData
         }
     }
 
+    public static boolean setStationName(ServerLevel level, TrackNode node, String newName)
+    {
+        RailNetwork network = node.getNetwork();
+        if (network.isValidStationName(newName))
+        {
+            String oldName = node.getName();
+            if (!oldName.isBlank())
+            {
+                network.removeStation(oldName);
+            }
+            node.setName(newName);
+            network.addStation(newName, node);
+            network.invalidatePaths();
+            RailNetworkSavedData.get(level).setDirty();
+            return true;
+        }
+        return false;
+    }
+
     void tryAddNetwork(Graph<RailNetwork> graph)
     {
         if (!networks.containsValue(graph))

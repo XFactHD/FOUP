@@ -2,6 +2,7 @@ package io.github.xfacthd.foup.common.entity;
 
 import com.google.common.base.Preconditions;
 import dev.gigaherz.graph3.Graph;
+import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.AbstractOverheadRailBlockEntity;
 import io.github.xfacthd.foup.common.data.TrackShape;
 import io.github.xfacthd.foup.common.data.railnet.Dijkstra;
@@ -77,7 +78,7 @@ final class OverheadCartBehaviour
 
         switch (action.state())
         {
-            case IDLE -> { }
+            case IDLE, POD_IN_LOADER_OR_STORAGE -> { }
             case MOVING ->
             {
                 if (prevNode == null && prevNodePos != null)
@@ -116,25 +117,26 @@ final class OverheadCartBehaviour
             {
                 if (cart.tickCount - actionStart > action.duration())
                 {
-                    startHoist(true);
+                    int heightDiff;
+                    AbstractOverheadRailBlockEntity owner = currNode.getOwner();
+                    if (!currNode.isStation() || owner == null || (heightDiff = owner.getStationHeightDifference()) <= 0)
+                    {
+                        setAction(OverheadCartState.IDLE, 0, 0);
+                        return;
+                    }
+
+                    startHoist(true, heightDiff);
                 }
             }
             case LOWERING_HOIST ->
             {
                 if (cart.tickCount - actionStart > action.duration())
                 {
-                    setAction(OverheadCartState.POD_IN_LOADER, 30, action.heightDiff());
+                    setAction(OverheadCartState.POD_IN_LOADER_OR_STORAGE, 30, action.heightDiff());
+                    // TODO: determine action from schedule
+                    currNode.notifyArrival(cart, AbstractCartInteractorBlockEntity.Action.LOAD);
                 }
             }
-            case POD_IN_LOADER ->
-            {
-                // TODO: no-op, station signals ready for departure
-                if (cart.tickCount - actionStart > action.duration())
-                {
-                    startHoist(false);
-                }
-            }
-            case POD_IN_STORAGE -> { }
             case RAISING_HOIST ->
             {
                 if (cart.tickCount - actionStart > action.duration())
@@ -271,19 +273,15 @@ final class OverheadCartBehaviour
         return null;
     }
 
-    void notifyLoadingComplete()
+    void notifyReadyForDeparture()
     {
-        OverheadCartState state = action.state();
-        Preconditions.checkState(state == OverheadCartState.POD_IN_LOADER || state == OverheadCartState.POD_IN_STORAGE);
-
-        startHoist(false);
+        Preconditions.checkState(action.state() == OverheadCartState.POD_IN_LOADER_OR_STORAGE);
+        startHoist(false, action.heightDiff());
     }
 
-    private void startHoist(boolean downward)
+    private void startHoist(boolean downward, int heightDiff)
     {
         OverheadCartState state = downward ? OverheadCartState.LOWERING_HOIST : OverheadCartState.RAISING_HOIST;
-        // TODO: replace with actual value from targeted station
-        int heightDiff = 2;
         float dist = OverheadCartEntity.calculateHoistDistance(heightDiff);
         int duration = (int) Math.ceil(dist / 16F * HOIST_TICKS_PER_BLOCK);
         setAction(state, duration, heightDiff);

@@ -59,5 +59,21 @@ public final class FoupBlockStateProvider extends BlockStateProvider
             return ConfiguredModel.builder().modelFile(model).rotationY(yRot).build();
         });
         simpleBlockItem(FoupContent.BLOCK_RAIL_SWITCH.value(), switchRightOutModel);
+
+        ModelFile stationModel = models().getExistingFile(modLoc("overhead_rail")); // TODO: add actual station model and link state
+        getVariantBuilder(FoupContent.BLOCK_RAIL_STATION.value()).forAllStates(state ->
+        {
+            int yRot = ((int) state.getValue(PropertyHolder.FACING_HOR).toYRot() + 180) % 360;
+            return ConfiguredModel.builder().modelFile(stationModel).rotationY(yRot).build();
+        });
+        simpleBlockItem(FoupContent.BLOCK_RAIL_STATION.value(), stationModel);
+
+        ModelFile loaderModel = models().getExistingFile(modLoc("foup_loader"));
+        getVariantBuilder(FoupContent.BLOCK_FOUP_LOADER.value()).forAllStates(state ->
+        {
+            int yRot = (int) state.getValue(PropertyHolder.FACING_HOR).toYRot() % 360;
+            return ConfiguredModel.builder().modelFile(loaderModel).rotationY(yRot).build();
+        });
+        simpleBlockItem(FoupContent.BLOCK_FOUP_LOADER.value(), loaderModel);
     }
 }

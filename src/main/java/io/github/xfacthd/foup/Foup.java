@@ -2,6 +2,7 @@ package io.github.xfacthd.foup;
 
 import com.mojang.logging.LogUtils;
 import io.github.xfacthd.foup.common.FoupContent;
+import io.github.xfacthd.foup.common.data.capability.CapabilitySetup;
 import io.github.xfacthd.foup.common.network.NetworkSetup;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -19,5 +20,6 @@ public final class Foup
         FoupContent.init(modBus);
 
         modBus.addListener(NetworkSetup::onRegisterPayloadHandlers);
+        modBus.addListener(CapabilitySetup::onRegisterCapabilities);
     }
 }

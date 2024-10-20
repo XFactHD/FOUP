@@ -120,7 +120,7 @@ public final class OverheadCartModel extends EntityModel<OverheadCartEntity>
 		{
 			case LOWERING_HOIST -> computeDistance(entity, computeMultiplier(entity, ageInTicks, false));
 			case RAISING_HOIST -> computeDistance(entity, computeMultiplier(entity, ageInTicks, true));
-			case POD_IN_LOADER, POD_IN_STORAGE -> computeDistance(entity, 1F);
+			case POD_IN_LOADER_OR_STORAGE -> computeDistance(entity, 1F);
 			default -> 0F;
 		};
 

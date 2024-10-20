@@ -2,7 +2,9 @@ package io.github.xfacthd.foup.common.data.railnet;
 
 import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
+import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.AbstractOverheadRailBlockEntity;
+import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.Nullable;
@@ -15,7 +17,7 @@ public final class TrackNode implements GraphObject<RailNetwork>
     // from NBT data don't try to add/remove that graph from the storage
     static boolean inhibitDataAccess = false;
 
-    private final String name;
+    private String name;
     private final BlockPos pos;
     private final boolean station;
     private boolean occupied;
@@ -40,6 +42,11 @@ public final class TrackNode implements GraphObject<RailNetwork>
     public String getName()
     {
         return name;
+    }
+
+    void setName(String name)
+    {
+        this.name = name;
     }
 
     public BlockPos getPos()
@@ -82,9 +89,22 @@ public final class TrackNode implements GraphObject<RailNetwork>
         this.blockEntity = null;
     }
 
+    public AbstractOverheadRailBlockEntity getOwner()
+    {
+        return blockEntity;
+    }
+
     public RailNetwork getNetwork()
     {
         return Objects.requireNonNull(graph).getContextData();
+    }
+
+    public void notifyArrival(OverheadCartEntity cart, AbstractCartInteractorBlockEntity.Action action)
+    {
+        if (blockEntity != null)
+        {
+            blockEntity.notifyArrival(cart, action);
+        }
     }
 
     @Override
@@ -122,6 +142,6 @@ public final class TrackNode implements GraphObject<RailNetwork>
     @Override
     public String toString()
     {
-        return "TrackNode[" + name + "]";
+        return "TrackNode[" + name + "@(" + pos.toShortString() + ")]";
     }
 }

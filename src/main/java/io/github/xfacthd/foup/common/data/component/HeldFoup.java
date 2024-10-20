@@ -2,6 +2,7 @@ package io.github.xfacthd.foup.common.data.component;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -35,6 +36,11 @@ public record HeldFoup(boolean hasFoup, ItemStack stack) implements TooltipProvi
         return new HeldFoup(stack != null, Objects.requireNonNullElse(stack, ItemStack.EMPTY));
     }
 
+    public void applyToCart(OverheadCartEntity cart)
+    {
+        cart.setFoupContent(hasFoup ? stack.copy() : null);
+    }
+
     @Override
     public void addToTooltip(Item.TooltipContext ctx, Consumer<Component> tooltipAdder, TooltipFlag flag)
     {
@@ -42,7 +48,7 @@ public record HeldFoup(boolean hasFoup, ItemStack stack) implements TooltipProvi
 
         if (!stack.isEmpty())
         {
-            tooltipAdder.accept(Component.translatable("desc.foup.component.held_foup.contents", stack.getCount(), stack.toString()));
+            tooltipAdder.accept(Component.translatable("desc.foup.component.held_foup.contents", stack.getCount(), stack.getHoverName()));
         }
         else
         {
@@ -53,7 +59,7 @@ public record HeldFoup(boolean hasFoup, ItemStack stack) implements TooltipProvi
     @Override
     public boolean equals(Object obj)
     {
-        return obj instanceof HeldFoup other && ItemStack.isSameItemSameComponents(stack, other.stack);
+        return obj instanceof HeldFoup other && other.hasFoup == hasFoup && ItemStack.isSameItemSameComponents(stack, other.stack);
     }
 
     @Override

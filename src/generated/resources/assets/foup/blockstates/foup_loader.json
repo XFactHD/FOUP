@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "foup:block/foup_loader",
+      "y": 270
+    },
+    "facing=north": {
+      "model": "foup:block/foup_loader",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "foup:block/foup_loader"
+    },
+    "facing=west": {
+      "model": "foup:block/foup_loader",
+      "y": 90
+    }
+  }
+}

@@ -16,7 +16,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.function.Predicate;
 
-public final class OverheadRailBlock extends AbstractOverheadRailBlock
+public sealed class OverheadRailBlock extends AbstractOverheadRailBlock permits OverheadRailStationBlock
 {
     public static final VoxelShape SHAPE_X = box(0, 9, 3, 16, 16, 13);
     public static final VoxelShape SHAPE_Z = box(3, 9, 0, 13, 16, 16);
@@ -24,6 +24,11 @@ public final class OverheadRailBlock extends AbstractOverheadRailBlock
     public OverheadRailBlock(Properties props)
     {
         super(props, RailType.STRAIGHT);
+    }
+
+    protected OverheadRailBlock(Properties props, RailType type)
+    {
+        super(props, type);
     }
 
     @Override

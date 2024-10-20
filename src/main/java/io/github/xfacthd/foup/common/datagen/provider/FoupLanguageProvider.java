@@ -21,8 +21,8 @@ public final class FoupLanguageProvider extends LanguageProvider
         add(FoupContent.BLOCK_RAIL.value(), "Overhead Rail");
         add(FoupContent.BLOCK_RAIL_CURVE.value(), "Overhead Rail Curve");
         add(FoupContent.BLOCK_RAIL_SWITCH.value(), "Overhead Rail Switch");
-        //add(FoupContent.BLOCK_RAIL_STATION.value(), "Overhead Rail Station");
-        //add(FoupContent.BLOCK_FOUP_LOADER.value(), "FOUP Loader");
+        add(FoupContent.BLOCK_RAIL_STATION.value(), "Overhead Rail Station");
+        add(FoupContent.BLOCK_FOUP_LOADER.value(), "FOUP Loader");
         //add(FoupContent.BLOCK_FOUP_STORAGE.value(), "FOUP Storage");
 
         add(FoupContent.ITEM_FOUP.value(), "FOUP");

@@ -44,7 +44,7 @@ public final class OverheadCartEntity extends Entity
     private double lerpXRot;
 
     @Nullable
-    private ItemStack foup;
+    private ItemStack foupContent;
 
     public OverheadCartEntity(EntityType<?> entityType, Level level)
     {
@@ -121,6 +121,26 @@ public final class OverheadCartEntity extends Entity
     public static float calculateHoistDistance(float heightDiff)
     {
         return heightDiff * 16F + OverheadCartEntity.CART_BASE_DIST - OverheadCartEntity.STATION_BASE_HEIGHT;
+    }
+
+    public void notifyReadyForDeparture()
+    {
+        behaviour.notifyReadyForDeparture();
+    }
+
+    /**
+     * Returns the contents of the held FOUP, an empty stack if the FOUP is empty or null if no FOUP is present
+     */
+    @Nullable
+    public ItemStack getFoupContent()
+    {
+        return foupContent;
+    }
+
+    public void setFoupContent(@Nullable ItemStack stack)
+    {
+        setHasFoup(stack != null);
+        foupContent = stack;
     }
 
     @Override
@@ -210,7 +230,7 @@ public final class OverheadCartEntity extends Entity
         kill();
 
         ItemStack stack = FoupContent.ITEM_CART.toStack();
-        stack.set(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.of(foup));
+        stack.set(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.of(foupContent));
         if (player != null)
         {
             if (player.isCreative() && player.getInventory().contains(stack))
@@ -243,17 +263,17 @@ public final class OverheadCartEntity extends Entity
     protected void readAdditionalSaveData(CompoundTag tag)
     {
         behaviour.load(tag);
-        foup = tag.contains("foup") ? ItemStack.parseOptional(level().registryAccess(), tag.getCompound("foup")) : null;
-        setHasFoup(foup != null);
+        foupContent = tag.contains("foup_content") ? ItemStack.parseOptional(level().registryAccess(), tag.getCompound("foup_content")) : null;
+        setHasFoup(foupContent != null);
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag)
     {
         behaviour.save(tag);
-        if (foup != null)
+        if (foupContent != null)
         {
-            tag.put("foup", foup.saveOptional(level().registryAccess()));
+            tag.put("foup_content", foupContent.saveOptional(level().registryAccess()));
         }
     }
 

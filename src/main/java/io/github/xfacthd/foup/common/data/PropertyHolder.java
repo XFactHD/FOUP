@@ -10,6 +10,7 @@ public final class PropertyHolder
 
     public static final BooleanProperty RIGHT = BooleanProperty.create("right");
     public static final BooleanProperty OUTWARD = BooleanProperty.create("outward");
+    public static final BooleanProperty LINKED = BooleanProperty.create("linked");
 
     private PropertyHolder() { }
 }

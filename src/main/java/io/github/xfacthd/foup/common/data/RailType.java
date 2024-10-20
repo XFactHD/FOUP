@@ -9,7 +9,7 @@ public enum RailType
     STRAIGHT(FoupContent.BE_TYPE_RAIL),
     CURVE(FoupContent.BE_TYPE_RAIL),
     SWITCH(FoupContent.BE_TYPE_RAIL),
-    //STATION(FoupContent.BE_TYPE_RAIL_STATION),
+    STATION(FoupContent.BE_TYPE_RAIL_STATION),
     ;
 
     private final Holder<BlockEntityType<?>> blockEntity;

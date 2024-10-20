@@ -1,10 +1,14 @@
 package io.github.xfacthd.foup.common;
 
 import io.github.xfacthd.foup.Foup;
+import io.github.xfacthd.foup.common.block.FoupLoaderBlock;
 import io.github.xfacthd.foup.common.block.OverheadRailBlock;
 import io.github.xfacthd.foup.common.block.OverheadRailCurveBlock;
+import io.github.xfacthd.foup.common.block.OverheadRailStationBlock;
 import io.github.xfacthd.foup.common.block.OverheadRailSwitchBlock;
+import io.github.xfacthd.foup.common.blockentity.FoupLoaderBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.OverheadRailBlockEntity;
+import io.github.xfacthd.foup.common.blockentity.OverheadRailStationBlockEntity;
 import io.github.xfacthd.foup.common.data.component.HeldFoup;
 import io.github.xfacthd.foup.common.data.component.ItemContents;
 import io.github.xfacthd.foup.common.entity.OverheadCartAction;
@@ -53,8 +57,8 @@ public final class FoupContent
     public static final Holder<Block> BLOCK_RAIL = registerBlock("overhead_rail", OverheadRailBlock::new);
     public static final Holder<Block> BLOCK_RAIL_CURVE = registerBlock("overhead_rail_curve", OverheadRailCurveBlock::new);
     public static final Holder<Block> BLOCK_RAIL_SWITCH = registerBlock("overhead_rail_switch", OverheadRailSwitchBlock::new);
-    //public static final Holder<Block> BLOCK_RAIL_STATION = registerBlock("overhead_rail_station", OverheadRailStationBlock::new);
-    //public static final Holder<Block> BLOCK_FOUP_LOADER = registerBlock("foup_loader", FoupLoaderBlock::new);
+    public static final Holder<Block> BLOCK_RAIL_STATION = registerBlock("overhead_rail_station", OverheadRailStationBlock::new);
+    public static final Holder<Block> BLOCK_FOUP_LOADER = registerBlock("foup_loader", FoupLoaderBlock::new);
     //public static final Holder<Block> BLOCK_FOUP_STORAGE = registerBlock("foup_storage", FoupStorageBlock::new);
     // endregion
 
@@ -76,12 +80,12 @@ public final class FoupContent
     public static final Holder<BlockEntityType<?>> BE_TYPE_RAIL = registerBlockEntity(
             "overhead_rail", OverheadRailBlockEntity::new, BLOCK_RAIL, BLOCK_RAIL_CURVE, BLOCK_RAIL_SWITCH
     );
-    //public static final Holder<BlockEntityType<?>> BE_TYPE_RAIL_STATION = registerBlockEntity(
-    //        "overhead_rail_station", OverheadRailStationBlockEntity::new, BLOCK_RAIL_STATION
-    //);
-    //public static final Holder<BlockEntityType<?>> BE_TYPE_FOUP_LOADER = registerBlockEntity(
-    //        "foup_loader", FoupLoaderBlockEntity::new, BLOCK_FOUP_LOADER
-    //);
+    public static final Holder<BlockEntityType<?>> BE_TYPE_RAIL_STATION = registerBlockEntity(
+            "overhead_rail_station", OverheadRailStationBlockEntity::new, BLOCK_RAIL_STATION
+    );
+    public static final DeferredBlockEntity<FoupLoaderBlockEntity> BE_TYPE_FOUP_LOADER = registerBlockEntity(
+            "foup_loader", FoupLoaderBlockEntity::new, BLOCK_FOUP_LOADER
+    );
     //public static final Holder<BlockEntityType<?>> BE_TYPE_FOUP_STORAGE = registerBlockEntity(
     //        "foup_storage", FoupStorageBlockEntity::new, BLOCK_FOUP_STORAGE
     //);
