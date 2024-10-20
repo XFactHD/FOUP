@@ -65,6 +65,6 @@ public record HeldFoup(boolean hasFoup, ItemStack stack) implements TooltipProvi
     @Override
     public int hashCode()
     {
-        return ItemStack.hashItemAndComponents(stack);
+        return Boolean.hashCode(hasFoup) * 31 + ItemStack.hashItemAndComponents(stack);
     }
 }
