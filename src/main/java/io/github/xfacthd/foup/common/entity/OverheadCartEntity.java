@@ -17,6 +17,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.Nullable;
 
 public final class OverheadCartEntity extends Entity
@@ -266,5 +267,24 @@ public final class OverheadCartEntity extends Entity
     public boolean canBeCollidedWith()
     {
         return true;
+    }
+
+    @Override
+    public boolean isPushedByFluid(FluidType type)
+    {
+        return false;
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public boolean isPushedByFluid()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean canChangeDimensions(Level oldLevel, Level newLevel)
+    {
+        return false;
     }
 }
