@@ -2,6 +2,8 @@ package io.github.xfacthd.foup.common.datagen;
 
 import io.github.xfacthd.foup.Foup;
 import io.github.xfacthd.foup.common.datagen.provider.FoupBlockStateProvider;
+import io.github.xfacthd.foup.common.datagen.provider.FoupBlockTagsProvider;
+import io.github.xfacthd.foup.common.datagen.provider.FoupEntityTypeTagsProvider;
 import io.github.xfacthd.foup.common.datagen.provider.FoupLanguageProvider;
 import io.github.xfacthd.foup.common.datagen.provider.FoupSpriteSourceProvider;
 import net.minecraft.core.HolderLookup;
@@ -34,5 +36,8 @@ public final class GeneratorHandler
         gen.addProvider(client, new FoupSpriteSourceProvider(output, lookupProvider, fileHelper));
         gen.addProvider(client, new FoupBlockStateProvider(output, fileHelper));
         gen.addProvider(client, new FoupLanguageProvider(output));
+
+        gen.addProvider(server, new FoupBlockTagsProvider(output, lookupProvider, fileHelper));
+        gen.addProvider(server, new FoupEntityTypeTagsProvider(output, lookupProvider, fileHelper));
     }
 }
