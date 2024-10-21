@@ -2,6 +2,7 @@ package io.github.xfacthd.foup.common.data.railnet;
 
 import com.google.common.base.Preconditions;
 import dev.gigaherz.graph3.Mergeable;
+import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
@@ -121,6 +122,7 @@ public final class RailNetwork implements Mergeable<RailNetwork>
             activePaths.forEach(TrackPath::invalidate);
             activePaths.clear();
         }
+        RailNetworkDebugPayloads.enqueueNetworkDebugUpdate(level, id);
     }
 
     @Override

@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -95,6 +96,11 @@ public final class Utils
         double x = axis.choose(value, 0, 0) + perpAxis.choose(vec.x, 0, 0);
         double z = axis.choose(0, 0, value) + perpAxis.choose(0, 0, vec.z);
         return new Vec3(x, vec.y, z);
+    }
+
+    public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> payloadType(String name)
+    {
+        return new CustomPacketPayload.Type<>(Utils.rl(name));
     }
 
     private Utils() { }

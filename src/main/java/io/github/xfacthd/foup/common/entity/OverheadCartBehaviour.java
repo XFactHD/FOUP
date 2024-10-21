@@ -72,6 +72,7 @@ final class OverheadCartBehaviour
             prevNode = findTrackNode(prevNodePos, false);
             if (prevNode != null)
             {
+                prevNode.setOccupied(true);
                 prevNodePos = null;
             }
         }

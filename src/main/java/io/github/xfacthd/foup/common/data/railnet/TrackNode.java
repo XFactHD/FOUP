@@ -4,6 +4,7 @@ import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
 import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.AbstractOverheadRailBlockEntity;
+import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -67,6 +68,10 @@ public final class TrackNode implements GraphObject<RailNetwork>
     public void setOccupied(boolean occupied)
     {
         this.occupied = occupied;
+
+        RailNetwork network = getNetwork();
+        RailNetworkSavedData.get(network.getLevel()).setDirty();
+        RailNetworkDebugPayloads.sendImmediateNetworkDebugUpdate(network.getLevel(), network.getId());
     }
 
     public boolean isAccessible()

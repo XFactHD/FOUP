@@ -1,13 +1,16 @@
 package io.github.xfacthd.foup.client;
 
 import io.github.xfacthd.foup.Foup;
+import io.github.xfacthd.foup.client.renderer.debug.RailNetworkDebugRenderer;
 import io.github.xfacthd.foup.client.renderer.entity.OverheadCartModel;
 import io.github.xfacthd.foup.client.renderer.entity.OverheadCartRenderer;
 import io.github.xfacthd.foup.common.FoupContent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(value = Foup.MOD_ID, dist = Dist.CLIENT)
 public final class FoupClient
@@ -16,6 +19,12 @@ public final class FoupClient
     {
         modBus.addListener(FoupClient::onRegisterLayerDefinitions);
         modBus.addListener(FoupClient::onRegisterRenderers);
+
+        if (!FMLEnvironment.production)
+        {
+            modBus.addListener(RailNetworkDebugRenderer::onRegisterRenderBuffers);
+            NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onRenderLevelStage);
+        }
     }
 
     private static void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event)

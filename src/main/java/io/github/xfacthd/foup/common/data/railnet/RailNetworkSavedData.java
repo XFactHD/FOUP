@@ -3,6 +3,7 @@ package io.github.xfacthd.foup.common.data.railnet;
 import com.mojang.datafixers.util.Pair;
 import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
+import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -20,28 +21,32 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 public final class RailNetworkSavedData extends SavedData
 {
     private static final String NAME = "foup_rail_networks";
 
+    private final ServerLevel level;
     private final Long2ObjectMap<Graph<RailNetwork>> networks;
     private long idCounter = 0;
 
-    private RailNetworkSavedData()
+    private RailNetworkSavedData(ServerLevel level)
     {
-        networks = new Long2ObjectOpenHashMap<>();
+        this.level = level;
+        this.networks = new Long2ObjectOpenHashMap<>();
     }
 
-    private RailNetworkSavedData(long idCounter, Long2ObjectMap<Graph<RailNetwork>> networks)
+    private RailNetworkSavedData(ServerLevel level, long idCounter, Long2ObjectMap<Graph<RailNetwork>> networks)
     {
+        this.level = level;
         this.idCounter = idCounter;
         this.networks = networks;
     }
 
     public static RailNetworkSavedData get(ServerLevel level)
     {
-        return level.getDataStorage().computeIfAbsent(new Factory<>(RailNetworkSavedData::new, (tag, registries) -> load(tag, level)), NAME);
+        return level.getDataStorage().computeIfAbsent(new Factory<>(() -> new RailNetworkSavedData(level), (tag, registries) -> load(tag, level)), NAME);
     }
 
     public static void connectTracks(ServerLevel level, TrackNode node, @Nullable TrackNode neighbour)
@@ -81,6 +86,7 @@ public final class RailNetworkSavedData extends SavedData
         {
             networks.put(idCounter, graph);
             graph.getContextData().setId(idCounter);
+            RailNetworkDebugPayloads.enqueueNetworkDebugUpdate(level, idCounter);
             idCounter++;
         }
         // Always mark dirty as a call to this means a graph changed
@@ -93,10 +99,18 @@ public final class RailNetworkSavedData extends SavedData
         // The graph clears the node's ref to the graph before removing the node from the graph
         if (objects.size() == 1 && objects.contains(node))
         {
-            networks.remove(graph.getContextData().getId());
+            long network = graph.getContextData().getId();
+            networks.remove(network);
+            RailNetworkDebugPayloads.enqueueNetworkDebugUpdate(level, network);
         }
         // Always mark dirty as a call to this means a graph changed
         setDirty();
+    }
+
+    @Nullable
+    public Graph<RailNetwork> getNetwork(long network)
+    {
+        return networks.get(network);
     }
 
     void removeNetwork(long network)
@@ -117,6 +131,14 @@ public final class RailNetworkSavedData extends SavedData
             }
         }
         return null;
+    }
+
+    public void forEach(BiConsumer<Long, Graph<RailNetwork>> consumer)
+    {
+        for (Long2ObjectMap.Entry<Graph<RailNetwork>> entry : networks.long2ObjectEntrySet())
+        {
+            consumer.accept(entry.getLongKey(), entry.getValue());
+        }
     }
 
     @Override
@@ -206,6 +228,6 @@ public final class RailNetworkSavedData extends SavedData
             graph.getContextData().setId(id);
             networks.put(id, graph);
         }
-        return new RailNetworkSavedData(tag.getLong("id_counter"), networks);
+        return new RailNetworkSavedData(level, tag.getLong("id_counter"), networks);
     }
 }
