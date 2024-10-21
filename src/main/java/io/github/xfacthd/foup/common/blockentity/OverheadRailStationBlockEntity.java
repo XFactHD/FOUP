@@ -110,7 +110,7 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
         if (getLinkedBlock() != null) return TriState.DEFAULT;
 
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        for (int i = 1; i < MAX_HEIGHT_DIFF; i++)
+        for (int i = 2; i <= MAX_HEIGHT_DIFF; i++)
         {
             pos.setWithOffset(worldPosition, 0, -i, 0);
             if (level().getBlockEntity(pos) instanceof AbstractCartInteractorBlockEntity be)
