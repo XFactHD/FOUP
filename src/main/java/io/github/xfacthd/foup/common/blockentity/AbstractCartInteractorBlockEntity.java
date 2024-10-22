@@ -16,8 +16,9 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.IntFunction;
 
-public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlockEntity permits FoupLoaderBlockEntity
+public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlockEntity permits FoupLoaderBlockEntity, FoupStorageInterfaceBlockEntity
 {
+    private final Type type;
     @Nullable
     private BlockPos linkedStation = null;
     // TODO: consider displaying state on the block itself
@@ -30,9 +31,10 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
     @Nullable
     private UUID currCartUuid = null;
 
-    protected AbstractCartInteractorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
+    protected AbstractCartInteractorBlockEntity(BlockEntityType<?> beType, BlockPos pos, BlockState state, Type type)
     {
-        super(type, pos, state);
+        super(beType, pos, state);
+        this.type = type;
     }
 
     @SuppressWarnings("unused")
@@ -66,16 +68,19 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
             return;
         }
 
+        OverheadCartEntity cart = getCart();
+        if (cart == null) return;
+
         switch (state)
         {
             case PRE_INTERACT_DELAY ->
             {
-                startInteraction();
+                startInteraction(cart, Objects.requireNonNull(currAction));
                 setState(State.INTERACTING);
             }
             case INTERACTING ->
             {
-                finishInteraction();
+                finishInteraction(cart, Objects.requireNonNull(currAction));
                 setState(State.POST_INTERACT_DELAY);
             }
             case POST_INTERACT_DELAY -> clearCart(true);
@@ -87,7 +92,7 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
     private void setState(State state)
     {
         this.state = state;
-        delayCounter = state.duration;
+        delayCounter = state.getDuration(type);
         setChangedWithoutSignalUpdate();
     }
 
@@ -104,9 +109,9 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
      */
     protected abstract TriState canStartAction(OverheadCartEntity cart, Action action);
 
-    protected abstract void startInteraction();
+    protected abstract void startInteraction(OverheadCartEntity cart, Action action);
 
-    protected abstract void finishInteraction();
+    protected abstract void finishInteraction(OverheadCartEntity cart, Action action);
 
     @Nullable
     protected final OverheadCartEntity getCart()
@@ -153,7 +158,7 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
     }
 
     @Nullable
-    public Action getActiveAction()
+    public final Action getActiveAction()
     {
         return currAction;
     }
@@ -205,26 +210,43 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         }
     }
 
+    public enum Type
+    {
+        LOADER,
+        STORAGE
+    }
+
     public enum State
     {
         IDLE(0),
         PRE_INTERACT_DELAY(10),
-        INTERACTING(40),
+        INTERACTING(30, 50),
         POST_INTERACT_DELAY(10),
         BLOCKED(0);
 
         private static final IntFunction<State> BY_ID = ByIdMap.continuous(State::ordinal, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
 
-        private final int duration;
+        private final int loaderDuration;
+        private final int storageDuration;
 
         State(int duration)
         {
-            this.duration = duration;
+            this(duration, duration);
         }
 
-        public int getDuration()
+        State(int loaderDuration, int storageDuration)
         {
-            return duration;
+            this.loaderDuration = loaderDuration;
+            this.storageDuration = storageDuration;
+        }
+
+        public int getDuration(Type type)
+        {
+            return switch (type)
+            {
+                case LOADER -> loaderDuration;
+                case STORAGE -> storageDuration;
+            };
         }
 
         public static State byId(int id)
@@ -238,7 +260,7 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         LOAD,
         UNLOAD;
 
-        private static final IntFunction<Action> BY_ID = ByIdMap.continuous(Action::ordinal, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
+        static final IntFunction<Action> BY_ID = ByIdMap.continuous(Action::ordinal, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
 
         public static Action byId(int id)
         {

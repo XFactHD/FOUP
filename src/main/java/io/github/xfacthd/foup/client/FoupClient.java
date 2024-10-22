@@ -1,6 +1,7 @@
 package io.github.xfacthd.foup.client;
 
 import io.github.xfacthd.foup.Foup;
+import io.github.xfacthd.foup.client.renderer.block.FoupStorageInterfaceRenderer;
 import io.github.xfacthd.foup.client.renderer.debug.RailNetworkDebugRenderer;
 import io.github.xfacthd.foup.client.renderer.entity.OverheadCartModel;
 import io.github.xfacthd.foup.client.renderer.entity.OverheadCartRenderer;
@@ -22,6 +23,7 @@ public final class FoupClient
         modBus.addListener(FoupClient::onRegisterLayerDefinitions);
         modBus.addListener(FoupClient::onRegisterRenderers);
         modBus.addListener(FoupClient::onClientSetup);
+        modBus.addListener(FoupStorageInterfaceRenderer::onTextureAtlasStitched);
 
         if (!FMLEnvironment.production)
         {
@@ -39,6 +41,7 @@ public final class FoupClient
     private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event)
     {
         event.registerEntityRenderer(FoupContent.ENTITY_TYPE_CART.value(), OverheadCartRenderer::new);
+        event.registerBlockEntityRenderer(FoupContent.BE_TYPE_FOUP_STORAGE_INTERFACE.value(), FoupStorageInterfaceRenderer::new);
     }
 
     private static void onClientSetup(FMLClientSetupEvent event)

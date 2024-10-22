@@ -2,6 +2,7 @@ package io.github.xfacthd.foup.common.blockentity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,6 +25,11 @@ public abstract class BaseBlockEntity extends BlockEntity
     protected final Level level()
     {
         return Objects.requireNonNull(level, "Level missing");
+    }
+
+    protected final void sendUpdatePacket()
+    {
+        level().sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
     }
 
     public final void setChangedWithoutSignalUpdate()

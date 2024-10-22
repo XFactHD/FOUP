@@ -1,5 +1,7 @@
 {
   "block.foup.foup_loader": "FOUP Loader",
+  "block.foup.foup_storage_interface": "FOUP Storage Interface",
+  "block.foup.foup_storage_locker": "FOUP Storage Locker",
   "block.foup.overhead_rail": "Overhead Rail",
   "block.foup.overhead_rail_curve": "Overhead Rail Curve",
   "block.foup.overhead_rail_station": "Overhead Rail Station",

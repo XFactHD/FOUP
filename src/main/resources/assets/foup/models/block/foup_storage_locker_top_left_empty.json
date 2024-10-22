@@ -1,0 +1,16 @@
+{
+	"credit": "Made with Blockbench",
+	"textures": {
+		"0": "foup:block/foup_locker_empty",
+		"particle": "foup:block/foup_locker_empty"
+	},
+	"elements": [
+		{
+			"from": [8, 8, 0],
+			"to": [16, 16, 0],
+			"faces": {
+				"north": {"uv": [0, 0, 8, 8], "texture": "#0"}
+			}
+		}
+	]
+}

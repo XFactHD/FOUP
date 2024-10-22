@@ -2,11 +2,15 @@ package io.github.xfacthd.foup.common;
 
 import io.github.xfacthd.foup.Foup;
 import io.github.xfacthd.foup.common.block.FoupLoaderBlock;
+import io.github.xfacthd.foup.common.block.FoupStorageInterfaceBlock;
+import io.github.xfacthd.foup.common.block.FoupStorageLockerBlock;
 import io.github.xfacthd.foup.common.block.OverheadRailBlock;
 import io.github.xfacthd.foup.common.block.OverheadRailCurveBlock;
 import io.github.xfacthd.foup.common.block.OverheadRailStationBlock;
 import io.github.xfacthd.foup.common.block.OverheadRailSwitchBlock;
 import io.github.xfacthd.foup.common.blockentity.FoupLoaderBlockEntity;
+import io.github.xfacthd.foup.common.blockentity.FoupStorageInterfaceBlockEntity;
+import io.github.xfacthd.foup.common.blockentity.FoupStorageLockerBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.OverheadRailBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.OverheadRailStationBlockEntity;
 import io.github.xfacthd.foup.common.data.component.HeldFoup;
@@ -59,7 +63,8 @@ public final class FoupContent
     public static final Holder<Block> BLOCK_RAIL_SWITCH = registerBlock("overhead_rail_switch", OverheadRailSwitchBlock::new);
     public static final Holder<Block> BLOCK_RAIL_STATION = registerBlock("overhead_rail_station", OverheadRailStationBlock::new);
     public static final Holder<Block> BLOCK_FOUP_LOADER = registerBlock("foup_loader", FoupLoaderBlock::new);
-    //public static final Holder<Block> BLOCK_FOUP_STORAGE = registerBlock("foup_storage", FoupStorageBlock::new);
+    public static final Holder<Block> BLOCK_FOUP_STORAGE_INTERFACE = registerBlock("foup_storage_interface", FoupStorageInterfaceBlock::new);
+    public static final Holder<Block> BLOCK_FOUP_STORAGE_LOCKER = registerBlock("foup_storage_locker", FoupStorageLockerBlock::new);
     // endregion
 
     // region Data Components
@@ -86,9 +91,12 @@ public final class FoupContent
     public static final DeferredBlockEntity<FoupLoaderBlockEntity> BE_TYPE_FOUP_LOADER = registerBlockEntity(
             "foup_loader", FoupLoaderBlockEntity::new, BLOCK_FOUP_LOADER
     );
-    //public static final Holder<BlockEntityType<?>> BE_TYPE_FOUP_STORAGE = registerBlockEntity(
-    //        "foup_storage", FoupStorageBlockEntity::new, BLOCK_FOUP_STORAGE
-    //);
+    public static final DeferredBlockEntity<FoupStorageInterfaceBlockEntity> BE_TYPE_FOUP_STORAGE_INTERFACE = registerBlockEntity(
+            "foup_storage_interface", FoupStorageInterfaceBlockEntity::new, BLOCK_FOUP_STORAGE_INTERFACE
+    );
+    public static final Holder<BlockEntityType<?>> BE_TYPE_FOUP_STORAGE_LOCKER = registerBlockEntity(
+            "foup_storage_locker", FoupStorageLockerBlockEntity::new, BLOCK_FOUP_STORAGE_LOCKER
+    );
     // endregion
 
     // region Entities

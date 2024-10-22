@@ -6,9 +6,12 @@ import io.github.xfacthd.foup.common.data.PropertyHolder;
 import io.github.xfacthd.foup.common.util.ShapeUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -24,6 +27,18 @@ public final class FoupLoaderBlock extends AbstractCartInteractorBlock
     public FoupLoaderBlock(Properties props)
     {
         super(props);
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+    {
+        builder.add(PropertyHolder.FACING_HOR);
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext ctx)
+    {
+        return defaultBlockState().setValue(PropertyHolder.FACING_HOR, ctx.getHorizontalDirection());
     }
 
     @Override

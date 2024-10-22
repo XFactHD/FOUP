@@ -25,6 +25,8 @@ public final class FoupBlockTagsProvider extends BlockTagsProvider
                 .add(FoupContent.BLOCK_RAIL_CURVE.value())
                 .add(FoupContent.BLOCK_RAIL_SWITCH.value())
                 .add(FoupContent.BLOCK_RAIL_STATION.value())
-                .add(FoupContent.BLOCK_FOUP_LOADER.value());
+                .add(FoupContent.BLOCK_FOUP_LOADER.value())
+                .add(FoupContent.BLOCK_FOUP_STORAGE_INTERFACE.value())
+                .add(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value());
     }
 }

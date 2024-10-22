@@ -39,7 +39,7 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
 
     public FoupLoaderBlockEntity(BlockPos pos, BlockState state)
     {
-        super(FoupContent.BE_TYPE_FOUP_LOADER.value(), pos, state);
+        super(FoupContent.BE_TYPE_FOUP_LOADER.value(), pos, state, Type.LOADER);
     }
 
     @Override
@@ -69,32 +69,24 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     }
 
     @Override
-    protected void startInteraction() { }
+    protected void startInteraction(OverheadCartEntity cart, Action action) { }
 
     @Override
-    protected void finishInteraction()
+    protected void finishInteraction(OverheadCartEntity cart, Action action)
     {
-        switch (Objects.requireNonNull(getActiveAction()))
+        switch (action)
         {
             case LOAD ->
             {
-                OverheadCartEntity cart = getCart();
-                if (cart != null)
-                {
-                    cart.setFoupContent(inventory.getStackInSlot(SLOT_INPUT));
-                    inventory.setStackInSlot(SLOT_INPUT, ItemStack.EMPTY);
-                    setChanged();
-                }
+                cart.setFoupContent(inventory.getStackInSlot(SLOT_INPUT));
+                inventory.setStackInSlot(SLOT_INPUT, ItemStack.EMPTY);
+                setChanged();
             }
             case UNLOAD ->
             {
-                OverheadCartEntity cart = getCart();
-                if (cart != null)
-                {
-                    inventory.setStackInSlot(SLOT_OUTPUT, Objects.requireNonNull(cart.getFoupContent()));
-                    cart.setFoupContent(ItemStack.EMPTY);
-                    setChanged();
-                }
+                inventory.setStackInSlot(SLOT_OUTPUT, Objects.requireNonNull(cart.getFoupContent()));
+                cart.setFoupContent(ItemStack.EMPTY);
+                setChanged();
             }
         }
     }

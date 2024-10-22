@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "foup:block/foup_storage_interface"
+    }
+  }
+}
