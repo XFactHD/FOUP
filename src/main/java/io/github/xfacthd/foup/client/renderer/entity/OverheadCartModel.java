@@ -44,41 +44,41 @@ public final class OverheadCartModel extends EntityModel<OverheadCartEntity>
 				CubeListBuilder.create()
 						.texOffs(5, 0).addBox(-6.5F, 6.0F, -10.0F, 12.0F, 14.0F, 2.0F, CubeDeformation.NONE)
 						.texOffs(34, 0).addBox(-6.5F, 6.0F, 4.0F, 12.0F, 14.0F, 2.0F, CubeDeformation.NONE)
-						.texOffs(59, 2).addBox(-6.5F, 4.0F, -10.0F, 12.0F, 2.0F, 16.0F, CubeDeformation.NONE)
-						.texOffs(1, 38).addBox(-1.5F, 0.0F, -3.0F, 2.0F, 4.0F, 2.0F, CubeDeformation.NONE),
+						.texOffs(0, 46).addBox(-6.5F, 4.0F, -10.0F, 12.0F, 2.0F, 16.0F, CubeDeformation.NONE)
+						.texOffs(1, 20).addBox(-1.5F, 0.0F, -3.0F, 2.0F, 4.0F, 2.0F, CubeDeformation.NONE),
 				PartPose.offset(0.5F, 4.0F, 2.0F)
 		);
 
 		PartDefinition carriage = body.addOrReplaceChild(
 				"carriage",
 				CubeListBuilder.create()
-						.texOffs(34, 35).addBox(-1.5F, -1.0F, -6.0F, 2.0F, 2.0F, 8.0F, CubeDeformation.NONE)
-						.texOffs(1, 35).addBox(-2.0F, -0.5F, -5.5F, 3.0F, 1.0F, 1.0F, CubeDeformation.NONE)
-						.texOffs(1, 35).addBox(-2.0F, -0.5F, 0.5F, 3.0F, 1.0F, 1.0F, CubeDeformation.NONE),
+						.texOffs(34, 17).addBox(-1.5F, -1.0F, -6.0F, 2.0F, 2.0F, 8.0F, CubeDeformation.NONE)
+						.texOffs(0, 53).addBox(-2.0F, -0.5F, -5.5F, 3.0F, 1.0F, 1.0F, CubeDeformation.NONE)
+						.texOffs(0, 53).addBox(-2.0F, -0.5F, 0.5F, 3.0F, 1.0F, 1.0F, CubeDeformation.NONE),
 				PartPose.offset(0.0F, 0.0F, 0.0F)
 		);
 
 		carriage.addOrReplaceChild(
 				"wheel_front_left",
-				CubeListBuilder.create().texOffs(1, 20).addBox(-1.5F, -1.5F, -1.5F, 1.0F, 3.0F, 3.0F, CubeDeformation.NONE),
+				CubeListBuilder.create().texOffs(0, 46).addBox(-1.5F, -1.5F, -1.5F, 1.0F, 3.0F, 3.0F, CubeDeformation.NONE),
 				PartPose.offset(2.5F, 0.0F, -5.0F)
 		);
 
 		carriage.addOrReplaceChild(
 				"wheel_front_right",
-				CubeListBuilder.create().texOffs(1, 20).addBox(0.5F, -1.5F, -1.5F, 1.0F, 3.0F, 3.0F, CubeDeformation.NONE),
+				CubeListBuilder.create().texOffs(0, 46).addBox(0.5F, -1.5F, -1.5F, 1.0F, 3.0F, 3.0F, CubeDeformation.NONE),
 				PartPose.offset(-3.5F, 0.0F, -5.0F)
 		);
 
 		carriage.addOrReplaceChild(
 				"wheel_back_left",
-				CubeListBuilder.create().texOffs(1, 20).addBox(-1.5F, -1.5F, -1.5F, 1.0F, 3.0F, 3.0F, CubeDeformation.NONE),
+				CubeListBuilder.create().texOffs(0, 46).addBox(-1.5F, -1.5F, -1.5F, 1.0F, 3.0F, 3.0F, CubeDeformation.NONE),
 				PartPose.offset(2.5F, 0.0F, 1.0F)
 		);
 
 		carriage.addOrReplaceChild(
 				"wheel_back_right",
-				CubeListBuilder.create().texOffs(1, 20).addBox(0.5F, -1.5F, -1.5F, 1.0F, 3.0F, 3.0F, CubeDeformation.NONE),
+				CubeListBuilder.create().texOffs(0, 46).addBox(0.5F, -1.5F, -1.5F, 1.0F, 3.0F, 3.0F, CubeDeformation.NONE),
 				PartPose.offset(-3.5F, 0.0F, 1.0F)
 		);
 
@@ -91,8 +91,8 @@ public final class OverheadCartModel extends EntityModel<OverheadCartEntity>
 		gripper.addOrReplaceChild(
 				"foup",
 				CubeListBuilder.create()
-						.texOffs(0, 35).addBox(-5.5F, 0.0F, -5.5F, 11.0F, 7.0F, 11.0F, CubeDeformation.NONE)
-						.texOffs(34, 17).addBox(-4.0F, -2.0F, -4.0F, 8.0F, 2.0F, 8.0F, CubeDeformation.NONE),
+						.texOffs(35, 28).addBox(-5.0F, 0.0F, -5.0F, 10.0F, 7.0F, 10.0F, CubeDeformation.NONE)
+						.texOffs(0, 35).addBox(-4.0F, -2.0F, -4.0F, 8.0F, 2.0F, 8.0F, CubeDeformation.NONE),
 				PartPose.offset(0.0F, 1.0F, 0.0F)
 		);
 

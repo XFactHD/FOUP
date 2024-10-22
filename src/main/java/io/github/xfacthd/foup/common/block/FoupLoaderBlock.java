@@ -20,8 +20,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public final class FoupLoaderBlock extends AbstractCartInteractorBlock
 {
     private static final VoxelShape BASE_SHAPE = Shapes.join(ShapeUtils.orUnoptimized(
-            box(0, 0, 0, 16, 5, 16), box(0, 0, 0, 16, 16, 2), box(2.5, 2, 2, 13.5, 9, 2.5)
-    ), box(2.5, 2, 2.5, 13.5, 5, 13.5), BooleanOp.ONLY_FIRST);
+            box(0, 0, 0, 16, 5, 16), box(0, 0, 0, 16, 16, 2), box(3, 2, 2, 13, 9, 3)
+    ), box(3, 2, 3, 13, 5, 13), BooleanOp.ONLY_FIRST);
     private static final VoxelShape[] SHAPES = ShapeUtils.makeHorizontalRotations(BASE_SHAPE, Direction.NORTH);
 
     public FoupLoaderBlock(Properties props)

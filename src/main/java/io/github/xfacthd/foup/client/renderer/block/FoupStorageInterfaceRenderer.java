@@ -22,8 +22,8 @@ import org.jetbrains.annotations.Nullable;
 public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<FoupStorageInterfaceBlockEntity>
 {
     private static final ResourceLocation DOOR_TEXTURE = ResourceLocation.withDefaultNamespace("block/vault_top");
-    private static final float MIN_XZ = 2.5F/16F;
-    private static final float MAX_XZ = 13.5F/16F;
+    private static final float MIN_XZ = 3F/16F;
+    private static final float MAX_XZ = 13F/16F;
     private static final float MAX_Y = 1.55F/16F;
     private static final float TOTAL_TIME = AbstractCartInteractorBlockEntity.State.INTERACTING.getDuration(AbstractCartInteractorBlockEntity.Type.STORAGE);
     private static final float DELAY_TIME = 5F;
