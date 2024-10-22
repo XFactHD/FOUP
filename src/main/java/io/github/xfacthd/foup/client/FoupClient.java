@@ -27,6 +27,7 @@ public final class FoupClient
         {
             modBus.addListener(RailNetworkDebugRenderer::onRegisterRenderBuffers);
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onRenderLevelStage);
+            NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onPlayerDisconnect);
         }
     }
 

@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
@@ -131,6 +132,11 @@ public final class RailNetworkDebugRenderer
     public static void onRegisterRenderBuffers(RegisterRenderBuffersEvent event)
     {
         event.registerRenderBuffer(DEBUG_QUADS);
+    }
+
+    public static void onPlayerDisconnect(@SuppressWarnings("unused") ClientPlayerNetworkEvent.LoggingOut event)
+    {
+        DEBUG_DATA.clear();
     }
 
     private RailNetworkDebugRenderer() { }
