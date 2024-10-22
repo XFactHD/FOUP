@@ -91,7 +91,7 @@ public final class OverheadCartModel extends EntityModel<OverheadCartEntity>
 		gripper.addOrReplaceChild(
 				"foup",
 				CubeListBuilder.create()
-						.texOffs(35, 28).addBox(-5.0F, 0.0F, -5.0F, 10.0F, 7.0F, 10.0F, CubeDeformation.NONE)
+						.texOffs(35, 28).addBox(-5.0F, 0.0F, -5.0F, 10.0F, 7.0F, 10.0F, new CubeDeformation(-0.0025F))
 						.texOffs(0, 35).addBox(-4.0F, -2.0F, -4.0F, 8.0F, 2.0F, 8.0F, CubeDeformation.NONE),
 				PartPose.offset(0.0F, 1.0F, 0.0F)
 		);
