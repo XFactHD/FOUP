@@ -104,8 +104,6 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
     /**
      * Returns whether the action can be started ({@link TriState#TRUE}), the action cannot be started and can be skipped
      * ({@link TriState#DEFAULT}) or the action cannot be started and the cart must be blocked ({@link TriState#FALSE}).
-     * // TODO: Storing FOUP in full storage or getting FOUP from empty storage blocks.
-     *          Getting FOUP when one exists or storing non-existent FOUP is skipped.
      */
     protected abstract TriState canStartAction(OverheadCartEntity cart, Action action);
 
