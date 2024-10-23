@@ -3,18 +3,31 @@ package io.github.xfacthd.foup.common.blockentity;
 import com.google.common.base.Preconditions;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.PropertyHolder;
+import io.github.xfacthd.foup.common.menu.FoupStorageLockerMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
-// TODO: lock reserved slot in UI
-public final class FoupStorageLockerBlockEntity extends BaseBlockEntity
+public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implements MenuProvider
 {
+    public static final Component MENU_TITLE = Component.translatable("foup.container.foup_storage_locker");
+
     private final ItemStackHandler inventory = new ItemStackHandler(8)
     {
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack)
+        {
+            return stack.is(FoupContent.ITEM_FOUP);
+        }
+
         @Override
         protected void onContentsChanged(int slot)
         {
@@ -31,6 +44,8 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity
 
     private void onInventoryChanged(int slot)
     {
+        if (level().isClientSide()) return;
+
         ItemStack stack = inventory.getStackInSlot(slot);
         boolean wasOccupied = (occupationState & (1 << slot)) != 0;
         if (wasOccupied == stack.isEmpty())
@@ -85,9 +100,25 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity
         return stack;
     }
 
-    public ItemStackHandler getInventory()
+    @Override
+    public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
-        return inventory;
+        return new FoupStorageLockerMenu(containerId, inventory, this.inventory, this::isUsableByPlayer, () -> reservedSlot);
+    }
+
+    @Override
+    public Component getDisplayName()
+    {
+        return MENU_TITLE;
+    }
+
+    private boolean isUsableByPlayer(Player player)
+    {
+        if (level().getBlockEntity(worldPosition) != this)
+        {
+            return false;
+        }
+        return !(player.distanceToSqr((double) worldPosition.getX() + 0.5D, (double) worldPosition.getY() + 0.5D, (double) worldPosition.getZ() + 0.5D) > 64.0D);
     }
 
     @Override

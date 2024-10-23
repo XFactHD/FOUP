@@ -19,12 +19,15 @@ import io.github.xfacthd.foup.common.entity.OverheadCartAction;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import io.github.xfacthd.foup.common.item.FoupItem;
 import io.github.xfacthd.foup.common.item.OverheadCartItem;
+import io.github.xfacthd.foup.common.menu.FoupStorageLockerMenu;
 import io.github.xfacthd.foup.common.util.registration.DeferredBlockEntity;
 import io.github.xfacthd.foup.common.util.registration.DeferredBlockEntityRegister;
 import io.github.xfacthd.foup.common.util.registration.DeferredDataComponentType;
 import io.github.xfacthd.foup.common.util.registration.DeferredDataComponentTypeRegister;
 import io.github.xfacthd.foup.common.util.registration.DeferredEntity;
 import io.github.xfacthd.foup.common.util.registration.DeferredEntityRegister;
+import io.github.xfacthd.foup.common.util.registration.DeferredMenuType;
+import io.github.xfacthd.foup.common.util.registration.DeferredMenuTypeRegister;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -55,6 +58,7 @@ public final class FoupContent
     private static final DeferredBlockEntityRegister BLOCK_ENTITIES = DeferredBlockEntityRegister.create(Foup.MOD_ID);
     private static final DeferredEntityRegister ENTITIES = DeferredEntityRegister.create(Foup.MOD_ID);
     private static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Foup.MOD_ID);
+    private static final DeferredMenuTypeRegister MENU_TYPES = DeferredMenuTypeRegister.create(Foup.MOD_ID);
     private static final DeferredRegister<EntityDataSerializer<?>> ENTITY_DATA_SERIALIZERS = DeferredRegister.create(NeoForgeRegistries.ENTITY_DATA_SERIALIZERS, Foup.MOD_ID);
 
     // region Blocks
@@ -116,6 +120,12 @@ public final class FoupContent
     );
     // endregion
 
+    // region Menu Types
+    public static final DeferredMenuType<FoupStorageLockerMenu> MENU_TYPE_FOUP_STORAGE_LOCKER = MENU_TYPES.registerMenuType(
+            "foup_storage_locker", FoupStorageLockerMenu::new
+    );
+    // endregion
+
     // region Entity Data Serializers
     public static final DeferredHolder<EntityDataSerializer<?>, EntityDataSerializer<OverheadCartAction>> ENTITY_DATA_SERIALIER_CART_ACTION =
             ENTITY_DATA_SERIALIZERS.register("cart_action", () -> EntityDataSerializer.forValueType(OverheadCartAction.STREAM_CODEC));
@@ -145,6 +155,7 @@ public final class FoupContent
         BLOCK_ENTITIES.register(modBus);
         ENTITIES.register(modBus);
         CREATIVE_TABS.register(modBus);
+        MENU_TYPES.register(modBus);
         ENTITY_DATA_SERIALIZERS.register(modBus);
     }
 

@@ -9,9 +9,12 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -101,6 +104,23 @@ public final class Utils
     public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> payloadType(String name)
     {
         return new CustomPacketPayload.Type<>(Utils.rl(name));
+    }
+
+    public static void addPlayerInvSlots(Consumer<Slot> slotConsumer, Inventory playerInv, int x, int y)
+    {
+        for (int row = 0; row < 3; ++row)
+        {
+            for (int col = 0; col < 9; ++col)
+            {
+                slotConsumer.accept(new Slot(playerInv, col + row * 9 + 9, x + col * 18, y));
+            }
+            y += 18;
+        }
+
+        for (int col = 0; col < 9; ++col)
+        {
+            slotConsumer.accept(new Slot(playerInv, col, x + col * 18, y + 4));
+        }
     }
 
     private Utils() { }

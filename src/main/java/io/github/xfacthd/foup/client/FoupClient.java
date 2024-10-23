@@ -6,6 +6,7 @@ import io.github.xfacthd.foup.client.renderer.debug.RailNetworkDebugRenderer;
 import io.github.xfacthd.foup.client.renderer.entity.OverheadCartModel;
 import io.github.xfacthd.foup.client.renderer.entity.OverheadCartRenderer;
 import io.github.xfacthd.foup.client.renderer.item.OverheadCartItemProperty;
+import io.github.xfacthd.foup.client.screen.FoupStorageLockerScreen;
 import io.github.xfacthd.foup.common.FoupContent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -13,6 +14,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(value = Foup.MOD_ID, dist = Dist.CLIENT)
@@ -23,6 +25,7 @@ public final class FoupClient
         modBus.addListener(FoupClient::onRegisterLayerDefinitions);
         modBus.addListener(FoupClient::onRegisterRenderers);
         modBus.addListener(FoupClient::onClientSetup);
+        modBus.addListener(FoupClient::onRegisterMenuScreens);
         modBus.addListener(FoupStorageInterfaceRenderer::onTextureAtlasStitched);
 
         if (!FMLEnvironment.production)
@@ -47,5 +50,10 @@ public final class FoupClient
     private static void onClientSetup(FMLClientSetupEvent event)
     {
         event.enqueueWork(OverheadCartItemProperty::register);
+    }
+
+    private static void onRegisterMenuScreens(RegisterMenuScreensEvent event)
+    {
+        event.register(FoupContent.MENU_TYPE_FOUP_STORAGE_LOCKER.value(), FoupStorageLockerScreen::new);
     }
 }

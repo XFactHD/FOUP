@@ -3,12 +3,16 @@ package io.github.xfacthd.foup.common.block;
 import io.github.xfacthd.foup.common.blockentity.FoupStorageLockerBlockEntity;
 import io.github.xfacthd.foup.common.data.PropertyHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.phys.BlockHitResult;
 
 public final class FoupStorageLockerBlock extends Block implements EntityBlock
 {
@@ -47,6 +51,16 @@ public final class FoupStorageLockerBlock extends Block implements EntityBlock
     public BlockState getStateForPlacement(BlockPlaceContext ctx)
     {
         return defaultBlockState().setValue(PropertyHolder.FACING_HOR, ctx.getHorizontalDirection().getOpposite());
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
+    {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof FoupStorageLockerBlockEntity be)
+        {
+            player.openMenu(be);
+        }
+        return InteractionResult.sidedSuccess(level.isClientSide());
     }
 
     @Override

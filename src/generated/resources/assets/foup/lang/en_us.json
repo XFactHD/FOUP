@@ -9,6 +9,7 @@
   "desc.foup.component.held_foup.contents": "FOUP Contents: %s x %s",
   "desc.foup.component.held_foup.contents.empty": "FOUP Contents: Empty",
   "desc.foup.component.item_contents.contents": "Contains: %s x %s",
+  "foup.container.foup_storage_locker": "FOUP Storage Locker",
   "foup.itemGroup.main": "FOUP",
   "item.foup.foup": "FOUP",
   "item.foup.foup.desc": "Front Opening Unified Pod",
