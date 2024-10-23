@@ -1,5 +1,6 @@
 package io.github.xfacthd.foup.common.data.railnet;
 
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongTag;
@@ -11,6 +12,8 @@ import java.util.Queue;
 
 public final class TrackPath
 {
+    public static final TrackPath INVALID = Util.make(new TrackPath(new ArrayDeque<>()), TrackPath::invalidate);
+
     private final Queue<PathNode> nodes;
     private boolean valid = true;
 
@@ -48,6 +51,11 @@ public final class TrackPath
     void invalidate()
     {
         valid = false;
+    }
+
+    int size()
+    {
+        return nodes.size();
     }
 
     public ListTag save()

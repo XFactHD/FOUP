@@ -23,9 +23,39 @@ public final class Dijkstra
      */
     public static TrackPath getShortestPath(Graph<RailNetwork> graph, TrackNode start, TrackNode target)
     {
+        return getShortestPath(graph, start, target, false);
+    }
+
+    private static TrackPath getShortestPath(Graph<RailNetwork> graph, TrackNode start, TrackNode target, boolean recursive)
+    {
         Preconditions.checkState(start.getGraph() == graph, "Start node is not part of the graph");
         Preconditions.checkState(target.getGraph() == graph, "Target node is not part of the graph");
 
+        // Special-case paths back to the current position
+        if (start == target)
+        {
+            if (recursive) throw new IllegalStateException("Full-circle path search recursed multiple times");
+
+            Collection<GraphObject<RailNetwork>> neighbours = graph.getNeighbours(start);
+            if (neighbours.isEmpty())
+            {
+                return TrackPath.INVALID;
+            }
+            if (neighbours.size() > 1)
+            {
+                TrackPath shortestPath = null;
+                for (GraphObject<RailNetwork> neighbour : neighbours)
+                {
+                    TrackPath path = getShortestPath(graph, (TrackNode) neighbour, target, true);
+                    if (shortestPath == null || path.size() < shortestPath.size())
+                    {
+                        shortestPath = path;
+                    }
+                }
+                return shortestPath;
+            }
+            start = (TrackNode) neighbours.iterator().next();
+        }
         // Special-case single-step paths
         if (graph.getNeighbours(start).contains(target))
         {
@@ -39,10 +69,15 @@ public final class Dijkstra
         SearchQueue queue = new SearchQueue(graph.getObjects());
         Objects.requireNonNull(queue.findNode(start)).distance = 0;
 
+        boolean pathFound = false;
         while (!queue.isEmpty())
         {
             SearchNode node = queue.remove();
-            if (node.node == target) break;
+            if (node.node == target)
+            {
+                pathFound = true;
+                break;
+            }
 
             for (GraphObject<RailNetwork> neighbour : graph.getNeighbours(node.node))
             {
@@ -58,6 +93,10 @@ public final class Dijkstra
                     }
                 }
             }
+        }
+        if (!pathFound)
+        {
+            return TrackPath.INVALID;
         }
 
         Deque<TrackPath.PathNode> nodes = new ArrayDeque<>();
