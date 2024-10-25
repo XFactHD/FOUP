@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEntity implements MenuProvider
+public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEntity implements MenuProvider, FoupLoaderMenu.LoaderStateProvider
 {
     public static final Component MENU_TITLE = Component.translatable("foup.container.foup_loader");
     private static final int SLOT_INPUT = 0;
@@ -44,6 +44,7 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     );
     @Nullable
     private BlockCapabilityCache<IItemHandler, Direction> outputTargetCache = null;
+    private boolean autoEject = true;
 
     public FoupLoaderBlockEntity(BlockPos pos, BlockState state)
     {
@@ -102,7 +103,7 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     @Override
     protected void tickInternal()
     {
-        if (level().getGameTime() % PUSH_INTERNAL != 0) return;
+        if (!autoEject || level().getGameTime() % PUSH_INTERNAL != 0) return;
 
         ItemStack stack = inventory.getStackInSlot(SLOT_OUTPUT);
         if (stack.isEmpty()) return;
@@ -135,6 +136,19 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     }
 
     @Override
+    public boolean isAutoEject()
+    {
+        return autoEject;
+    }
+
+    @Override
+    public void setAutoEject(boolean autoExtract)
+    {
+        this.autoEject = autoExtract;
+        setChangedWithoutSignalUpdate();
+    }
+
+    @Override
     public void onLoad()
     {
         super.onLoad();
@@ -161,6 +175,7 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     {
         super.loadAdditional(tag, registries);
         inventory.deserializeNBT(registries, tag.getCompound("inventory"));
+        autoEject = tag.getBoolean("auto_eject");
     }
 
     @Override
@@ -168,5 +183,6 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     {
         super.saveAdditional(tag, registries);
         tag.put("inventory", inventory.serializeNBT(registries));
+        tag.putBoolean("auto_eject", autoEject);
     }
 }

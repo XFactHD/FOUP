@@ -45,6 +45,7 @@ public final class FoupLanguageProvider extends LanguageProvider
 
         add(FoupLoaderScreen.MSG_LOADING_BLOCKED, "Loader is waiting for items to load");
         add(FoupLoaderScreen.MSG_UNLOADING_BLOCKED, "Loader is waiting for space in the output");
+        add(FoupLoaderScreen.BUTTON_AUTO_EJECT, "Auto-eject");
     }
 
     private void add(Component key, String value)

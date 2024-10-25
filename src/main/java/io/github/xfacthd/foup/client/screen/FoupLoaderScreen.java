@@ -1,18 +1,22 @@
 package io.github.xfacthd.foup.client.screen;
 
+import io.github.xfacthd.foup.client.screen.widget.IndicatorButton;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
 import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.menu.FoupLoaderMenu;
 import io.github.xfacthd.foup.common.menu.slot.LockableSlot;
+import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundToggleLoaderAutoEjectPayload;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMenu>
@@ -34,8 +38,10 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
     private static final int CROSS_OFFSET_X = 3;
     private static final int CROSS_OFFSET_Y = -2;
     private static final int CROSS_SIZE = 18;
+    private static final int AUTO_EJECT_BUTTON_WIDTH = 80;
     public static final Component MSG_LOADING_BLOCKED = Component.translatable("msg.foup.foup_loader.loading_blocked");
     public static final Component MSG_UNLOADING_BLOCKED = Component.translatable("msg.foup.foup_loader.unloading_blocked");
+    public static final Component BUTTON_AUTO_EJECT = Component.translatable("button.foup.foup_loader.auto_eject");
     private static final int INTERACT_DURATION = AbstractCartInteractorBlockEntity.State.INTERACTING.getDuration(StationType.LOADER);
 
     public FoupLoaderScreen(FoupLoaderMenu menu, Inventory inventory, Component title)
@@ -44,6 +50,22 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
         this.imageWidth = WIDTH;
         this.imageHeight = HEIGHT;
         this.inventoryLabelY += 9;
+    }
+
+    @Override
+    protected void init()
+    {
+        super.init();
+
+        addRenderableWidget(new IndicatorButton(
+                leftPos + WIDTH - 5 - AUTO_EJECT_BUTTON_WIDTH,
+                topPos + 5,
+                AUTO_EJECT_BUTTON_WIDTH,
+                Button.DEFAULT_HEIGHT,
+                BUTTON_AUTO_EJECT,
+                menu::isAutoEject,
+                this::toggleAutoEject
+        ));
     }
 
     @Override
@@ -111,5 +133,10 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
             graphics.blitSprite(LOCK_ICON, slot.x + SLOT_SIZE_INNER - 5, slot.y + SLOT_SIZE_INNER - 7, 5, 7);
             graphics.pose().popPose();
         }
+    }
+
+    private void toggleAutoEject(Button button)
+    {
+        PacketDistributor.sendToServer(new ServerboundToggleLoaderAutoEjectPayload(menu.containerId, !menu.isAutoEject()));
     }
 }

@@ -1,6 +1,7 @@
 package io.github.xfacthd.foup.common.network;
 
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRailNetworkDebugPayload;
+import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundToggleLoaderAutoEjectPayload;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 public final class NetworkSetup
@@ -14,6 +15,11 @@ public final class NetworkSetup
                         ClientboundRailNetworkDebugPayload.TYPE,
                         ClientboundRailNetworkDebugPayload.STREAM_CODEC,
                         ClientboundRailNetworkDebugPayload::handle
+                )
+                .playToServer(
+                        ServerboundToggleLoaderAutoEjectPayload.TYPE,
+                        ServerboundToggleLoaderAutoEjectPayload.STREAM_CODEC,
+                        ServerboundToggleLoaderAutoEjectPayload::handle
                 );
     }
 

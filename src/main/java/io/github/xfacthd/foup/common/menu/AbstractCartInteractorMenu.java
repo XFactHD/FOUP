@@ -47,7 +47,7 @@ public abstract class AbstractCartInteractorMenu extends AbstractContainerMenu
         this.stateSlot = addDataSlot(DataSlot.standalone());
         this.actionSlot = addDataSlot(DataSlot.standalone());
         this.timeLeftSlot = addDataSlot(DataSlot.standalone());
-        if (stateProvider != DUMMY)
+        if (stateProvider instanceof AbstractCartInteractorBlockEntity)
         {
             updateState();
         }
