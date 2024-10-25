@@ -41,7 +41,6 @@ public final class FoupStorageInterfaceBlock extends AbstractCartInteractorBlock
     {
         if (side == Direction.DOWN && !canSurvive(state, level, pos))
         {
-            // FIXME: doesn't call onRemoved and therefor doesn't break the station link
             return Blocks.AIR.defaultBlockState();
         }
         return state;

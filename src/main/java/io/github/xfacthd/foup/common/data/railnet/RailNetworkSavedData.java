@@ -3,6 +3,7 @@ package io.github.xfacthd.foup.common.data.railnet;
 import com.mojang.datafixers.util.Pair;
 import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
+import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -163,6 +164,10 @@ public final class RailNetworkSavedData extends SavedData
                 nodeTag.putString("name", node.getName());
                 nodeTag.putLong("pos", node.getPos().asLong());
                 nodeTag.putBoolean("station", node.isStation());
+                if (node.getStationType() != null)
+                {
+                    nodeTag.putString("station_type", node.getStationType().getSerializedName());
+                }
                 nodeTag.putBoolean("occupied", node.isOccupied());
 
                 IntList neighbours = new IntArrayList();
@@ -200,8 +205,9 @@ public final class RailNetworkSavedData extends SavedData
                 String name = nodeTag.getString("name");
                 BlockPos pos = BlockPos.of(nodeTag.getLong("pos"));
                 boolean station = nodeTag.getBoolean("station");
+                StationType stationType = StationType.byName(nodeTag.getString("station_type"));
                 boolean occupied = nodeTag.getBoolean("occupied");
-                TrackNode node = new TrackNode(name, pos, station, occupied);
+                TrackNode node = new TrackNode(name, pos, station, stationType, occupied);
 
                 nodes.add(Pair.of(node, nodeTag.getIntArray("neighbours")));
             }

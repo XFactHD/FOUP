@@ -13,6 +13,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.common.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBlockEntity
 {
     private static final int MAX_HEIGHT_DIFF = 6;
@@ -63,6 +65,7 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     {
         linkedBlock = null;
         linkedPos = null;
+        Objects.requireNonNull(getTrackNode()).setLinkedStationType(null);
         if (!aboutToBeDestroyed)
         {
             level().setBlockAndUpdate(worldPosition, getBlockState().setValue(PropertyHolder.LINKED, false));
@@ -117,6 +120,10 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
             {
                 linkedPos = pos.immutable();
                 linkedBlock = be;
+
+                be.notifyLinked(worldPosition);
+                Objects.requireNonNull(getTrackNode()).setLinkedStationType(be.getStationType());
+
                 level().setBlockAndUpdate(worldPosition, getBlockState().setValue(PropertyHolder.LINKED, true));
                 setChangedWithoutSignalUpdate();
                 return TriState.TRUE;

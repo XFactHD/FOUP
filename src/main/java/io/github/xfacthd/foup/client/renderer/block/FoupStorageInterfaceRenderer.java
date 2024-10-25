@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.FoupStorageInterfaceBlockEntity;
+import io.github.xfacthd.foup.common.data.StationType;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -25,7 +26,7 @@ public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<F
     private static final float MIN_XZ = 3F/16F;
     private static final float MAX_XZ = 13F/16F;
     private static final float MAX_Y = 1.55F/16F;
-    private static final float TOTAL_TIME = AbstractCartInteractorBlockEntity.State.INTERACTING.getDuration(AbstractCartInteractorBlockEntity.Type.STORAGE);
+    private static final float TOTAL_TIME = AbstractCartInteractorBlockEntity.State.INTERACTING.getDuration(StationType.STORAGE);
     private static final float DELAY_TIME = 5F;
     private static final float FOUP_TIME = (TOTAL_TIME - (DELAY_TIME * 2F)) / 2F;
     private static final float DOOR_TIME = (TOTAL_TIME - FOUP_TIME - (DELAY_TIME * 2F)) / 2F;

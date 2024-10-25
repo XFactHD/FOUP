@@ -1,6 +1,7 @@
 package io.github.xfacthd.foup.common.blockentity;
 
 import io.github.xfacthd.foup.common.FoupContent;
+import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.component.ItemContents;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import net.minecraft.core.BlockPos;
@@ -25,7 +26,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
 
     public FoupStorageInterfaceBlockEntity(BlockPos pos, BlockState state)
     {
-        super(FoupContent.BE_TYPE_FOUP_STORAGE_INTERFACE.value(), pos, state, Type.STORAGE);
+        super(FoupContent.BE_TYPE_FOUP_STORAGE_INTERFACE.value(), pos, state, StationType.STORAGE);
     }
 
     @Override

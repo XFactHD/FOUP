@@ -1,6 +1,7 @@
 package io.github.xfacthd.foup.common.blockentity;
 
 import io.github.xfacthd.foup.common.FoupContent;
+import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.capability.itemhandler.ExternalItemHandler;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import io.github.xfacthd.foup.common.menu.FoupLoaderMenu;
@@ -46,7 +47,7 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
 
     public FoupLoaderBlockEntity(BlockPos pos, BlockState state)
     {
-        super(FoupContent.BE_TYPE_FOUP_LOADER.value(), pos, state, Type.LOADER);
+        super(FoupContent.BE_TYPE_FOUP_LOADER.value(), pos, state, StationType.LOADER);
     }
 
     @Override

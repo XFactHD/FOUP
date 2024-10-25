@@ -4,6 +4,7 @@ import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
 import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.AbstractOverheadRailBlockEntity;
+import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import net.minecraft.core.BlockPos;
@@ -21,6 +22,8 @@ public final class TrackNode implements GraphObject<RailNetwork>
     private String name;
     private final BlockPos pos;
     private final boolean station;
+    @Nullable
+    private StationType stationType;
     private boolean occupied;
     @Nullable
     private Graph<RailNetwork> graph = null;
@@ -29,14 +32,15 @@ public final class TrackNode implements GraphObject<RailNetwork>
 
     public TrackNode(String name, BlockPos pos, boolean station)
     {
-        this(name, pos, station, false);
+        this(name, pos, station, null, false);
     }
 
-    TrackNode(String name, BlockPos pos, boolean station, boolean occupied)
+    TrackNode(String name, BlockPos pos, boolean station, @Nullable StationType stationType, boolean occupied)
     {
         this.name = name;
         this.pos = pos;
         this.station = station;
+        this.stationType = stationType;
         this.occupied = occupied;
     }
 
@@ -48,6 +52,7 @@ public final class TrackNode implements GraphObject<RailNetwork>
     void setName(String name)
     {
         this.name = name;
+        saveAndDebugSync();
     }
 
     public BlockPos getPos()
@@ -60,6 +65,18 @@ public final class TrackNode implements GraphObject<RailNetwork>
         return station;
     }
 
+    @Nullable
+    public StationType getStationType()
+    {
+        return stationType;
+    }
+
+    public void setLinkedStationType(@Nullable StationType stationType)
+    {
+        this.stationType = stationType;
+        saveAndDebugSync();
+    }
+
     public boolean isOccupied()
     {
         return occupied;
@@ -68,10 +85,7 @@ public final class TrackNode implements GraphObject<RailNetwork>
     public void setOccupied(boolean occupied)
     {
         this.occupied = occupied;
-
-        RailNetwork network = getNetwork();
-        RailNetworkSavedData.get(network.getLevel()).setDirty();
-        RailNetworkDebugPayloads.sendImmediateNetworkDebugUpdate(network.getLevel(), network.getId());
+        saveAndDebugSync();
     }
 
     public boolean isAccessible()
@@ -110,6 +124,13 @@ public final class TrackNode implements GraphObject<RailNetwork>
         {
             blockEntity.notifyArrival(cart, action);
         }
+    }
+
+    private void saveAndDebugSync()
+    {
+        RailNetwork network = getNetwork();
+        RailNetworkSavedData.get(network.getLevel()).setDirty();
+        RailNetworkDebugPayloads.sendImmediateNetworkDebugUpdate(network.getLevel(), network.getId());
     }
 
     @Override

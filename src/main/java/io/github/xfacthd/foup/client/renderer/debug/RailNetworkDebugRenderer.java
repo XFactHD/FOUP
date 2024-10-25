@@ -108,7 +108,9 @@ public final class RailNetworkDebugRenderer
 
                 pose = poseStack.last().pose();
                 String name = node.stationName().get();
-                font.drawInBatch(name, -(font.width(name) / 2F), 0, 0xFFBB00FF, false, pose, buffer, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+                String type = node.stationType().orElse("NULL");
+                font.drawInBatch(name, -(font.width(name) / 2F), -9, 0xFFBB00FF, false, pose, buffer, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+                font.drawInBatch(type, -(font.width(type) / 2F), 1, 0xFFBB00FF, false, pose, buffer, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
 
                 poseStack.popPose();
             }

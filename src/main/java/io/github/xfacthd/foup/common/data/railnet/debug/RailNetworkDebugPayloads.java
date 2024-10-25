@@ -3,6 +3,7 @@ package io.github.xfacthd.foup.common.data.railnet.debug;
 import com.google.common.collect.Sets;
 import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
+import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.railnet.RailNetwork;
 import io.github.xfacthd.foup.common.data.railnet.RailNetworkSavedData;
 import io.github.xfacthd.foup.common.data.railnet.TrackNode;
@@ -63,7 +64,8 @@ public final class RailNetworkDebugPayloads
             {
                 neighbours.add(((TrackNode) neighbour).getPos());
             }
-            nodes.add(new RailNetworkDebugData.Node(node.getPos(), name, node.isOccupied(), neighbours));
+            Optional<String> type = Optional.ofNullable(node.getStationType()).map(StationType::name);
+            nodes.add(new RailNetworkDebugData.Node(node.getPos(), name, type, node.isOccupied(), neighbours));
         }
         return Optional.of(new RailNetworkDebugData(nodes));
     }

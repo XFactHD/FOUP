@@ -1,5 +1,6 @@
 package io.github.xfacthd.foup.common.blockentity;
 
+import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import io.github.xfacthd.foup.common.menu.AbstractCartInteractorMenu;
 import net.minecraft.core.BlockPos;
@@ -20,7 +21,7 @@ import java.util.function.IntFunction;
 public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlockEntity implements AbstractCartInteractorMenu.StateProvider
         permits FoupLoaderBlockEntity, FoupStorageInterfaceBlockEntity
 {
-    private final Type type;
+    private final StationType type;
     @Nullable
     private BlockPos linkedStation = null;
     // TODO: consider displaying state on the block itself
@@ -33,7 +34,7 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
     @Nullable
     private UUID currCartUuid = null;
 
-    protected AbstractCartInteractorBlockEntity(BlockEntityType<?> beType, BlockPos pos, BlockState state, Type type)
+    protected AbstractCartInteractorBlockEntity(BlockEntityType<?> beType, BlockPos pos, BlockState state, StationType type)
     {
         super(beType, pos, state);
         this.type = type;
@@ -186,10 +187,21 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         clearLink();
     }
 
+    void notifyLinked(BlockPos pos)
+    {
+        linkedStation = pos;
+        setChangedWithoutSignalUpdate();
+    }
+
     void clearLink()
     {
         linkedStation = null;
         setChangedWithoutSignalUpdate();
+    }
+
+    public final StationType getStationType()
+    {
+        return type;
     }
 
     @Override
@@ -223,12 +235,6 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         }
     }
 
-    public enum Type
-    {
-        LOADER,
-        STORAGE
-    }
-
     public enum State
     {
         IDLE(0),
@@ -253,7 +259,7 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
             this.storageDuration = storageDuration;
         }
 
-        public int getDuration(Type type)
+        public int getDuration(StationType type)
         {
             return switch (type)
             {

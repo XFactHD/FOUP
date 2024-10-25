@@ -2,6 +2,7 @@ package io.github.xfacthd.foup.client.screen;
 
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
+import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.menu.FoupLoaderMenu;
 import io.github.xfacthd.foup.common.menu.slot.LockableSlot;
 import io.github.xfacthd.foup.common.util.Utils;
@@ -35,7 +36,7 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
     private static final int CROSS_SIZE = 18;
     public static final Component MSG_LOADING_BLOCKED = Component.translatable("msg.foup.foup_loader.loading_blocked");
     public static final Component MSG_UNLOADING_BLOCKED = Component.translatable("msg.foup.foup_loader.unloading_blocked");
-    private static final int INTERACT_DURATION = AbstractCartInteractorBlockEntity.State.INTERACTING.getDuration(AbstractCartInteractorBlockEntity.Type.LOADER);
+    private static final int INTERACT_DURATION = AbstractCartInteractorBlockEntity.State.INTERACTING.getDuration(StationType.LOADER);
 
     public FoupLoaderScreen(FoupLoaderMenu menu, Inventory inventory, Component title)
     {
