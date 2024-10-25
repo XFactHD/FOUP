@@ -1,6 +1,7 @@
 package io.github.xfacthd.foup.common.blockentity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -38,6 +39,15 @@ public abstract class BaseBlockEntity extends BlockEntity
         {
             owningChunk.setUnsaved(true);
         }
+    }
+
+    protected final boolean isUsableByPlayer(Player player)
+    {
+        if (level().getBlockEntity(worldPosition) != this)
+        {
+            return false;
+        }
+        return !(player.distanceToSqr(worldPosition.getX() + .5, worldPosition.getY() + .5, worldPosition.getZ() + .5) > 64D);
     }
 
     @Override

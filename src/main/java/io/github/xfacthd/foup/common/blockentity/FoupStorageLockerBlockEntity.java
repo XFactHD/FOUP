@@ -112,15 +112,6 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
         return MENU_TITLE;
     }
 
-    private boolean isUsableByPlayer(Player player)
-    {
-        if (level().getBlockEntity(worldPosition) != this)
-        {
-            return false;
-        }
-        return !(player.distanceToSqr((double) worldPosition.getX() + 0.5D, (double) worldPosition.getY() + 0.5D, (double) worldPosition.getZ() + 0.5D) > 64.0D);
-    }
-
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {

@@ -9,9 +9,12 @@
   "desc.foup.component.held_foup.contents": "FOUP Contents: %s x %s",
   "desc.foup.component.held_foup.contents.empty": "FOUP Contents: Empty",
   "desc.foup.component.item_contents.contents": "Contains: %s x %s",
+  "foup.container.foup_loader": "FOUP Loader",
   "foup.container.foup_storage_locker": "FOUP Storage Locker",
   "foup.itemGroup.main": "FOUP",
   "item.foup.foup": "FOUP",
   "item.foup.foup.desc": "Front Opening Unified Pod",
-  "item.foup.overhead_cart": "Overhead Hoist Cart"
+  "item.foup.overhead_cart": "Overhead Hoist Cart",
+  "msg.foup.foup_loader.loading_blocked": "Loader is waiting for items to load",
+  "msg.foup.foup_loader.unloading_blocked": "Loader is waiting for space in the output"
 }

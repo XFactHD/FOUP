@@ -1,7 +1,9 @@
 package io.github.xfacthd.foup.common.datagen.provider;
 
 import io.github.xfacthd.foup.Foup;
+import io.github.xfacthd.foup.client.screen.FoupLoaderScreen;
 import io.github.xfacthd.foup.common.FoupContent;
+import io.github.xfacthd.foup.common.blockentity.FoupLoaderBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.FoupStorageLockerBlockEntity;
 import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
@@ -38,7 +40,11 @@ public final class FoupLanguageProvider extends LanguageProvider
         add("desc.foup.component.held_foup.contents.empty", "FOUP Contents: Empty");
         add("desc.foup.component.item_contents.contents", "Contains: %s x %s");
 
+        add(FoupLoaderBlockEntity.MENU_TITLE, "FOUP Loader");
         add(FoupStorageLockerBlockEntity.MENU_TITLE, "FOUP Storage Locker");
+
+        add(FoupLoaderScreen.MSG_LOADING_BLOCKED, "Loader is waiting for items to load");
+        add(FoupLoaderScreen.MSG_UNLOADING_BLOCKED, "Loader is waiting for space in the output");
     }
 
     private void add(Component key, String value)

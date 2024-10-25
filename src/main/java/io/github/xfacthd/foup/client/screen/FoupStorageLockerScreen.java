@@ -1,6 +1,7 @@
 package io.github.xfacthd.foup.client.screen;
 
 import io.github.xfacthd.foup.common.menu.FoupStorageLockerMenu;
+import io.github.xfacthd.foup.common.menu.slot.LockableSlot;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -44,7 +45,7 @@ public final class FoupStorageLockerScreen extends AbstractContainerScreen<FoupS
     protected void renderSlotContents(GuiGraphics graphics, ItemStack stack, Slot slot, @Nullable String countString)
     {
         super.renderSlotContents(graphics, stack, slot, countString);
-        if (slot instanceof FoupStorageLockerMenu.LockerSlot lockerSlot && lockerSlot.isLocked())
+        if (slot instanceof LockableSlot lockableSlot && lockableSlot.isLocked())
         {
             graphics.pose().pushPose();
             graphics.pose().translate(0, 0, 200);

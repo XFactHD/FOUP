@@ -3,11 +3,17 @@ package io.github.xfacthd.foup.common.blockentity;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.capability.itemhandler.ExternalItemHandler;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
+import io.github.xfacthd.foup.common.menu.FoupLoaderMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
@@ -20,8 +26,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEntity
+public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEntity implements MenuProvider
 {
+    public static final Component MENU_TITLE = Component.translatable("foup.container.foup_loader");
     private static final int SLOT_INPUT = 0;
     private static final int SLOT_OUTPUT = 1;
     private static final int PUSH_INTERNAL = 5;
@@ -134,6 +141,18 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
         {
             outputTargetCache = BlockCapabilityCache.create(Capabilities.ItemHandler.BLOCK, serverLevel, worldPosition, Direction.DOWN, () -> !isRemoved(), () -> {});
         }
+    }
+
+    @Override
+    public Component getDisplayName()
+    {
+        return MENU_TITLE;
+    }
+
+    @Override
+    public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
+    {
+        return new FoupLoaderMenu(containerId, inventory, this.inventory, this::isUsableByPlayer, this);
     }
 
     @Override

@@ -6,6 +6,7 @@ import io.github.xfacthd.foup.client.renderer.debug.RailNetworkDebugRenderer;
 import io.github.xfacthd.foup.client.renderer.entity.OverheadCartModel;
 import io.github.xfacthd.foup.client.renderer.entity.OverheadCartRenderer;
 import io.github.xfacthd.foup.client.renderer.item.OverheadCartItemProperty;
+import io.github.xfacthd.foup.client.screen.FoupLoaderScreen;
 import io.github.xfacthd.foup.client.screen.FoupStorageLockerScreen;
 import io.github.xfacthd.foup.common.FoupContent;
 import net.neoforged.api.distmarker.Dist;
@@ -54,6 +55,7 @@ public final class FoupClient
 
     private static void onRegisterMenuScreens(RegisterMenuScreensEvent event)
     {
+        event.register(FoupContent.MENU_TYPE_FOUP_LOADER.value(), FoupLoaderScreen::new);
         event.register(FoupContent.MENU_TYPE_FOUP_STORAGE_LOCKER.value(), FoupStorageLockerScreen::new);
     }
 }

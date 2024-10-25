@@ -1,6 +1,7 @@
 package io.github.xfacthd.foup.common.blockentity;
 
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
+import io.github.xfacthd.foup.common.menu.AbstractCartInteractorMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -16,7 +17,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.IntFunction;
 
-public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlockEntity permits FoupLoaderBlockEntity, FoupStorageInterfaceBlockEntity
+public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlockEntity implements AbstractCartInteractorMenu.StateProvider
+        permits FoupLoaderBlockEntity, FoupStorageInterfaceBlockEntity
 {
     private final Type type;
     @Nullable
@@ -155,10 +157,23 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         currAction = state == State.POST_INTERACT_DELAY ? null : action;
     }
 
+    @Override
+    public final State getState()
+    {
+        return state;
+    }
+
     @Nullable
+    @Override
     public final Action getActiveAction()
     {
         return currAction;
+    }
+
+    @Override
+    public final int getRemainingDuration()
+    {
+        return delayCounter;
     }
 
     public void unlink()
