@@ -2,6 +2,7 @@ package io.github.xfacthd.foup.common.block;
 
 import io.github.xfacthd.foup.common.blockentity.AbstractOverheadRailBlockEntity;
 import io.github.xfacthd.foup.common.data.RailType;
+import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -12,6 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -37,10 +39,18 @@ public abstract class AbstractOverheadRailBlock extends Block implements EntityB
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
     {
-        // TODO: any cart on the track being destroyed must be dropped
-        if (!newState.is(state.getBlock()) && !level.isClientSide() && level.getBlockEntity(pos) instanceof AbstractOverheadRailBlockEntity be)
+        if (!newState.is(state.getBlock()) && !level.isClientSide())
         {
-            be.destroyNode();
+            AABB area = AABB.encapsulatingFullBlocks(pos, pos.below());
+            for (OverheadCartEntity entity : level.getEntitiesOfClass(OverheadCartEntity.class, area))
+            {
+                entity.killAndDrop(null);
+            }
+
+            if (level.getBlockEntity(pos) instanceof AbstractOverheadRailBlockEntity be)
+            {
+                be.destroyNode();
+            }
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }

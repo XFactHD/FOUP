@@ -225,7 +225,7 @@ public final class OverheadCartEntity extends Entity
         }
     }
 
-    private void killAndDrop(@Nullable Player player)
+    public void killAndDrop(@Nullable Player player)
     {
         kill();
 
