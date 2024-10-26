@@ -35,7 +35,14 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     private static final int PUSH_INTERNAL = 5;
     private static final int PUSH_COUNT = 8;
 
-    private final ItemStackHandler inventory = new ItemStackHandler(2);
+    private final ItemStackHandler inventory = new ItemStackHandler(2)
+    {
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack)
+        {
+            return stack.getItem().canFitInsideContainerItems();
+        }
+    };
     private final ExternalItemHandler inputItemHandler = new ExternalItemHandler(
             inventory, slot -> slot == SLOT_INPUT && (getActiveAction() != Action.LOAD || isBlocked()), slot -> false
     );

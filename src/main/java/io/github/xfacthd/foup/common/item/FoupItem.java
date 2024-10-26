@@ -18,6 +18,12 @@ public final class FoupItem extends Item
     }
 
     @Override
+    public boolean canFitInsideContainerItems()
+    {
+        return false;
+    }
+
+    @Override
     public void appendHoverText(ItemStack stack, TooltipContext ctx, List<Component> lines, TooltipFlag flag)
     {
         lines.add(Component.translatable("item.foup.foup.desc").withStyle(ChatFormatting.GRAY));
