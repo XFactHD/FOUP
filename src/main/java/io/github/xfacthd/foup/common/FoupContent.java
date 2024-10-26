@@ -90,7 +90,7 @@ public final class FoupContent
     public static final Holder<BlockEntityType<?>> BE_TYPE_RAIL = registerBlockEntity(
             "overhead_rail", OverheadRailBlockEntity::new, BLOCK_RAIL, BLOCK_RAIL_CURVE, BLOCK_RAIL_SWITCH
     );
-    public static final Holder<BlockEntityType<?>> BE_TYPE_RAIL_STATION = registerBlockEntity(
+    public static final DeferredBlockEntity<OverheadRailStationBlockEntity> BE_TYPE_RAIL_STATION = registerBlockEntity(
             "overhead_rail_station", OverheadRailStationBlockEntity::new, BLOCK_RAIL_STATION
     );
     public static final DeferredBlockEntity<FoupLoaderBlockEntity> BE_TYPE_FOUP_LOADER = registerBlockEntity(

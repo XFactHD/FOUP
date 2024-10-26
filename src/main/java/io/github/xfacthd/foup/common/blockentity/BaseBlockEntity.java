@@ -41,7 +41,7 @@ public abstract class BaseBlockEntity extends BlockEntity
         }
     }
 
-    protected final boolean isUsableByPlayer(Player player)
+    public final boolean isUsableByPlayer(Player player)
     {
         if (level().getBlockEntity(worldPosition) != this)
         {

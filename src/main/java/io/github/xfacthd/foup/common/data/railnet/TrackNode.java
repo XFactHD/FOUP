@@ -74,6 +74,7 @@ public final class TrackNode implements GraphObject<RailNetwork>
     public void setLinkedStationType(@Nullable StationType stationType)
     {
         this.stationType = stationType;
+        getNetwork().invalidatePaths();
         saveAndDebugSync();
     }
 

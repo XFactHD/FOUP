@@ -2,6 +2,7 @@ package io.github.xfacthd.foup.common.data.railnet;
 
 import com.google.common.base.Preconditions;
 import dev.gigaherz.graph3.Mergeable;
+import io.github.xfacthd.foup.common.data.RenameResult;
 import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -100,9 +101,16 @@ public final class RailNetwork implements Mergeable<RailNetwork>
         stations.remove(name);
     }
 
-    boolean isValidStationName(String name)
+    RenameResult isAvailableStationName(String name)
     {
-        return !name.isBlank() && !stations.containsKey(name);
+        if (!isValidStationName(name)) return RenameResult.NAME_INVALID;
+        if (stations.containsKey(name)) return RenameResult.NAME_TAKEN;
+        return RenameResult.SUCCESS;
+    }
+
+    public static boolean isValidStationName(String name)
+    {
+        return !name.isBlank();
     }
 
     public void registerPath(TrackPath path)

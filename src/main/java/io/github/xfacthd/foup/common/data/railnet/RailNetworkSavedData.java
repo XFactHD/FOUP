@@ -3,6 +3,7 @@ package io.github.xfacthd.foup.common.data.railnet;
 import com.mojang.datafixers.util.Pair;
 import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
+import io.github.xfacthd.foup.common.data.RenameResult;
 import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -62,10 +63,11 @@ public final class RailNetworkSavedData extends SavedData
         }
     }
 
-    public static boolean setStationName(ServerLevel level, TrackNode node, String newName)
+    public static RenameResult setStationName(ServerLevel level, TrackNode node, String newName)
     {
         RailNetwork network = node.getNetwork();
-        if (network.isValidStationName(newName))
+        RenameResult result = network.isAvailableStationName(newName);
+        if (result == RenameResult.SUCCESS)
         {
             String oldName = node.getName();
             if (!oldName.isBlank())
@@ -76,9 +78,8 @@ public final class RailNetworkSavedData extends SavedData
             network.addStation(newName, node);
             network.invalidatePaths();
             RailNetworkSavedData.get(level).setDirty();
-            return true;
         }
-        return false;
+        return result;
     }
 
     void tryAddNetwork(Graph<RailNetwork> graph)

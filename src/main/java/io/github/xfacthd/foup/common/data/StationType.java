@@ -15,6 +15,7 @@ public enum StationType implements StringRepresentable
     STORAGE,
     ;
 
+    private static final StationType[] VALUES = values();
     private static final Map<String, StationType> LOOKUP = Arrays.stream(values()).collect(Collectors.toMap(t -> t.name, Function.identity()));
 
     private final String name = toString().toLowerCase(Locale.ROOT);
@@ -29,5 +30,11 @@ public enum StationType implements StringRepresentable
     public static StationType byName(String name)
     {
         return LOOKUP.get(name);
+    }
+
+    @Nullable
+    public static StationType byId(int id)
+    {
+        return id >= 0 && id < VALUES.length ? VALUES[id] : null;
     }
 }

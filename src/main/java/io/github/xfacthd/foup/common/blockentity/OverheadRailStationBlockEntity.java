@@ -2,12 +2,18 @@ package io.github.xfacthd.foup.common.blockentity;
 
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.PropertyHolder;
+import io.github.xfacthd.foup.common.data.RenameResult;
+import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.railnet.RailNetworkSavedData;
 import io.github.xfacthd.foup.common.data.railnet.TrackNode;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.common.util.TriState;
@@ -24,6 +30,8 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     private BlockPos linkedPos = null;
     @Nullable
     private AbstractCartInteractorBlockEntity linkedBlock = null;
+    @Nullable
+    private StationType linkedType;
     private boolean aboutToBeDestroyed = false;
 
     public OverheadRailStationBlockEntity(BlockPos pos, BlockState state)
@@ -65,29 +73,35 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     {
         linkedBlock = null;
         linkedPos = null;
+        linkedType = null;
         Objects.requireNonNull(getTrackNode()).setLinkedStationType(null);
         if (!aboutToBeDestroyed)
         {
             level().setBlockAndUpdate(worldPosition, getBlockState().setValue(PropertyHolder.LINKED, false));
+            sendUpdatePacket();
         }
         setChangedWithoutSignalUpdate();
     }
 
-    // TODO: implement naming in UI
-    public boolean setName(String name)
+    public RenameResult setName(String name)
     {
         TrackNode node = getTrackNode();
-        if (node != null && level instanceof ServerLevel serverLevel && RailNetworkSavedData.setStationName(serverLevel, node, name))
+        if (node != null && level instanceof ServerLevel serverLevel)
         {
-            this.name = name;
-            setChangedWithoutSignalUpdate();
-            return true;
+            RenameResult result = RailNetworkSavedData.setStationName(serverLevel, node, name);
+            if (result == RenameResult.SUCCESS)
+            {
+                this.name = name;
+                setChangedWithoutSignalUpdate();
+                sendUpdatePacket();
+            }
+            return result;
         }
-        return false;
+        return RenameResult.UNKNOWN;
     }
 
     @Override
-    protected String getName()
+    public String getName()
     {
         return name;
     }
@@ -96,6 +110,12 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     protected boolean isStation()
     {
         return true;
+    }
+
+    @Nullable
+    public StationType getLinkedType()
+    {
+        return linkedType;
     }
 
     @Override
@@ -120,6 +140,7 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
             {
                 linkedPos = pos.immutable();
                 linkedBlock = be;
+                linkedType = be.getStationType();
 
                 be.notifyLinked(worldPosition);
                 Objects.requireNonNull(getTrackNode()).setLinkedStationType(be.getStationType());
@@ -144,11 +165,40 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     }
 
     @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket()
+    {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries)
+    {
+        handleUpdateTag(pkt.getTag(), registries);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
+    {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("name", name);
+        tag.putInt("linked_type", linkedType != null ? linkedType.ordinal() : -1);
+        return tag;
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider)
+    {
+        name = tag.getString("name");
+        linkedType = StationType.byId(tag.getInt("linked_type"));
+    }
+
+    @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag, registries);
         name = tag.getString("name");
         linkedPos = tag.contains("linked_pos") ? BlockPos.of(tag.getLong("linked_pos")) : null;
+        linkedType = StationType.byName(tag.getString("linked_type"));
     }
 
     @Override
@@ -159,6 +209,10 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
         if (linkedPos != null)
         {
             tag.putLong("linked_pos", linkedPos.asLong());
+        }
+        if (linkedType != null)
+        {
+            tag.putString("linked_type", linkedType.getSerializedName());
         }
     }
 }

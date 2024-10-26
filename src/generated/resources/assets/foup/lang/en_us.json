@@ -16,6 +16,19 @@
   "item.foup.foup": "FOUP",
   "item.foup.foup.desc": "Front Opening Unified Pod",
   "item.foup.overhead_cart": "Overhead Hoist Cart",
+  "label.foup.overhead_rail_station.error": "Error:",
+  "label.foup.overhead_rail_station.name": "Name:",
+  "label.foup.overhead_rail_station.state": "State:",
   "msg.foup.foup_loader.loading_blocked": "Loader is waiting for items to load",
-  "msg.foup.foup_loader.unloading_blocked": "Loader is waiting for space in the output"
+  "msg.foup.foup_loader.unloading_blocked": "Loader is waiting for space in the output",
+  "msg.foup.overhead_rail_station.link.already_linked": "Station is already linked",
+  "msg.foup.overhead_rail_station.link.failed": "Failed to link station",
+  "msg.foup.overhead_rail_station.name.invalid": "This name is invalid",
+  "msg.foup.overhead_rail_station.name.rename_failed": "Renaming failed",
+  "msg.foup.overhead_rail_station.name.taken": "This name is taken",
+  "screen.foup.rail_station": "Overhead Rail Station",
+  "title.foup.overhead_rail_station.name_edit": "Station Name",
+  "value.foup.overhead_rail_station.link.loader": "Linked to loader",
+  "value.foup.overhead_rail_station.link.storage": "Linked to storage",
+  "value.foup.overhead_rail_station.link.unlinked": "Unlinked"
 }
