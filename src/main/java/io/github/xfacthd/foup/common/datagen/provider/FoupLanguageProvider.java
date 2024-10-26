@@ -6,6 +6,7 @@ import io.github.xfacthd.foup.client.screen.OverheadRailStationScreen;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.blockentity.FoupLoaderBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.FoupStorageLockerBlockEntity;
+import io.github.xfacthd.foup.common.item.FoupItem;
 import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
@@ -44,6 +45,7 @@ public final class FoupLanguageProvider extends LanguageProvider
         add(OverheadRailStationScreen.SCREEN_TITLE, "Overhead Rail Station");
         add(FoupLoaderBlockEntity.MENU_TITLE, "FOUP Loader");
         add(FoupStorageLockerBlockEntity.MENU_TITLE, "FOUP Storage Locker");
+        add(FoupItem.MENU_TITLE, "FOUP");
 
         add(OverheadRailStationScreen.TITLE_NAME_EDIT, "Station Name");
         add(OverheadRailStationScreen.LABEL_NAME, "Name:");

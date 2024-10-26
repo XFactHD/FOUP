@@ -46,6 +46,12 @@ public final class OverheadCartItem extends Item
     }
 
     @Override
+    public boolean canFitInsideContainerItems()
+    {
+        return false;
+    }
+
+    @Override
     public void appendHoverText(ItemStack stack, TooltipContext ctx, List<Component> lines, TooltipFlag flag)
     {
         stack.addToTooltip(FoupContent.DC_TYPE_HELD_FOUP, ctx, lines::add, flag);
