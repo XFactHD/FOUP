@@ -43,6 +43,12 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
         {
             return FoupItem.canPlaceInFoup(stack);
         }
+
+        @Override
+        protected void onContentsChanged(int slot)
+        {
+            FoupLoaderBlockEntity.this.setChangedWithoutSignalUpdate();
+        }
     };
     private final ExternalItemHandler inputItemHandler = new ExternalItemHandler(
             inventory, slot -> slot == SLOT_INPUT && (getActiveAction() != Action.LOAD || isBlocked()), slot -> false
