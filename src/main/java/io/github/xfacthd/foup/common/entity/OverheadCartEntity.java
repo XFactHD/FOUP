@@ -76,15 +76,29 @@ public final class OverheadCartEntity extends Entity
         {
             behaviour.tick(firstTick);
         }
-        else if (lerpSteps > 0) // Lerping code copied from AbstractMinecart
-        {
-            lerpPositionAndRotationStep(lerpSteps, lerpX, lerpY, lerpZ, lerpYRot, lerpXRot);
-            lerpSteps--;
-        }
         else
         {
-            reapplyPosition();
-            setRot(getYRot(), getXRot());
+            if (lerpSteps > 0) // Lerping code copied from AbstractMinecart
+            {
+                lerpPositionAndRotationStep(lerpSteps, lerpX, lerpY, lerpZ, lerpYRot, lerpXRot);
+                lerpSteps--;
+            }
+            else
+            {
+                reapplyPosition();
+                setRot(getYRot(), getXRot());
+            }
+
+            // Handle rotation wrapping around and causing interpolation hitch
+            double diff = getYRot() - yRotO;
+            if (diff < -270F)
+            {
+                yRotO -= 360F;
+            }
+            else if (diff > 270F)
+            {
+                yRotO += 360F;
+            }
         }
     }
 

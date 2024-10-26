@@ -206,19 +206,26 @@ final class OverheadCartBehaviour
         }
         else
         {
-            // FIXME: rotation causes a hitch when the client "runs out" of interpolation steps
             if (rotating)
             {
                 newPos = pos;
-                float srcRot = dirOne.toYRot();
+
+                float srcRot = cart.getYRot();
                 float destRot = dirTwo.toYRot();
-                float sign = Math.signum(destRot - srcRot);
-                if (Math.abs(destRot - srcRot) > 180F)
+                float maximumChange = 9F;
+                float diff = Mth.wrapDegrees(destRot - srcRot);
+                diff = Math.clamp(diff, -maximumChange, maximumChange);
+
+                float newRot = srcRot + diff;
+                if (newRot < 0.0F)
                 {
-                    destRot -= 360F * sign;
-                    sign *= -1F;
+                    newRot += 360.0F;
                 }
-                float newRot = Math.clamp(cart.getYRot() + 9 * sign, Math.min(srcRot, destRot), Math.max(srcRot, destRot));
+                else if (newRot >= 360.0F)
+                {
+                    newRot -= 360.0F;
+                }
+
                 if (Mth.equal(newRot, destRot))
                 {
                     newRot = destRot;
