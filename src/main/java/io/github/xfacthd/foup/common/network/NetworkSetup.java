@@ -2,6 +2,7 @@ package io.github.xfacthd.foup.common.network;
 
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundAcknowledgeStationLinkPayload;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundAcknowledgeStationRenamePayload;
+import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundOpenOverheadRailStationPayload;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRailNetworkDebugPayload;
 import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundRequestStationLinkPayload;
 import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundRequestStationRenamePayload;
@@ -19,6 +20,11 @@ public final class NetworkSetup
                         ClientboundRailNetworkDebugPayload.TYPE,
                         ClientboundRailNetworkDebugPayload.STREAM_CODEC,
                         ClientboundRailNetworkDebugPayload::handle
+                )
+                .playToClient(
+                        ClientboundOpenOverheadRailStationPayload.TYPE,
+                        ClientboundOpenOverheadRailStationPayload.STREAM_CODEC,
+                        ClientboundOpenOverheadRailStationPayload::handle
                 )
                 .playToClient(
                         ClientboundAcknowledgeStationRenamePayload.TYPE,

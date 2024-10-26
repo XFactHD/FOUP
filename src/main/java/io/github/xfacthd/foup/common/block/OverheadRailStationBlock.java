@@ -1,11 +1,12 @@
 package io.github.xfacthd.foup.common.block;
 
-import io.github.xfacthd.foup.client.util.ClientAccess;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.blockentity.OverheadRailStationBlockEntity;
 import io.github.xfacthd.foup.common.data.PropertyHolder;
 import io.github.xfacthd.foup.common.data.RailType;
+import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundOpenOverheadRailStationPayload;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -13,6 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public final class OverheadRailStationBlock extends OverheadRailBlock
 {
@@ -34,9 +36,9 @@ public final class OverheadRailStationBlock extends OverheadRailBlock
     {
         if (!player.getMainHandItem().is(FoupContent.ITEM_CART) && !player.getOffhandItem().is(FoupContent.ITEM_CART))
         {
-            if (level.isClientSide() && level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity be)
+            if (player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity)
             {
-                ClientAccess.openStationScreen(pos, be);
+                PacketDistributor.sendToPlayer(serverPlayer, new ClientboundOpenOverheadRailStationPayload(pos));
             }
             return InteractionResult.sidedSuccess(level.isClientSide());
         }
