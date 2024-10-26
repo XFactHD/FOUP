@@ -2,6 +2,7 @@ package io.github.xfacthd.foup.common.menu;
 
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.component.ItemContents;
+import io.github.xfacthd.foup.common.item.FoupItem;
 import io.github.xfacthd.foup.common.menu.slot.LockableInventorySlot;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.world.Container;
@@ -113,7 +114,7 @@ public final class FoupMenu extends AbstractContainerMenu
         @Override
         public boolean mayPlace(ItemStack stack)
         {
-            return stack.getItem().canFitInsideContainerItems();
+            return FoupItem.canPlaceInFoup(stack);
         }
 
         @Override
@@ -139,7 +140,7 @@ public final class FoupMenu extends AbstractContainerMenu
         @Override
         public boolean mayPlace(ItemStack stack)
         {
-            return stack.getItem().canFitInsideContainerItems();
+            return FoupItem.canPlaceInFoup(stack);
         }
     }
 }

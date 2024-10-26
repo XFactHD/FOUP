@@ -2,6 +2,7 @@ package io.github.xfacthd.foup.common.menu;
 
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
+import io.github.xfacthd.foup.common.item.FoupItem;
 import io.github.xfacthd.foup.common.menu.slot.LockableSlot;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.world.entity.player.Inventory;
@@ -9,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.items.SlotItemHandler;
 import org.jetbrains.annotations.Nullable;
@@ -57,7 +59,7 @@ public final class FoupLoaderMenu extends AbstractCartInteractorMenu
 
     public FoupLoaderMenu(int containerId, Inventory inventory)
     {
-        this(containerId, inventory, new ItemStackHandler(2), p -> true, DUMMY);
+        this(containerId, inventory, new ClientItemHandler(LOADER_SLOTS), p -> true, DUMMY);
     }
 
     public FoupLoaderMenu(int containerId, Inventory inventory, ItemStackHandler beInv, Predicate<Player> stillValid, LoaderStateProvider stateProvider)
@@ -66,7 +68,7 @@ public final class FoupLoaderMenu extends AbstractCartInteractorMenu
         this.stateProvider = stateProvider;
         this.autoEjectSlot = addDataSlot(DataSlot.standalone());
         addSlot(new LockableSlot(beInv, 0, 25, 39, i -> isInputLocked()));
-        addSlot(new SlotItemHandler(beInv, 1, 135, 39));
+        addSlot(new OutputSlot(beInv, 1, 135, 39));
         Utils.addPlayerInvSlots(this::addSlot, inventory, 8, 92);
     }
 
@@ -103,7 +105,7 @@ public final class FoupLoaderMenu extends AbstractCartInteractorMenu
                     return ItemStack.EMPTY;
                 }
             }
-            else if (!moveItemStackTo(stack, 0, LOADER_SLOTS, false))
+            else if (!moveItemStackTo(stack, 0, 1, false))
             {
                 return ItemStack.EMPTY;
             }
@@ -131,5 +133,33 @@ public final class FoupLoaderMenu extends AbstractCartInteractorMenu
         boolean isAutoEject();
 
         void setAutoEject(boolean autoExtract);
+    }
+
+    private static final class OutputSlot extends SlotItemHandler
+    {
+        public OutputSlot(IItemHandler itemHandler, int index, int xPosition, int yPosition)
+        {
+            super(itemHandler, index, xPosition, yPosition);
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack)
+        {
+            return false;
+        }
+    }
+
+    private static final class ClientItemHandler extends ItemStackHandler
+    {
+        public ClientItemHandler(int slots)
+        {
+            super(slots);
+        }
+
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack)
+        {
+            return FoupItem.canPlaceInFoup(stack);
+        }
     }
 }

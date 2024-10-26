@@ -1,6 +1,7 @@
 package io.github.xfacthd.foup.common.menu;
 
 import io.github.xfacthd.foup.common.FoupContent;
+import io.github.xfacthd.foup.common.blockentity.FoupStorageLockerBlockEntity;
 import io.github.xfacthd.foup.common.menu.slot.LockableSlot;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.world.entity.player.Inventory;
@@ -24,7 +25,7 @@ public final class FoupStorageLockerMenu extends AbstractContainerMenu
 
     public FoupStorageLockerMenu(int containerId, Inventory inventory)
     {
-        this(containerId, inventory, new ItemStackHandler(8), p -> true, () -> -1);
+        this(containerId, inventory, new ClientItemHandler(LOCKER_SLOTS), p -> true, () -> -1);
     }
 
     public FoupStorageLockerMenu(int containerId, Inventory inventory, ItemStackHandler beInv, Predicate<Player> stillValid, IntSupplier lockedSlotSupplier)
@@ -87,5 +88,19 @@ public final class FoupStorageLockerMenu extends AbstractContainerMenu
     public boolean stillValid(Player player)
     {
         return stillValid.test(player);
+    }
+
+    private static final class ClientItemHandler extends ItemStackHandler
+    {
+        public ClientItemHandler(int slots)
+        {
+            super(slots);
+        }
+
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack)
+        {
+            return FoupStorageLockerBlockEntity.canPlaceInStorage(stack);
+        }
     }
 }

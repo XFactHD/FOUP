@@ -55,6 +55,11 @@ public final class FoupItem extends Item
         stack.addToTooltip(FoupContent.DC_TYPE_ITEM_CONTENTS, ctx, lines::add, flag);
     }
 
+    public static boolean canPlaceInFoup(ItemStack stack)
+    {
+        return stack.getItem().canFitInsideContainerItems();
+    }
+
     private record FoupMenuProvider(ItemStack foupStack) implements MenuProvider
     {
         @Override

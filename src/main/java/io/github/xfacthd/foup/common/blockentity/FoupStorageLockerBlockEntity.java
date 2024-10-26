@@ -25,7 +25,7 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
         @Override
         public boolean isItemValid(int slot, ItemStack stack)
         {
-            return stack.is(FoupContent.ITEM_FOUP);
+            return canPlaceInStorage(stack);
         }
 
         @Override
@@ -133,5 +133,10 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
         super.saveAdditional(tag, registries);
         tag.put("inventory", inventory.serializeNBT(registries));
         tag.putInt("reserved_slot", reservedSlot);
+    }
+
+    public static boolean canPlaceInStorage(ItemStack stack)
+    {
+        return stack.is(FoupContent.ITEM_FOUP);
     }
 }

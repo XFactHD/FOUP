@@ -4,6 +4,7 @@ import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.capability.itemhandler.ExternalItemHandler;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
+import io.github.xfacthd.foup.common.item.FoupItem;
 import io.github.xfacthd.foup.common.menu.FoupLoaderMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -40,7 +41,7 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
         @Override
         public boolean isItemValid(int slot, ItemStack stack)
         {
-            return stack.getItem().canFitInsideContainerItems();
+            return FoupItem.canPlaceInFoup(stack);
         }
     };
     private final ExternalItemHandler inputItemHandler = new ExternalItemHandler(
