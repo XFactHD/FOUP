@@ -112,6 +112,11 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
         return MENU_TITLE;
     }
 
+    public int getAnalogSignal()
+    {
+        return Integer.bitCount(occupationState) * 15 / 8;
+    }
+
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {

@@ -64,7 +64,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
                 if (locker != null)
                 {
                     transferBuffer = locker.removeFirst();
-                    setChanged();
+                    setChangedWithoutSignalUpdate();
                 }
             }
             case UNLOAD ->
@@ -75,7 +75,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
                     transferBuffer = FoupContent.ITEM_FOUP.toStack();
                     transferBuffer.set(FoupContent.DC_TYPE_ITEM_CONTENTS, new ItemContents(cart.getFoupContent()));
                     cart.setFoupContent(null);
-                    setChanged();
+                    setChangedWithoutSignalUpdate();
                 }
             }
         }
@@ -95,7 +95,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
                     ItemContents contents = transferBuffer.getOrDefault(FoupContent.DC_TYPE_ITEM_CONTENTS, ItemContents.EMPTY);
                     cart.setFoupContent(contents.stack());
                     transferBuffer = null;
-                    setChanged();
+                    setChangedWithoutSignalUpdate();
                 }
             }
             case UNLOAD ->
@@ -105,7 +105,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
                 {
                     locker.insertReserved(transferBuffer);
                     transferBuffer = null;
-                    setChanged();
+                    setChangedWithoutSignalUpdate();
                 }
             }
         }

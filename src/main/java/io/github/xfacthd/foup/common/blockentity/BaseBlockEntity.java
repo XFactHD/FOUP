@@ -33,14 +33,6 @@ public abstract class BaseBlockEntity extends BlockEntity
         level().sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
     }
 
-    public final void setChangedWithoutSignalUpdate()
-    {
-        if (owningChunk != null)
-        {
-            owningChunk.setUnsaved(true);
-        }
-    }
-
     public final boolean isUsableByPlayer(Player player)
     {
         if (level().getBlockEntity(worldPosition) != this)
@@ -48,6 +40,14 @@ public abstract class BaseBlockEntity extends BlockEntity
             return false;
         }
         return !(player.distanceToSqr(worldPosition.getX() + .5, worldPosition.getY() + .5, worldPosition.getZ() + .5) > 64D);
+    }
+
+    public final void setChangedWithoutSignalUpdate()
+    {
+        if (owningChunk != null)
+        {
+            owningChunk.setUnsaved(true);
+        }
     }
 
     @Override

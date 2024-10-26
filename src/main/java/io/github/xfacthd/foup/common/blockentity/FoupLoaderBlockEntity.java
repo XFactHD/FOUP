@@ -103,13 +103,11 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
             {
                 cart.setFoupContent(inventory.getStackInSlot(SLOT_INPUT));
                 inventory.setStackInSlot(SLOT_INPUT, ItemStack.EMPTY);
-                setChanged();
             }
             case UNLOAD ->
             {
                 inventory.setStackInSlot(SLOT_OUTPUT, Objects.requireNonNull(cart.getFoupContent()));
                 cart.setFoupContent(ItemStack.EMPTY);
-                setChanged();
             }
         }
     }
@@ -130,7 +128,6 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
         if (remainder.getCount() < toInsert.getCount())
         {
             inventory.extractItem(SLOT_OUTPUT, toInsert.getCount() - remainder.getCount(), false);
-            setChanged();
         }
     }
 

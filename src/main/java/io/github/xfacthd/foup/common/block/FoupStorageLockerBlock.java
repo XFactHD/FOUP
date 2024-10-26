@@ -64,6 +64,22 @@ public final class FoupStorageLockerBlock extends Block implements EntityBlock
     }
 
     @Override
+    protected boolean hasAnalogOutputSignal(BlockState state)
+    {
+        return true;
+    }
+
+    @Override
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos)
+    {
+        if (level.getBlockEntity(pos) instanceof FoupStorageLockerBlockEntity be)
+        {
+            return be.getAnalogSignal();
+        }
+        return 0;
+    }
+
+    @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
     {
         return new FoupStorageLockerBlockEntity(pos, state);
