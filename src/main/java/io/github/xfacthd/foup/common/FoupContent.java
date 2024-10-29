@@ -15,8 +15,10 @@ import io.github.xfacthd.foup.common.blockentity.OverheadRailBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.OverheadRailStationBlockEntity;
 import io.github.xfacthd.foup.common.data.component.HeldFoup;
 import io.github.xfacthd.foup.common.data.component.ItemContents;
+import io.github.xfacthd.foup.common.data.component.ScheduleSnapshot;
 import io.github.xfacthd.foup.common.entity.OverheadCartAction;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
+import io.github.xfacthd.foup.common.entity.OverheadCartIssue;
 import io.github.xfacthd.foup.common.item.FoupItem;
 import io.github.xfacthd.foup.common.item.OverheadCartItem;
 import io.github.xfacthd.foup.common.menu.FoupLoaderMenu;
@@ -80,6 +82,9 @@ public final class FoupContent
     public static final DeferredDataComponentType<ItemContents> DC_TYPE_ITEM_CONTENTS = DATA_COMPONENTS.registerComponentType(
             "item_contents", builder -> builder.persistent(ItemContents.CODEC).networkSynchronized(ItemContents.STREAM_CODEC).cacheEncoding()
     );
+    public static final DeferredDataComponentType<ScheduleSnapshot> DC_TYPE_SCHEDULE = DATA_COMPONENTS.registerComponentType(
+            "schedule", builder -> builder.persistent(ScheduleSnapshot.CODEC).networkSynchronized(ScheduleSnapshot.STREAM_CODEC).cacheEncoding()
+    );
     // endregion
 
     // region Items
@@ -137,6 +142,8 @@ public final class FoupContent
     // region Entity Data Serializers
     public static final DeferredHolder<EntityDataSerializer<?>, EntityDataSerializer<OverheadCartAction>> ENTITY_DATA_SERIALIER_CART_ACTION =
             ENTITY_DATA_SERIALIZERS.register("cart_action", () -> EntityDataSerializer.forValueType(OverheadCartAction.STREAM_CODEC));
+    public static final DeferredHolder<EntityDataSerializer<?>, EntityDataSerializer<OverheadCartIssue>> ENTITY_DATA_SERIALIZER_CART_ISSUE =
+            ENTITY_DATA_SERIALIZERS.register("cart_issue", () -> EntityDataSerializer.forValueType(OverheadCartIssue.STREAM_CODEC));
     // endregion
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Function<BlockBehaviour.Properties, T> factory)

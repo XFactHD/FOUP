@@ -2,6 +2,7 @@ package io.github.xfacthd.foup.common.menu;
 
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
+import io.github.xfacthd.foup.common.data.StationAction;
 import io.github.xfacthd.foup.common.item.FoupItem;
 import io.github.xfacthd.foup.common.menu.slot.LockableSlot;
 import io.github.xfacthd.foup.common.util.Utils;
@@ -42,7 +43,7 @@ public final class FoupLoaderMenu extends AbstractCartInteractorMenu
 
         @Nullable
         @Override
-        public AbstractCartInteractorBlockEntity.Action getActiveAction()
+        public StationAction getActiveAction()
         {
             throw new UnsupportedOperationException();
         }
@@ -124,7 +125,7 @@ public final class FoupLoaderMenu extends AbstractCartInteractorMenu
 
     private boolean isInputLocked()
     {
-        return getActiveAction() == AbstractCartInteractorBlockEntity.Action.LOAD &&
+        return getActiveAction() == StationAction.LOAD &&
                 getState() != AbstractCartInteractorBlockEntity.State.BLOCKED;
     }
 

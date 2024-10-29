@@ -3,6 +3,7 @@ package io.github.xfacthd.foup.client.screen;
 import io.github.xfacthd.foup.client.screen.widget.IndicatorButton;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
+import io.github.xfacthd.foup.common.data.StationAction;
 import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.menu.FoupLoaderMenu;
 import io.github.xfacthd.foup.common.menu.slot.LockableSlot;
@@ -86,11 +87,11 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
         graphics.renderFakeItem(FoupContent.ITEM_FOUP.toStack(), 0, 0, 0);
         graphics.pose().popPose();
 
-        AbstractCartInteractorBlockEntity.Action action = menu.getActiveAction();
+        StationAction action = menu.getActiveAction();
         if (action == null) return;
 
         AbstractCartInteractorBlockEntity.State state = menu.getState();
-        int x = action == AbstractCartInteractorBlockEntity.Action.LOAD ? ARROW_LOAD_X : ARROW_UNLOAD_X;
+        int x = action == StationAction.LOAD ? ARROW_LOAD_X : ARROW_UNLOAD_X;
         if (state == AbstractCartInteractorBlockEntity.State.INTERACTING)
         {
             float factor = 1F - (menu.getRemainingDuration() / (float) INTERACT_DURATION);
@@ -110,10 +111,10 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
 
         if (menu.getState() != AbstractCartInteractorBlockEntity.State.BLOCKED) return;
 
-        AbstractCartInteractorBlockEntity.Action action = menu.getActiveAction();
+        StationAction action = menu.getActiveAction();
         if (action == null) return;
 
-        boolean load = action == AbstractCartInteractorBlockEntity.Action.LOAD;
+        boolean load = action == StationAction.LOAD;
         int minX = leftPos + (load ? ARROW_LOAD_X : ARROW_UNLOAD_X) + CROSS_OFFSET_X;
         int minY = topPos + ARROW_Y + CROSS_OFFSET_Y;
         if (mouseX >= minX && mouseX < minX + CROSS_SIZE && mouseY >= minY && mouseY < minY + CROSS_SIZE)

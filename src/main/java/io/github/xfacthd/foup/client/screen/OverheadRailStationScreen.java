@@ -102,7 +102,7 @@ public final class OverheadRailStationScreen extends Screen
         {
             case LOADER -> VALUE_LINKED_LOADER;
             case STORAGE -> VALUE_LINKED_STORAGE;
-            case null -> VALUE_UNLINKED;
+            case null, default -> VALUE_UNLINKED;
         };
         graphics.drawString(font, linkState, leftPos + 45, topPos + 48, 0x404040, false);
 

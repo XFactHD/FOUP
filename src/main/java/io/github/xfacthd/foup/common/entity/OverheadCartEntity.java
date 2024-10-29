@@ -1,11 +1,17 @@
 package io.github.xfacthd.foup.common.entity;
 
 import io.github.xfacthd.foup.common.FoupContent;
+import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.component.HeldFoup;
+import io.github.xfacthd.foup.common.data.component.ScheduleSnapshot;
+import io.github.xfacthd.foup.common.data.railnet.RailNetwork;
+import io.github.xfacthd.foup.common.data.railnet.Schedule;
+import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundOpenOverheadCartScreenPayload;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -18,7 +24,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 public final class OverheadCartEntity extends Entity
 {
@@ -32,6 +41,9 @@ public final class OverheadCartEntity extends Entity
     );
     private static final EntityDataAccessor<Boolean> HAS_FOUP = SynchedEntityData.defineId(
             OverheadCartEntity.class, EntityDataSerializers.BOOLEAN
+    );
+    static final EntityDataAccessor<OverheadCartIssue> ISSUE = SynchedEntityData.defineId(
+            OverheadCartEntity.class, FoupContent.ENTITY_DATA_SERIALIZER_CART_ISSUE.value()
     );
 
     private final OverheadCartBehaviour behaviour = new OverheadCartBehaviour(this);
@@ -56,6 +68,7 @@ public final class OverheadCartEntity extends Entity
     {
         builder.define(ACTION, OverheadCartAction.DEFAULT);
         builder.define(HAS_FOUP, false);
+        builder.define(ISSUE, OverheadCartIssue.NONE);
     }
 
     @Override
@@ -224,7 +237,13 @@ public final class OverheadCartEntity extends Entity
         }
         if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty() && !player.isShiftKeyDown())
         {
-            behaviour.interact();
+            if (player instanceof ServerPlayer serverPlayer)
+            {
+                RailNetwork network = behaviour.getOwningNetwork();
+                PacketDistributor.sendToPlayer(serverPlayer, new ClientboundOpenOverheadCartScreenPayload(
+                        getId(), behaviour.getSchedule().getEntriesCopy(), network.getStations()
+                ));
+            }
             return InteractionResult.sidedSuccess(level().isClientSide());
         }
         return InteractionResult.PASS;
@@ -245,6 +264,10 @@ public final class OverheadCartEntity extends Entity
 
         ItemStack stack = FoupContent.ITEM_CART.toStack();
         stack.set(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.of(foupContent));
+        if (!getSchedule().isEmpty())
+        {
+            stack.set(FoupContent.DC_TYPE_SCHEDULE, new ScheduleSnapshot(getSchedule().getEntriesCopy()));
+        }
         if (player != null)
         {
             if (player.isCreative() && player.getInventory().contains(stack))
@@ -263,6 +286,43 @@ public final class OverheadCartEntity extends Entity
         }
     }
 
+    public Schedule getSchedule()
+    {
+        return behaviour.getSchedule();
+    }
+
+    public Map<String, StationType> getAvailableStations()
+    {
+        return behaviour.getOwningNetwork().getStations();
+    }
+
+    public boolean executeSchedule()
+    {
+        return behaviour.executeSchedule();
+    }
+
+    public void stopSchedule()
+    {
+        behaviour.stopSchedule();
+    }
+
+    public boolean isIdle()
+    {
+        return getState() == OverheadCartState.IDLE;
+    }
+
+    public boolean isUsableByPlayer(Player player)
+    {
+        return player.distanceToSqr(this) < 64D;
+    }
+
+    @Nullable
+    public OverheadCartIssue getIssue()
+    {
+        OverheadCartIssue issue = entityData.get(ISSUE);
+        return issue == OverheadCartIssue.NONE ? null : issue;
+    }
+
     @Override
     public void remove(RemovalReason reason)
     {
@@ -276,7 +336,7 @@ public final class OverheadCartEntity extends Entity
     @Override
     protected void readAdditionalSaveData(CompoundTag tag)
     {
-        behaviour.load(tag);
+        behaviour.load(tag, level().registryAccess());
         foupContent = tag.contains("foup_content") ? ItemStack.parseOptional(level().registryAccess(), tag.getCompound("foup_content")) : null;
         setHasFoup(foupContent != null);
     }
@@ -284,7 +344,7 @@ public final class OverheadCartEntity extends Entity
     @Override
     protected void addAdditionalSaveData(CompoundTag tag)
     {
-        behaviour.save(tag);
+        behaviour.save(tag, level().registryAccess());
         if (foupContent != null)
         {
             tag.put("foup_content", foupContent.saveOptional(level().registryAccess()));

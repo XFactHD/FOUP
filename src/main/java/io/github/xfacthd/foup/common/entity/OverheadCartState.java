@@ -1,10 +1,12 @@
 package io.github.xfacthd.foup.common.entity;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ByIdMap;
 
+import java.util.Locale;
 import java.util.function.IntFunction;
 
 public enum OverheadCartState
@@ -22,11 +24,18 @@ public enum OverheadCartState
     public static final IntFunction<OverheadCartState> BY_ID = ByIdMap.continuous(OverheadCartState::ordinal, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
     public static final StreamCodec<ByteBuf, OverheadCartState> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, OverheadCartState::ordinal);
 
+    private final String name = toString().toLowerCase(Locale.ROOT);
+    private final Component translation = Component.translatable("msg.foup.overhead_cart.issue." + name);
     private final boolean movingHoist;
 
     OverheadCartState(boolean movingHoist)
     {
         this.movingHoist = movingHoist;
+    }
+
+    public Component getTranslation()
+    {
+        return translation;
     }
 
     public boolean hasMovingHoist()

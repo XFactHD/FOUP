@@ -1,6 +1,7 @@
 package io.github.xfacthd.foup.common.menu;
 
 import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
+import io.github.xfacthd.foup.common.data.StationAction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.DataSlot;
@@ -21,7 +22,7 @@ public abstract class AbstractCartInteractorMenu extends AbstractContainerMenu
 
         @Nullable
         @Override
-        public AbstractCartInteractorBlockEntity.Action getActiveAction()
+        public StationAction getActiveAction()
         {
             throw new UnsupportedOperationException();
         }
@@ -63,7 +64,7 @@ public abstract class AbstractCartInteractorMenu extends AbstractContainerMenu
     private void updateState()
     {
         stateSlot.set(stateProvider.getState().ordinal());
-        AbstractCartInteractorBlockEntity.Action action = stateProvider.getActiveAction();
+        StationAction action = stateProvider.getActiveAction();
         actionSlot.set(action != null ? action.ordinal() : -1);
         timeLeftSlot.set(stateProvider.getRemainingDuration());
     }
@@ -74,10 +75,10 @@ public abstract class AbstractCartInteractorMenu extends AbstractContainerMenu
     }
 
     @Nullable
-    public final AbstractCartInteractorBlockEntity.Action getActiveAction()
+    public final StationAction getActiveAction()
     {
         int id = actionSlot.get();
-        return id == -1 ? null : AbstractCartInteractorBlockEntity.Action.byId(id);
+        return id == -1 ? null : StationAction.byId(id);
     }
 
     public final int getRemainingDuration()
@@ -96,7 +97,7 @@ public abstract class AbstractCartInteractorMenu extends AbstractContainerMenu
         AbstractCartInteractorBlockEntity.State getState();
 
         @Nullable
-        AbstractCartInteractorBlockEntity.Action getActiveAction();
+        StationAction getActiveAction();
 
         int getRemainingDuration();
     }

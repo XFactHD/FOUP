@@ -2,7 +2,6 @@ package io.github.xfacthd.foup.common.data.railnet;
 
 import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
-import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.AbstractOverheadRailBlockEntity;
 import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
@@ -119,11 +118,11 @@ public final class TrackNode implements GraphObject<RailNetwork>
         return Objects.requireNonNull(graph).getContextData();
     }
 
-    public void notifyArrival(OverheadCartEntity cart, AbstractCartInteractorBlockEntity.Action action)
+    public void notifyArrival(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
     {
         if (blockEntity != null)
         {
-            blockEntity.notifyArrival(cart, action);
+            blockEntity.notifyArrival(cart, scheduleEntry);
         }
     }
 

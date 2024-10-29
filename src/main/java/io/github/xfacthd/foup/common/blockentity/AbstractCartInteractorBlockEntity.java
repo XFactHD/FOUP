@@ -1,7 +1,9 @@
 package io.github.xfacthd.foup.common.blockentity;
 
+import io.github.xfacthd.foup.common.data.StationAction;
 import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
+import io.github.xfacthd.foup.common.data.railnet.Schedule;
 import io.github.xfacthd.foup.common.menu.AbstractCartInteractorMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -28,7 +30,9 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
     private State state = State.IDLE;
     private int delayCounter = 0;
     @Nullable
-    protected Action currAction = null;
+    private Schedule.Entry currScheduleEntry = null;
+    @Nullable
+    protected StationAction currAction = null;
     @Nullable
     private OverheadCartEntity currCart = null;
     @Nullable
@@ -56,7 +60,7 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
             OverheadCartEntity cart = getCart();
             if (cart != null && level().getGameTime() % 20 == 0)
             {
-                if (canStartAction(cart, Objects.requireNonNull(currAction)).isTrue())
+                if (canStartAction(cart, Objects.requireNonNull(currScheduleEntry)).isTrue())
                 {
                     setState(State.PRE_INTERACT_DELAY);
                 }
@@ -78,12 +82,12 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         {
             case PRE_INTERACT_DELAY ->
             {
-                startInteraction(cart, Objects.requireNonNull(currAction));
+                startInteraction(cart, Objects.requireNonNull(currScheduleEntry));
                 setState(State.INTERACTING);
             }
             case INTERACTING ->
             {
-                finishInteraction(cart, Objects.requireNonNull(currAction));
+                finishInteraction(cart, Objects.requireNonNull(currScheduleEntry));
                 setState(State.POST_INTERACT_DELAY);
             }
             case POST_INTERACT_DELAY -> clearCart(true);
@@ -108,11 +112,11 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
      * Returns whether the action can be started ({@link TriState#TRUE}), the action cannot be started and can be skipped
      * ({@link TriState#DEFAULT}) or the action cannot be started and the cart must be blocked ({@link TriState#FALSE}).
      */
-    protected abstract TriState canStartAction(OverheadCartEntity cart, Action action);
+    protected abstract TriState canStartAction(OverheadCartEntity cart, Schedule.Entry scheduleEntry);
 
-    protected abstract void startInteraction(OverheadCartEntity cart, Action action);
+    protected abstract void startInteraction(OverheadCartEntity cart, Schedule.Entry scheduleEntry);
 
-    protected abstract void finishInteraction(OverheadCartEntity cart, Action action);
+    protected abstract void finishInteraction(OverheadCartEntity cart, Schedule.Entry scheduleEntry);
 
     @Nullable
     protected final OverheadCartEntity getCart()
@@ -139,23 +143,33 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
             Objects.requireNonNull(getCart()).notifyReadyForDeparture();
         }
 
+        currScheduleEntry = null;
         currAction = null;
         currCart = null;
         currCartUuid = null;
         setState(State.IDLE);
     }
 
-    void notifyArrival(OverheadCartEntity cart, Action action)
+    void notifyArrival(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
     {
         currCart = cart;
         currCartUuid = cart.getUUID();
-        switch (canStartAction(cart, action))
+        switch (canStartAction(cart, scheduleEntry))
         {
             case TRUE -> setState(State.PRE_INTERACT_DELAY); // Continue
             case DEFAULT -> setState(State.POST_INTERACT_DELAY); // Skip
             case FALSE -> setState(State.BLOCKED); // Hold
         }
-        currAction = state == State.POST_INTERACT_DELAY ? null : action;
+        if (state == State.POST_INTERACT_DELAY)
+        {
+            currScheduleEntry = null;
+            currAction = null;
+        }
+        else
+        {
+            currScheduleEntry = scheduleEntry;
+            currAction = scheduleEntry.action();
+        }
     }
 
     @Override
@@ -166,7 +180,7 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
 
     @Nullable
     @Override
-    public final Action getActiveAction()
+    public final StationAction getActiveAction()
     {
         return currAction;
     }
@@ -211,7 +225,12 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         linkedStation = tag.contains("linked_station") ? BlockPos.of(tag.getLong("linked_station")) : null;
         state = State.BY_ID.apply(tag.getInt("state"));
         delayCounter = tag.getInt("delay_counter");
-        currAction = tag.contains("current_action") ? Action.BY_ID.apply(tag.getInt("current_action")) : null;
+        currScheduleEntry = null;
+        if (tag.contains("current_schedule_entry"))
+        {
+            currScheduleEntry = Schedule.Entry.load(tag.getCompound("current_schedule_entry"), registries);
+        }
+        currAction = currScheduleEntry != null ? currScheduleEntry.action() : null;
         currCartUuid = tag.contains("current_cart") ? tag.getUUID("current_cart") : null;
     }
 
@@ -225,9 +244,9 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         }
         tag.putInt("state", state.ordinal());
         tag.putInt("delay_counter", delayCounter);
-        if (currAction != null)
+        if (currScheduleEntry != null)
         {
-            tag.putInt("current_action", currAction.ordinal());
+            tag.put("current_schedule_entry", currScheduleEntry.save(registries));
         }
         if (currCartUuid != null)
         {
@@ -263,25 +282,13 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         {
             return switch (type)
             {
+                case UNKNOWN -> 0;
                 case LOADER -> loaderDuration;
                 case STORAGE -> storageDuration;
             };
         }
 
         public static State byId(int id)
-        {
-            return BY_ID.apply(id);
-        }
-    }
-
-    public enum Action
-    {
-        LOAD,
-        UNLOAD;
-
-        static final IntFunction<Action> BY_ID = ByIdMap.continuous(Action::ordinal, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
-
-        public static Action byId(int id)
         {
             return BY_ID.apply(id);
         }

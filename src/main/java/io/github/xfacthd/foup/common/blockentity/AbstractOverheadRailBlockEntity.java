@@ -6,6 +6,7 @@ import io.github.xfacthd.foup.common.data.railnet.RailNetwork;
 import io.github.xfacthd.foup.common.data.railnet.RailNetworkSavedData;
 import io.github.xfacthd.foup.common.data.railnet.TrackNode;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
+import io.github.xfacthd.foup.common.data.railnet.Schedule;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -54,7 +55,7 @@ public abstract class AbstractOverheadRailBlockEntity extends BaseBlockEntity
         return trackNode;
     }
 
-    public void notifyArrival(OverheadCartEntity cart, AbstractCartInteractorBlockEntity.Action action) { }
+    public void notifyArrival(OverheadCartEntity cart, Schedule.Entry stationEntry) { }
 
     @Override
     public void setRemoved()

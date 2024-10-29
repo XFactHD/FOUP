@@ -2,16 +2,17 @@ package io.github.xfacthd.foup.common.entity;
 
 import com.google.common.base.Preconditions;
 import dev.gigaherz.graph3.Graph;
-import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.AbstractOverheadRailBlockEntity;
 import io.github.xfacthd.foup.common.data.TrackShape;
 import io.github.xfacthd.foup.common.data.railnet.Dijkstra;
 import io.github.xfacthd.foup.common.data.railnet.RailNetwork;
 import io.github.xfacthd.foup.common.data.railnet.TrackNode;
 import io.github.xfacthd.foup.common.data.railnet.TrackPath;
+import io.github.xfacthd.foup.common.data.railnet.Schedule;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.Mth;
@@ -19,6 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
 
 final class OverheadCartBehaviour
 {
@@ -31,6 +33,7 @@ final class OverheadCartBehaviour
     private static final int PARK_DURATION = 10;
 
     private final OverheadCartEntity cart;
+    private final Schedule schedule;
     private OverheadCartAction action = OverheadCartAction.DEFAULT;
     private int actionStart = -1;
     @Nullable
@@ -44,10 +47,12 @@ final class OverheadCartBehaviour
     @Nullable
     private TrackNode currNode;
     private boolean rotating = false;
+    private boolean haltRequested = false;
 
     OverheadCartBehaviour(OverheadCartEntity cart)
     {
         this.cart = cart;
+        this.schedule = new Schedule(cart);
     }
 
     void tick(boolean firstTick)
@@ -93,12 +98,12 @@ final class OverheadCartBehaviour
                         currNode.getNetwork().removePath(path);
                         path = null;
                     }
-                    setAction(OverheadCartState.IDLE, 0, 0);
+                    setIdleOnError(OverheadCartIssue.Type.PATH_INVALID, null);
                     break;
                 }
 
-                //boolean done = move(prevNode, currNode, path.peek(currNode.getNetwork()));
                 boolean done;
+                boolean errored = false;
                 try
                 {
                     done = move(path, prevNode, currNode, path.peek(currNode.getNetwork()));
@@ -106,12 +111,20 @@ final class OverheadCartBehaviour
                 catch (Throwable ignored)
                 {
                     done = true;
+                    errored = true;
                 }
                 if (done)
                 {
                     currNode.getNetwork().removePath(path);
                     path = null;
-                    setAction(OverheadCartState.PARK_AFTER_ARRIVAL, PARK_DURATION, 0);
+                    if (errored)
+                    {
+                        setIdleOnError(OverheadCartIssue.Type.MOVEMENT_ERROR, null);
+                    }
+                    else
+                    {
+                        setAction(OverheadCartState.PARK_AFTER_ARRIVAL, PARK_DURATION, 0);
+                    }
                 }
             }
             case PARK_AFTER_ARRIVAL ->
@@ -122,7 +135,7 @@ final class OverheadCartBehaviour
                     AbstractOverheadRailBlockEntity owner = currNode.getOwner();
                     if (!currNode.isStation() || owner == null || (heightDiff = owner.getStationHeightDifference()) <= 0)
                     {
-                        setAction(OverheadCartState.IDLE, 0, 0);
+                        setIdleOnError(OverheadCartIssue.Type.TARGET_INVALID, schedule.getActiveEntry().station());
                         return;
                     }
 
@@ -133,37 +146,62 @@ final class OverheadCartBehaviour
             {
                 if (cart.tickCount - actionStart > action.duration())
                 {
-                    setAction(OverheadCartState.POD_IN_LOADER_OR_STORAGE, 30, action.heightDiff());
-                    // TODO: determine action from schedule
-                    currNode.notifyArrival(cart, AbstractCartInteractorBlockEntity.Action.LOAD);
+                    if (schedule.isEmpty())
+                    {
+                        setIdleOnError(OverheadCartIssue.Type.EMPTY_SCHEDULE, null);
+                        break;
+                    }
+
+                    setAction(OverheadCartState.POD_IN_LOADER_OR_STORAGE, 0, action.heightDiff());
+                    currNode.notifyArrival(cart, schedule.getActiveEntry());
                 }
             }
             case RAISING_HOIST ->
             {
                 if (cart.tickCount - actionStart > action.duration())
                 {
-                    // TODO: move to PARK_BEFORE_DEPARTURE instead
-                    setAction(OverheadCartState.IDLE, 0, 0);
-                    //setAction(OverheadCartState.PATHING, 0, 0);
+                    setAction(OverheadCartState.PARK_BEFORE_DEPARTURE, PARK_DURATION, 0);
                 }
             }
             case PARK_BEFORE_DEPARTURE ->
             {
                 if (cart.tickCount - actionStart > action.duration())
                 {
-                    setAction(OverheadCartState.PATHING, 0, 0);
+                    schedule.advance();
+
+                    if (haltRequested)
+                    {
+                        setAction(OverheadCartState.IDLE, 0, 0);
+                        haltRequested = false;
+                    }
+                    else
+                    {
+                        setAction(OverheadCartState.PATHING, 0, 0);
+                    }
                 }
             }
             case PATHING ->
             {
+                if (schedule.isEmpty())
+                {
+                    setIdleOnError(OverheadCartIssue.Type.EMPTY_SCHEDULE, null);
+                    break;
+                }
+
                 Graph<RailNetwork> graph = Objects.requireNonNull(currNode.getGraph());
                 RailNetwork network = graph.getContextData();
-                //TrackNode targetNode = network.getStation(schedule.getNextStation());
-                //path = Dijkstra.getShortestPath(graph, currNode, targetNode);
-                path = Dijkstra.getShortestPath(graph, currNode, currNode); // TODO: Replace with above lines when schedules are implemented
+                String station = schedule.getActiveEntry().station();
+                TrackNode targetNode = network.getStation(station);
+                if (targetNode == null)
+                {
+                    setIdleOnError(OverheadCartIssue.Type.TARGET_MISSING, station);
+                    break;
+                }
+
+                path = Dijkstra.getShortestPath(graph, currNode, targetNode);
                 if (!path.isValid())
                 {
-                    setAction(OverheadCartState.IDLE, 0, 0);
+                    setIdleOnError(OverheadCartIssue.Type.TARGET_UNREACHABLE, station);
                     break;
                 }
                 if (path.peek(network) == currNode)
@@ -305,13 +343,59 @@ final class OverheadCartBehaviour
         this.actionStart = cart.tickCount;
         this.action = new OverheadCartAction(state, duration, heightDiff);
         cart.getEntityData().set(OverheadCartEntity.ACTION, action);
+        if (state != OverheadCartState.IDLE)
+        {
+            cart.getEntityData().set(OverheadCartEntity.ISSUE, OverheadCartIssue.NONE);
+        }
     }
 
-    void interact()
+    void setIdleOnError(OverheadCartIssue.Type type, @Nullable String detail)
     {
-        if (action.state() == OverheadCartState.IDLE)
+        setAction(OverheadCartState.IDLE, 0, 0);
+        cart.getEntityData().set(OverheadCartEntity.ISSUE, new OverheadCartIssue(type, Optional.ofNullable(detail)));
+    }
+
+    Schedule getSchedule()
+    {
+        return schedule;
+    }
+
+    RailNetwork getOwningNetwork()
+    {
+        return Objects.requireNonNull(currNode).getNetwork();
+    }
+
+    boolean executeSchedule()
+    {
+        RailNetwork network = getOwningNetwork();
+        if (action.state() == OverheadCartState.IDLE && schedule.isValid(network))
         {
-            setAction(OverheadCartState.PATHING, 0, 0);
+            TrackNode node = network.getStation(schedule.getActiveEntry().station());
+            if (node == currNode)
+            {
+                setAction(OverheadCartState.PARK_AFTER_ARRIVAL, PARK_DURATION, 0);
+            }
+            else
+            {
+                setAction(OverheadCartState.PATHING, 0, 0);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public void stopSchedule()
+    {
+        OverheadCartState state = action.state();
+        if (state == OverheadCartState.IDLE) return;
+
+        if (state == OverheadCartState.PATHING || state == OverheadCartState.MOVING)
+        {
+            setAction(OverheadCartState.IDLE, 0, 0);
+        }
+        else
+        {
+            haltRequested = true;
         }
     }
 
@@ -331,13 +415,14 @@ final class OverheadCartBehaviour
         }
     }
 
-    void save(CompoundTag tag)
+    void save(CompoundTag tag, RegistryAccess registryAccess)
     {
         tag.putInt("state", action.state().ordinal());
         tag.putInt("action_start", actionStart);
         tag.putInt("action_duration", action.duration());
         tag.putInt("height_diff", action.heightDiff());
         tag.putBoolean("rotating", rotating);
+        tag.putBoolean("halt_requested", haltRequested);
         if (prevNode != null)
         {
             tag.putLong("prev_node", prevNode.getPos().asLong());
@@ -350,14 +435,30 @@ final class OverheadCartBehaviour
         {
             tag.put("path", path.save());
         }
+        if (!schedule.isEmpty())
+        {
+            tag.put("schedule", schedule.save(registryAccess));
+        }
+        OverheadCartIssue issue = cart.getIssue();
+        if (issue != null)
+        {
+            CompoundTag issueTag = new CompoundTag();
+            issueTag.putString("type", issue.type().getSerializedName());
+            if (issue.detail().isPresent())
+            {
+                issueTag.putString("detail", issue.detail().get());
+            }
+            tag.put("issue", issueTag);
+        }
     }
 
-    void load(CompoundTag tag)
+    void load(CompoundTag tag, RegistryAccess registryAccess)
     {
         actionStart = tag.contains("action_start") ? tag.getInt("action_start") : -1;
         OverheadCartState state = OverheadCartState.of(tag.getInt("state"));
         setAction(state, tag.getInt("action_duration"), tag.getInt("height_diff"));
         rotating = tag.getBoolean("rotating");
+        haltRequested = tag.getBoolean("halt_requested");
         if (tag.contains("prev_node"))
         {
             prevNodePos = BlockPos.of(tag.getLong("prev_node"));
@@ -369,6 +470,24 @@ final class OverheadCartBehaviour
         if (tag.contains("path"))
         {
             path = TrackPath.load(tag.getList("path", Tag.TAG_LONG));
+        }
+        if (tag.contains("schedule"))
+        {
+            schedule.load(tag.getCompound("schedule"), registryAccess);
+        }
+        if (tag.contains("issue"))
+        {
+            CompoundTag issueTag = tag.getCompound("issue");
+            OverheadCartIssue.Type type = OverheadCartIssue.Type.byName(issueTag.getString("type"));
+            if (type != null)
+            {
+                Optional<String> detail = Optional.empty();
+                if (tag.contains("detail", Tag.TAG_STRING))
+                {
+                    detail = Optional.of(tag.getString("detail"));
+                }
+                cart.getEntityData().set(OverheadCartEntity.ISSUE, new OverheadCartIssue(type, detail));
+            }
         }
     }
 }

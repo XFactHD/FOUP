@@ -1,9 +1,11 @@
 package io.github.xfacthd.foup.common.blockentity;
 
 import io.github.xfacthd.foup.common.FoupContent;
+import io.github.xfacthd.foup.common.data.StationAction;
 import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.capability.itemhandler.ExternalItemHandler;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
+import io.github.xfacthd.foup.common.data.railnet.Schedule;
 import io.github.xfacthd.foup.common.item.FoupItem;
 import io.github.xfacthd.foup.common.menu.FoupLoaderMenu;
 import net.minecraft.core.BlockPos;
@@ -51,7 +53,7 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
         }
     };
     private final ExternalItemHandler inputItemHandler = new ExternalItemHandler(
-            inventory, slot -> slot == SLOT_INPUT && (getActiveAction() != Action.LOAD || isBlocked()), slot -> false
+            inventory, slot -> slot == SLOT_INPUT && (getActiveAction() != StationAction.LOAD || isBlocked()), slot -> false
     );
     private final ExternalItemHandler outputItemHandler = new ExternalItemHandler(
             inventory, slot -> false, slot -> slot == SLOT_OUTPUT
@@ -66,7 +68,7 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     }
 
     @Override
-    protected TriState canStartAction(OverheadCartEntity cart, Action action)
+    protected TriState canStartAction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
     {
         ItemStack foup = cart.getFoupContent();
         if (foup == null)
@@ -74,7 +76,7 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
             // No FOUP -> skip interaction
             return TriState.DEFAULT;
         }
-        return switch (action)
+        return switch (scheduleEntry.action()) // TODO: check filter and count
         {
             case LOAD ->
             {
@@ -92,12 +94,12 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     }
 
     @Override
-    protected void startInteraction(OverheadCartEntity cart, Action action) { }
+    protected void startInteraction(OverheadCartEntity cart, Schedule.Entry scheduleEntry) { }
 
     @Override
-    protected void finishInteraction(OverheadCartEntity cart, Action action)
+    protected void finishInteraction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
     {
-        switch (action)
+        switch (scheduleEntry.action()) // TODO: use filter and count
         {
             case LOAD ->
             {

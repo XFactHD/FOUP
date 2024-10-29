@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.FoupStorageInterfaceBlockEntity;
+import io.github.xfacthd.foup.common.data.StationAction;
 import io.github.xfacthd.foup.common.data.StationType;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
@@ -99,12 +100,12 @@ public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<F
         }
 
         float factor = 0F;
-        AbstractCartInteractorBlockEntity.Action action = start > -1 ? be.getActiveAction() : null;
-        if (action == AbstractCartInteractorBlockEntity.Action.LOAD && time > FOUP_START_RAISE)
+        StationAction action = start > -1 ? be.getActiveAction() : null;
+        if (action == StationAction.LOAD && time > FOUP_START_RAISE)
         {
             factor = Math.min(time - FOUP_START_RAISE, FOUP_TIME) / FOUP_TIME;
         }
-        else if (action == AbstractCartInteractorBlockEntity.Action.UNLOAD && time < FOUP_END_LOWER)
+        else if (action == StationAction.UNLOAD && time < FOUP_END_LOWER)
         {
             factor = 1F - Math.max((time - FOUP_START_RAISE) / FOUP_TIME, 0F);
         }

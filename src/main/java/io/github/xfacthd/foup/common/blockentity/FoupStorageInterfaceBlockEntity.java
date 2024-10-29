@@ -1,9 +1,11 @@
 package io.github.xfacthd.foup.common.blockentity;
 
 import io.github.xfacthd.foup.common.FoupContent;
+import io.github.xfacthd.foup.common.data.StationAction;
 import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.component.ItemContents;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
+import io.github.xfacthd.foup.common.data.railnet.Schedule;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -30,13 +32,13 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     }
 
     @Override
-    protected TriState canStartAction(OverheadCartEntity cart, Action action)
+    protected TriState canStartAction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
     {
         FoupStorageLockerBlockEntity locker = getLocker();
         if (locker == null) return TriState.DEFAULT;
 
         ItemStack foup = cart.getFoupContent();
-        return switch (action)
+        return switch (scheduleEntry.action()) // TODO: check filter
         {
             case LOAD ->
             {
@@ -54,9 +56,9 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     }
 
     @Override
-    protected void startInteraction(OverheadCartEntity cart, Action action)
+    protected void startInteraction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
     {
-        switch (action)
+        switch (scheduleEntry.action()) // TODO: use filter
         {
             case LOAD ->
             {
@@ -84,9 +86,9 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     }
 
     @Override
-    protected void finishInteraction(OverheadCartEntity cart, Action action)
+    protected void finishInteraction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
     {
-        switch (action)
+        switch (scheduleEntry.action())
         {
             case LOAD ->
             {
@@ -155,7 +157,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     @Override
     public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider)
     {
-        currAction = tag.contains("action") ? Action.BY_ID.apply(tag.getInt("action")) : null;
+        currAction = tag.contains("action") ? StationAction.byId(tag.getInt("action")) : null;
         actionStart = tag.getLong("action_start");
     }
 

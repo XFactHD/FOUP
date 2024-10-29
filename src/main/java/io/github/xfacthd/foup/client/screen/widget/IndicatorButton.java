@@ -13,7 +13,7 @@ public final class IndicatorButton extends Button
 {
     private static final ResourceLocation INDICATOR_TEXTURE = Utils.rl("indicator");
     private static final ResourceLocation INDICATOR_CHECKED_TEXTURE = Utils.rl("indicator_checked");
-    private static final int INDICATOR_SIZE = 13;
+    private static final int INDICATOR_SIZE = 14;
 
     private final BooleanSupplier checkedSupplier;
 
@@ -27,8 +27,8 @@ public final class IndicatorButton extends Button
     public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
     {
         super.renderWidget(graphics, mouseX, mouseY, partialTick);
-        int x = getX() + width - INDICATOR_SIZE - 3;
-        int y = getY() + 3;
+        int x = getX() + width - INDICATOR_SIZE - Math.min(3, (width - INDICATOR_SIZE) / 2);
+        int y = getY() + (height - INDICATOR_SIZE) / 2;
         boolean checked = checkedSupplier.getAsBoolean();
         ResourceLocation tex = checked ? INDICATOR_CHECKED_TEXTURE : INDICATOR_TEXTURE;
         graphics.blitSprite(tex, x, y, 0, INDICATOR_SIZE, INDICATOR_SIZE);

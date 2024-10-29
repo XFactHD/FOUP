@@ -7,6 +7,7 @@ import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.railnet.RailNetworkSavedData;
 import io.github.xfacthd.foup.common.data.railnet.TrackNode;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
+import io.github.xfacthd.foup.common.data.railnet.Schedule;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -41,12 +42,12 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     }
 
     @Override
-    public void notifyArrival(OverheadCartEntity cart, AbstractCartInteractorBlockEntity.Action action)
+    public void notifyArrival(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
     {
         AbstractCartInteractorBlockEntity linked = getLinkedBlock();
         if (linked != null)
         {
-            linked.notifyArrival(cart, action);
+            linked.notifyArrival(cart, scheduleEntry);
         }
     }
 

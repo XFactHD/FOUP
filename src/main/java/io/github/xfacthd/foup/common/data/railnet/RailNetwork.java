@@ -1,8 +1,10 @@
 package io.github.xfacthd.foup.common.data.railnet;
 
 import com.google.common.base.Preconditions;
+import com.mojang.datafixers.util.Pair;
 import dev.gigaherz.graph3.Mergeable;
 import io.github.xfacthd.foup.common.data.RenameResult;
+import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -89,6 +91,14 @@ public final class RailNetwork implements Mergeable<RailNetwork>
     public TrackNode getStation(String name)
     {
         return stations.get(name);
+    }
+
+    public Map<String, StationType> getStations()
+    {
+        return stations.entrySet()
+                .stream()
+                .map(e -> Pair.of(e.getKey(), e.getValue().getStationType()))
+                .collect(Pair.toMap());
     }
 
     void addStation(String name, TrackNode node)

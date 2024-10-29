@@ -35,10 +35,13 @@ public final class OverheadCartItem extends Item
             OverheadCartEntity cart = FoupContent.ENTITY_TYPE_CART.value().create(level);
             if (cart == null) return InteractionResult.FAIL;
 
-            ctx.getItemInHand().getOrDefault(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.EMPTY).applyToCart(cart);
             cart.setPos(Vec3.atBottomCenterOf(pos).add(0, OverheadCartEntity.PLACEMENT_Y_OFFSET, 0));
             cart.setYRot(state.getValue(PropertyHolder.FACING_HOR).toYRot());
             if (!level.noCollision(cart)) return InteractionResult.FAIL;
+
+            ItemStack stack = ctx.getItemInHand();
+            stack.getOrDefault(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.EMPTY).applyToCart(cart);
+            cart.getSchedule().applySnapshot(stack.get(FoupContent.DC_TYPE_SCHEDULE));
 
             level.addFreshEntity(cart);
         }

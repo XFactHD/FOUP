@@ -1,5 +1,10 @@
 package io.github.xfacthd.foup.common.data;
 
+import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,12 +16,18 @@ import java.util.stream.Collectors;
 
 public enum StationType implements StringRepresentable
 {
+    UNKNOWN,
     LOADER,
     STORAGE,
     ;
 
     private static final StationType[] VALUES = values();
     private static final Map<String, StationType> LOOKUP = Arrays.stream(values()).collect(Collectors.toMap(t -> t.name, Function.identity()));
+    public static final Codec<StationType> CODEC = StringRepresentable.fromEnum(StationType::values);
+    public static final StreamCodec<ByteBuf, StationType> STREAM_CODEC = ByteBufCodecs.idMapper(
+            ByIdMap.continuous(StationType::ordinal, VALUES, ByIdMap.OutOfBoundsStrategy.ZERO),
+            StationType::ordinal
+    );
 
     private final String name = toString().toLowerCase(Locale.ROOT);
 
