@@ -37,7 +37,7 @@ public final class OverheadCartEntity extends Entity
     // Height in "pixels" of the base of loader and storage
     public static final float STATION_BASE_HEIGHT = 2F;
     static final EntityDataAccessor<OverheadCartAction> ACTION = SynchedEntityData.defineId(
-            OverheadCartEntity.class, FoupContent.ENTITY_DATA_SERIALIER_CART_ACTION.value()
+            OverheadCartEntity.class, FoupContent.ENTITY_DATA_SERIALIZER_CART_ACTION.value()
     );
     private static final EntityDataAccessor<Boolean> HAS_FOUP = SynchedEntityData.defineId(
             OverheadCartEntity.class, EntityDataSerializers.BOOLEAN

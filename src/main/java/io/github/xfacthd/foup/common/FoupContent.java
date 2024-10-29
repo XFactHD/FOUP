@@ -140,7 +140,7 @@ public final class FoupContent
     // endregion
 
     // region Entity Data Serializers
-    public static final DeferredHolder<EntityDataSerializer<?>, EntityDataSerializer<OverheadCartAction>> ENTITY_DATA_SERIALIER_CART_ACTION =
+    public static final DeferredHolder<EntityDataSerializer<?>, EntityDataSerializer<OverheadCartAction>> ENTITY_DATA_SERIALIZER_CART_ACTION =
             ENTITY_DATA_SERIALIZERS.register("cart_action", () -> EntityDataSerializer.forValueType(OverheadCartAction.STREAM_CODEC));
     public static final DeferredHolder<EntityDataSerializer<?>, EntityDataSerializer<OverheadCartIssue>> ENTITY_DATA_SERIALIZER_CART_ISSUE =
             ENTITY_DATA_SERIALIZERS.register("cart_issue", () -> EntityDataSerializer.forValueType(OverheadCartIssue.STREAM_CODEC));

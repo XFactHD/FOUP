@@ -9,11 +9,11 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record ClientboundOpenOverheadRailStationPayload(BlockPos pos) implements CustomPacketPayload
+public record ClientboundOpenOverheadRailStationScreenPayload(BlockPos pos) implements CustomPacketPayload
 {
-    public static final Type<ClientboundOpenOverheadRailStationPayload> TYPE = Utils.payloadType("open_rail_station_screen");
-    public static final StreamCodec<ByteBuf, ClientboundOpenOverheadRailStationPayload> STREAM_CODEC = BlockPos.STREAM_CODEC
-            .map(ClientboundOpenOverheadRailStationPayload::new, ClientboundOpenOverheadRailStationPayload::pos);
+    public static final Type<ClientboundOpenOverheadRailStationScreenPayload> TYPE = Utils.payloadType("open_rail_station_screen");
+    public static final StreamCodec<ByteBuf, ClientboundOpenOverheadRailStationScreenPayload> STREAM_CODEC = BlockPos.STREAM_CODEC
+            .map(ClientboundOpenOverheadRailStationScreenPayload::new, ClientboundOpenOverheadRailStationScreenPayload::pos);
 
     public void handle(IPayloadContext ctx)
     {
@@ -24,7 +24,7 @@ public record ClientboundOpenOverheadRailStationPayload(BlockPos pos) implements
     }
 
     @Override
-    public Type<ClientboundOpenOverheadRailStationPayload> type()
+    public Type<ClientboundOpenOverheadRailStationScreenPayload> type()
     {
         return TYPE;
     }

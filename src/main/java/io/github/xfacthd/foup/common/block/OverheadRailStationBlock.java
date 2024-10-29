@@ -4,7 +4,7 @@ import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.blockentity.OverheadRailStationBlockEntity;
 import io.github.xfacthd.foup.common.data.PropertyHolder;
 import io.github.xfacthd.foup.common.data.RailType;
-import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundOpenOverheadRailStationPayload;
+import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundOpenOverheadRailStationScreenPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -38,7 +38,7 @@ public final class OverheadRailStationBlock extends OverheadRailBlock
         {
             if (player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity)
             {
-                PacketDistributor.sendToPlayer(serverPlayer, new ClientboundOpenOverheadRailStationPayload(pos));
+                PacketDistributor.sendToPlayer(serverPlayer, new ClientboundOpenOverheadRailStationScreenPayload(pos));
             }
             return InteractionResult.sidedSuccess(level.isClientSide());
         }
