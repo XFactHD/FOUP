@@ -8,7 +8,7 @@ issueTrackerURL="https://www.github.com/xfacthd/foup/issues"
     version="${mod_version}"
     displayName="FOUP"
     #displayURL="https://modrinth.com/mod/foup"
-    #logoFile="logo.png"
+    logoFile="logo.png"
     authors="XFactHD"
     description=''''''
 
