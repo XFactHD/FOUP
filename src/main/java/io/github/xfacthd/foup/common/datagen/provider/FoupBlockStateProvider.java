@@ -89,7 +89,6 @@ public final class FoupBlockStateProvider extends BlockStateProvider
         getVariantBuilder(FoupContent.BLOCK_FOUP_STORAGE_INTERFACE.value()).forAllStates(state ->
                 ConfiguredModel.builder().modelFile(interfaceModel).build()
         );
-        simpleBlockItem(FoupContent.BLOCK_FOUP_STORAGE_INTERFACE.value(), interfaceModel); // TODO: replace with model including the door
 
         registerStorageLocker();
     }
