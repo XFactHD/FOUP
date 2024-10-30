@@ -26,7 +26,7 @@ public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<F
     private static final ResourceLocation DOOR_TEXTURE = ResourceLocation.withDefaultNamespace("block/vault_top");
     private static final float MIN_XZ = 3F/16F;
     private static final float MAX_XZ = 13F/16F;
-    private static final float MAX_Y = 1.55F/16F;
+    private static final float MAX_Y = 1.95F/16F;
     private static final float TOTAL_TIME = AbstractCartInteractorBlockEntity.State.INTERACTING.getDuration(StationType.STORAGE);
     private static final float DELAY_TIME = 5F;
     private static final float FOUP_TIME = (TOTAL_TIME - (DELAY_TIME * 2F)) / 2F;
