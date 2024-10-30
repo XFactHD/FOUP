@@ -308,6 +308,21 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         return cart;
     }
 
+    public boolean setFilterSlotFromDrop(ItemStack stack, int x, int y)
+    {
+        if (scheduleList.isMouseOver(x, y))
+        {
+            for (ScheduleList.ScheduleEntry entry : scheduleList.children())
+            {
+                if (entry.filterSlot.isMouseOver(x, y))
+                {
+                    return entry.filterSlot.setFilterFromDrop(stack);
+                }
+            }
+        }
+        return false;
+    }
+
     private static final class ScheduleList extends ContainerObjectSelectionList<ScheduleList.ScheduleEntry>
     {
         private static final int LIST_ENTRY_WIDTH = LIST_WIDTH - 15;

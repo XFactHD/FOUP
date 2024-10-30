@@ -55,6 +55,16 @@ public final class FilterSlot extends AbstractWidget
     @Override
     protected void updateWidgetNarration(NarrationElementOutput output) { }
 
+    public boolean setFilterFromDrop(ItemStack stack)
+    {
+        if (active && preFilter.test(stack))
+        {
+            setFilter(stack);
+            return true;
+        }
+        return false;
+    }
+
     public void setFilter(ItemStack filter)
     {
         this.filter = filter;

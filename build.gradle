@@ -68,7 +68,18 @@ configurations {
 
 repositories {
     maven {
-        url 'https://dogforce-games.com/maven'
+        name = 'gigaherz maven'
+        url = 'https://dogforce-games.com/maven'
+        content {
+            includeGroup('dev.gigaherz.graph')
+        }
+    }
+    maven {
+        name = 'TerraformersMC maven'
+        url = "https://maven.terraformersmc.com/"
+        content {
+            includeGroup('dev.emi')
+        }
     }
 }
 
@@ -79,6 +90,9 @@ dependencies {
             prefer graphlib_version
         }
     }
+
+    compileOnly("dev.emi:emi-neoforge:${emi_version}+${emi_mc_version}:api")
+    runtimeOnly("dev.emi:emi-neoforge:${emi_version}+${emi_mc_version}")
 }
 
 tasks.withType(ProcessResources).configureEach {
