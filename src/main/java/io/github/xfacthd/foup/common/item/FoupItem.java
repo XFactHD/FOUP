@@ -1,5 +1,6 @@
 package io.github.xfacthd.foup.common.item;
 
+import com.mojang.serialization.DataResult;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.component.ItemContents;
 import io.github.xfacthd.foup.common.menu.FoupMenu;
@@ -58,6 +59,15 @@ public final class FoupItem extends Item
     public static boolean canPlaceInFoup(ItemStack stack)
     {
         return stack.getItem().canFitInsideContainerItems();
+    }
+
+    public static DataResult<ItemStack> validateCanPlaceInFoup(ItemStack stack)
+    {
+        if (!canPlaceInFoup(stack))
+        {
+            return DataResult.error(() -> "Given item cannot be placed in container items", stack);
+        }
+        return DataResult.success(stack);
     }
 
     private record FoupMenuProvider(ItemStack foupStack) implements MenuProvider

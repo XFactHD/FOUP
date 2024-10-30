@@ -3,6 +3,7 @@ package io.github.xfacthd.foup.common.data.component;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
+import io.github.xfacthd.foup.common.item.FoupItem;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -20,7 +21,7 @@ public record HeldFoup(boolean hasFoup, ItemStack stack) implements TooltipProvi
 {
     public static final Codec<HeldFoup> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             Codec.BOOL.fieldOf("has_foup").forGetter(HeldFoup::hasFoup),
-            ItemStack.OPTIONAL_CODEC.fieldOf("stack").forGetter(HeldFoup::stack)
+            ItemStack.OPTIONAL_CODEC.fieldOf("stack").validate(FoupItem::validateCanPlaceInFoup).forGetter(HeldFoup::stack)
     ).apply(inst, HeldFoup::new));
     public static final StreamCodec<RegistryFriendlyByteBuf, HeldFoup> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL,
