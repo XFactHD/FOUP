@@ -1,0 +1,6 @@
+{
+  "parent": "foup:block/overhead_rail_station",
+  "textures": {
+    "indicator": "foup:block/station_indicator_linked"
+  }
+}

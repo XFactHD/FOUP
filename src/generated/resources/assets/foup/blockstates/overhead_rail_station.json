@@ -1,33 +1,33 @@
 {
   "variants": {
     "facing=east,linked=false": {
-      "model": "foup:block/overhead_rail",
+      "model": "foup:block/overhead_rail_station_unlinked",
       "y": 90
     },
     "facing=east,linked=true": {
-      "model": "foup:block/overhead_rail",
+      "model": "foup:block/overhead_rail_station_linked",
       "y": 90
     },
     "facing=north,linked=false": {
-      "model": "foup:block/overhead_rail"
+      "model": "foup:block/overhead_rail_station_unlinked"
     },
     "facing=north,linked=true": {
-      "model": "foup:block/overhead_rail"
+      "model": "foup:block/overhead_rail_station_linked"
     },
     "facing=south,linked=false": {
-      "model": "foup:block/overhead_rail",
+      "model": "foup:block/overhead_rail_station_unlinked",
       "y": 180
     },
     "facing=south,linked=true": {
-      "model": "foup:block/overhead_rail",
+      "model": "foup:block/overhead_rail_station_linked",
       "y": 180
     },
     "facing=west,linked=false": {
-      "model": "foup:block/overhead_rail",
+      "model": "foup:block/overhead_rail_station_unlinked",
       "y": 270
     },
     "facing=west,linked=true": {
-      "model": "foup:block/overhead_rail",
+      "model": "foup:block/overhead_rail_station_linked",
       "y": 270
     }
   }
