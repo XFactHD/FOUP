@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "tag": "c:dusts/redstone"
+    },
+    "G": {
+      "tag": "c:ingots/gold"
+    },
+    "R": {
+      "item": "foup:overhead_rail"
+    }
+  },
+  "pattern": [
+    "DGD",
+    "RRR"
+  ],
+  "result": {
+    "count": 1,
+    "id": "foup:overhead_rail_station"
+  }
+}

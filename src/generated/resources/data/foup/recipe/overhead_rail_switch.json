@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "R": {
+      "item": "foup:overhead_rail"
+    }
+  },
+  "pattern": [
+    "RRR",
+    " R "
+  ],
+  "result": {
+    "count": 4,
+    "id": "foup:overhead_rail_switch"
+  }
+}

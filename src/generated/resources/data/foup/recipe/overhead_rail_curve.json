@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "R": {
+      "item": "foup:overhead_rail"
+    }
+  },
+  "pattern": [
+    "RR",
+    " R"
+  ],
+  "result": {
+    "count": 3,
+    "id": "foup:overhead_rail_curve"
+  }
+}

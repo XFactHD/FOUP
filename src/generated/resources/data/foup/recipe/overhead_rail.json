@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "tag": "c:ingots/iron"
+    },
+    "R": {
+      "item": "minecraft:rail"
+    }
+  },
+  "pattern": [
+    "III",
+    "RRR",
+    "III"
+  ],
+  "result": {
+    "count": 3,
+    "id": "foup:overhead_rail"
+  }
+}

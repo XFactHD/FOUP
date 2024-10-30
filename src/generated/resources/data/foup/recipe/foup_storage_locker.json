@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "tag": "c:chests/wooden"
+    },
+    "F": {
+      "item": "foup:foup"
+    },
+    "I": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "pattern": [
+    "IFI",
+    "FCF",
+    "IFI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "foup:foup_storage_locker"
+  }
+}

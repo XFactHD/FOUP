@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "hasOverheadRail": {
+      "conditions": {
+        "items": [
+          {
+            "items": "foup:overhead_rail"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "foup:overhead_rail_curve"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "hasOverheadRail"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "foup:overhead_rail_curve"
+    ]
+  }
+}
