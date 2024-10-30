@@ -2,7 +2,6 @@ package io.github.xfacthd.foup.common.network;
 
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundAcknowledgeStationLinkPayload;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundAcknowledgeStationRenamePayload;
-import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundOpenOverheadCartScreenPayload;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundOpenOverheadRailStationScreenPayload;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRailNetworkDebugPayload;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRefreshStaleSchedulePayload;
@@ -43,11 +42,6 @@ public final class NetworkSetup
                         ClientboundAcknowledgeStationLinkPayload.TYPE,
                         ClientboundAcknowledgeStationLinkPayload.STREAM_CODEC,
                         ClientboundAcknowledgeStationLinkPayload::handle
-                )
-                .playToClient(
-                        ClientboundOpenOverheadCartScreenPayload.TYPE,
-                        ClientboundOpenOverheadCartScreenPayload.STREAM_CODEC,
-                        ClientboundOpenOverheadCartScreenPayload::handle
                 )
                 .playToClient(
                         ClientboundRefreshStaleSchedulePayload.TYPE,

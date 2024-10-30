@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.neoforged.neoforge.network.IContainerFactory;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -27,6 +28,11 @@ public final class DeferredMenuTypeRegister extends DeferredRegister<MenuType<?>
     }
 
     public <T extends AbstractContainerMenu> DeferredMenuType<T> registerMenuType(String name, MenuType.MenuSupplier<T> constructor)
+    {
+        return (DeferredMenuType<T>) register(name, () -> new MenuType<>(constructor, FeatureFlags.VANILLA_SET));
+    }
+
+    public <T extends AbstractContainerMenu> DeferredMenuType<T> registerAdvanceMenuType(String name, IContainerFactory<T> constructor)
     {
         return (DeferredMenuType<T>) register(name, () -> new MenuType<>(constructor, FeatureFlags.VANILLA_SET));
     }

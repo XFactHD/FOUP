@@ -1,6 +1,6 @@
 package io.github.xfacthd.foup.common.network.payload.serverbound;
 
-import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
+import io.github.xfacthd.foup.common.menu.OverheadCartMenu;
 import io.github.xfacthd.foup.common.util.Utils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -16,9 +16,9 @@ public record ServerboundStopSchedulePayload(int cartId) implements CustomPacket
 
     public void handle(IPayloadContext ctx)
     {
-        if (ctx.player().level().getEntity(cartId) instanceof OverheadCartEntity cart && cart.isUsableByPlayer(ctx.player()))
+        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId)
         {
-            cart.stopSchedule();
+            menu.getCart().stopSchedule();
         }
     }
 

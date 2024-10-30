@@ -9,6 +9,8 @@ import io.github.xfacthd.foup.common.data.railnet.Schedule;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import io.github.xfacthd.foup.common.entity.OverheadCartIssue;
 import io.github.xfacthd.foup.common.entity.OverheadCartState;
+import io.github.xfacthd.foup.common.item.FoupItem;
+import io.github.xfacthd.foup.common.menu.OverheadCartMenu;
 import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundAddScheduleEntryPayload;
 import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundDeleteScheduleEntryPayload;
 import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundEditScheduleEntryPayload;
@@ -26,14 +28,17 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.Locale;
@@ -43,14 +48,33 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 // TODO: add description tooltips for filter and count
-public final class OverheadCartScreen extends Screen
+public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCartMenu>
 {
-    public static final Component SCREEN_TITLE = Component.translatable("screen.foup.overhead_hoist_cart");
     private static final ResourceLocation BACKGROUND = Utils.rl("background");
+    private static final ResourceLocation INVENTORY = ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
     private static final int WIDTH = 300;
-    private static final int HEIGHT = 240;
-    private static final int TITLE_X = 8;
-    private static final int TITLE_Y = 6;
+    private static final int MIN_HEIGHT = 240;
+    private static final int MAX_HEIGHT = 440;
+    private static final int EDGE_PADDING_X = 8;
+    private static final int EDGE_PADDING_Y = 6;
+    private static final int PADDING = 5;
+    private static final int INVENTORY_WIDTH = 162;
+    private static final int INVENTORY_HEIGHT = 76;
+    private static final int INVENTORY_X = (WIDTH / 2) - (INVENTORY_WIDTH / 2);
+    private static final int INVENTORY_Y_OFF = EDGE_PADDING_Y + INVENTORY_HEIGHT;
+    private static final int INVENTORY_U = 7;
+    private static final int INVENTORY_V = 139;
+    private static final int EXEC_STOP_WIDTH = 60;
+    private static final int EXEC_STOP_X = WIDTH - EDGE_PADDING_X - EXEC_STOP_WIDTH;
+    private static final int ADD_ENTRY_WIDTH = 90;
+    private static final int ADD_ENTRY_X = EXEC_STOP_X - PADDING - ADD_ENTRY_WIDTH;
+    private static final int BUTTON_HEIGHT = 14;
+    private static final int BUTTON_Y = 50;
+    private static final int STATE_Y = EDGE_PADDING_Y + 15;
+    private static final int ISSUE_Y = EDGE_PADDING_Y + 27;
+    private static final int SCHEDULE_Y = EDGE_PADDING_Y + 48;
+    private static final int LIST_WIDTH = WIDTH - (EDGE_PADDING_X * 2);
+    private static final int LIST_Y = BUTTON_Y + BUTTON_HEIGHT + 3;
     public static final Component BUTTON_ADD_ENTRY = Component.translatable("button.foup.overhead_cart.add_entry");
     public static final Component BUTTON_EXEC = Component.translatable("button.foup.overhead_cart.execute");
     public static final Component BUTTON_STOP = Component.translatable("button.foup.overhead_cart.stop");
@@ -74,41 +98,41 @@ public final class OverheadCartScreen extends Screen
     private final OverheadCartEntity cart;
     private final List<Schedule.Entry> scheduleEntries;
     private final Map<String, StationType> stations;
-    private int leftPos;
-    private int topPos;
     private Button buttonExecute;
     private Button buttonStop;
     private ScheduleList scheduleList;
     private boolean cartIdle;
 
-    public OverheadCartScreen(OverheadCartEntity cart, List<Schedule.Entry> scheduleEntries, Map<String, StationType> stations)
+    public OverheadCartScreen(OverheadCartMenu menu, Inventory inventory, Component title)
     {
-        super(SCREEN_TITLE);
-        this.cart = cart;
-        this.scheduleEntries = scheduleEntries;
-        this.stations = stations;
+        super(menu, inventory, title);
+        this.cart = menu.getCart();
+        this.scheduleEntries = menu.getInitialScheduleEntries();
+        this.stations = menu.getInitialStations();
         this.cartIdle = cart.getState() == OverheadCartState.IDLE;
+        this.imageHeight = MIN_HEIGHT;
+        this.imageWidth = WIDTH;
     }
 
     @Override
     protected void init()
     {
-        leftPos = (width - WIDTH) / 2;
-        topPos = (height - HEIGHT) / 2;
+        imageHeight = Math.min(Math.max(MIN_HEIGHT, height), MAX_HEIGHT);
+        super.init();
 
         addRenderableWidget(Button.builder(BUTTON_ADD_ENTRY, this::addStation)
-                .pos(leftPos + WIDTH - 8 - 60 - 5 - 90, topPos + 26 + 24)
-                .size(90, 14)
+                .pos(leftPos + ADD_ENTRY_X, topPos + BUTTON_Y)
+                .size(ADD_ENTRY_WIDTH, BUTTON_HEIGHT)
                 .build()
         );
         buttonExecute = addRenderableWidget(Button.builder(BUTTON_EXEC, this::requestExecute)
-                .pos(leftPos + WIDTH - 8 - 60, topPos + 26 + 24)
-                .size(60, 14)
+                .pos(leftPos + EXEC_STOP_X, topPos + BUTTON_Y)
+                .size(EXEC_STOP_WIDTH, BUTTON_HEIGHT)
                 .build()
         );
         buttonStop = addRenderableWidget(Button.builder(BUTTON_STOP, this::requestStop)
-                .pos(leftPos + WIDTH - 8 - 60, topPos + 26 + 24)
-                .size(60, 14)
+                .pos(leftPos + EXEC_STOP_X, topPos + BUTTON_Y)
+                .size(EXEC_STOP_WIDTH, BUTTON_HEIGHT)
                 .build()
         );
 
@@ -116,37 +140,59 @@ public final class OverheadCartScreen extends Screen
         buttonStop.visible = !cartIdle;
 
         ScheduleList oldList = scheduleList;
-        scheduleList = addRenderableWidget(new ScheduleList(minecraft, leftPos + 8, topPos + 26 + 41, HEIGHT - 14 - 20 - 41, scheduleList));
+        int listHeight = imageHeight - LIST_Y - INVENTORY_Y_OFF - PADDING;
+        scheduleList = addRenderableWidget(new ScheduleList(minecraft, leftPos + EDGE_PADDING_X, topPos + LIST_Y, listHeight, scheduleList));
         if (oldList == null)
         {
             rebuiltScheduleList();
         }
+
+        int invTop = topPos + imageHeight - INVENTORY_Y_OFF + 1;
+        for (Slot slot : menu.slots)
+        {
+            slot.x = INVENTORY_X + 1 + (slot.index % 9 * 18);
+            slot.y = invTop + (slot.index / 9 * 18) + (slot.index >= 27 ? 4 : 0);
+        }
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    {
+        super.render(graphics, mouseX, mouseY, partialTick);
+        renderTooltip(graphics, mouseX, mouseY);
+    }
+
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY)
+    {
+        graphics.drawString(font, title, titleLabelX, titleLabelY, 0x404040, false);
+    }
+
+    @Override
+    public void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY)
     {
         renderTransparentBackground(graphics);
-        graphics.blitSprite(BACKGROUND, leftPos, topPos, WIDTH, HEIGHT);
-        graphics.drawString(font, title, leftPos + TITLE_X, topPos + TITLE_Y, 0x404040, false);
+        graphics.blitSprite(BACKGROUND, leftPos, topPos, WIDTH, imageHeight);
+        graphics.blit(INVENTORY, leftPos + INVENTORY_X, topPos + imageHeight - INVENTORY_Y_OFF, INVENTORY_U, INVENTORY_V, INVENTORY_WIDTH, INVENTORY_HEIGHT);
+        graphics.drawString(font, title, leftPos + EDGE_PADDING_X, topPos + EDGE_PADDING_Y, 0x404040, false);
 
         OverheadCartIssue issue = cart.getIssue();
         boolean hasIssue = issue != null;
 
-        graphics.drawString(font, LABEL_STATE, leftPos + TITLE_X, topPos + TITLE_Y + 15, 0x404040, false);
+        graphics.drawString(font, LABEL_STATE, leftPos + EDGE_PADDING_X, topPos + STATE_Y, 0x404040, false);
         if (hasIssue)
         {
-            graphics.drawString(font, LABEL_ISSUE, leftPos + TITLE_X, topPos + TITLE_Y + 27, 0x404040, false);
+            graphics.drawString(font, LABEL_ISSUE, leftPos + EDGE_PADDING_X, topPos + ISSUE_Y, 0x404040, false);
         }
 
         int offset = Math.max(font.width(LABEL_STATE), hasIssue ? font.width(LABEL_ISSUE) : 0) + 4;
-        graphics.drawString(font, cart.getState().getTranslation(), leftPos + TITLE_X + offset, topPos + TITLE_Y + 15, 0x404040, false);
+        graphics.drawString(font, cart.getState().getTranslation(), leftPos + EDGE_PADDING_X + offset, topPos + STATE_Y, 0x404040, false);
         if (hasIssue)
         {
-            graphics.drawString(font, formatIssue(issue), leftPos + TITLE_X + offset, topPos + TITLE_Y + 15, 0x404040, false);
+            graphics.drawString(font, formatIssue(issue), leftPos + EDGE_PADDING_X + offset, topPos + ISSUE_Y, 0x404040, false);
         }
 
-        graphics.drawString(font, LABEL_SCHEDULE, leftPos + TITLE_X, topPos + 26 + 28, 0x404040, false);
+        graphics.drawString(font, LABEL_SCHEDULE, leftPos + EDGE_PADDING_X, topPos + SCHEDULE_Y, 0x404040, false);
     }
 
     @Override
@@ -180,7 +226,7 @@ public final class OverheadCartScreen extends Screen
     }
 
     @Override
-    public void tick()
+    public void containerTick()
     {
         if (cart.isRemoved() || !cart.isUsableByPlayer(Objects.requireNonNull(Minecraft.getInstance().player)))
         {
@@ -197,6 +243,16 @@ public final class OverheadCartScreen extends Screen
             buttonExecute.active = true;
             buttonStop.active = true;
         }
+    }
+
+    @Override // For some reason AbstractContainerScreen doesn't forward dragging to widgets
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    {
+        if (scheduleList.isMouseOver(mouseX, mouseY))
+        {
+            return scheduleList.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
     private static Component formatIssue(OverheadCartIssue issue)
@@ -252,17 +308,14 @@ public final class OverheadCartScreen extends Screen
         return cart;
     }
 
-    @Override
-    public boolean isPauseScreen()
-    {
-        return false;
-    }
-
     private static final class ScheduleList extends ContainerObjectSelectionList<ScheduleList.ScheduleEntry>
     {
+        private static final int LIST_ENTRY_WIDTH = LIST_WIDTH - 15;
+        private static final int LIST_ENTRY_HEIGHT = 48;
+
         public ScheduleList(Minecraft minecraft, int x, int y, int height, @Nullable ScheduleList oldList)
         {
-            super(minecraft, WIDTH - 16, height, y, 48);
+            super(minecraft, LIST_WIDTH, height, y, LIST_ENTRY_HEIGHT);
             setX(x);
             if (oldList != null)
             {
@@ -297,13 +350,19 @@ public final class OverheadCartScreen extends Screen
         @Override
         public int getRowWidth()
         {
-            return width - 15;
+            return LIST_ENTRY_WIDTH;
         }
 
         @Override
         protected int getListOutlinePadding()
         {
             return 4;
+        }
+
+        @Override
+        protected boolean isValidMouseClick(int button)
+        {
+            return button == GLFW.GLFW_MOUSE_BUTTON_LEFT || button == GLFW.GLFW_MOUSE_BUTTON_RIGHT;
         }
 
         private static final class ScheduleEntry extends Entry<ScheduleEntry>
@@ -314,6 +373,24 @@ public final class OverheadCartScreen extends Screen
             private static final ResourceLocation ICON_SAVE = Utils.rl("save");
             private static final ResourceLocation ICON_DELETE = Utils.rl("delete");
             private static final ResourceLocation ICON_ERROR = ResourceLocation.withDefaultNamespace("icon/unseen_notification");
+            private static final int SPRITE_SIZE = 18;
+            private static final int ELEM_HEIGHT = 18;
+            private static final int MOVE_BTN_WIDTH = 18;
+            private static final int MOVE_BTN_HEIGHT = 14;
+            private static final int LEFT_ELEM_WIDTH = 100;
+            private static final int CHECKBOX_SIZE = 18;
+            private static final int STACKSIZE_WIDTH = 60;
+            private static final int EDGE_PADDING = 2;
+            private static final int MOVE_BTN_X = EDGE_PADDING;
+            private static final int LEFT_ELEM_X = 22;
+            private static final int CHECKBOX_X = 158;
+            private static final int FILTER_X = 180;
+            private static final int FILTER_LABEL_X = 126;
+            private static final int FILTER_LABEL_Y = 7;
+            private static final int COUNT_LABEL_Y_OFF = 14;
+            private static final int ERROR_SIZE = 10;
+            private static final int ERROR_X = EDGE_PADDING + (MOVE_BTN_WIDTH / 2) - (ERROR_SIZE / 2);
+            private static final int ERROR_Y = 17;
 
             private final OverheadCartScreen owner;
             private final Button buttonUp;
@@ -344,36 +421,37 @@ public final class OverheadCartScreen extends Screen
                 this.useCount = entry.count().isPresent();
                 this.mutable = mutable;
                 this.buttonUp = SpriteIconButton.builder(BUTTON_MOVE_UP, this::moveUp, true)
-                        .size(18, 14)
-                        .sprite(ICON_UP, 18, 18)
+                        .size(MOVE_BTN_WIDTH, MOVE_BTN_HEIGHT)
+                        .sprite(ICON_UP, SPRITE_SIZE, SPRITE_SIZE)
                         .build();
                 this.buttonDown = SpriteIconButton.builder(BUTTON_MOVE_DOWN, this::moveDown, true)
-                        .size(17, 14)
-                        .sprite(ICON_DOWN, 18, 18)
+                        .size(MOVE_BTN_WIDTH, MOVE_BTN_HEIGHT)
+                        .sprite(ICON_DOWN, SPRITE_SIZE, SPRITE_SIZE)
                         .build();
-                this.boxStation = new EditBox(owner.font, 100, 18, SELECT_STATION); // TODO: replace with combo box or provide auto-complete suggestions
+                this.boxStation = new EditBox(owner.font, LEFT_ELEM_WIDTH, ELEM_HEIGHT, SELECT_STATION); // TODO: replace with combo box or provide auto-complete suggestions
                 this.boxStation.setValue(entry.station());
                 this.boxStation.setResponder(this::onStationChange);
                 this.buttonAction = CycleButton.builder(StationAction::getTranslation)
                         .withValues(StationAction.values())
                         .withInitialValue(entry.action())
-                        .create(0, 0, 100, 18, BUTTON_ACTION, this::onActionChange);
-                this.checkFilter = new IndicatorButton(0, 0, 18, 18, CHECK_FILTER, () -> useFilter, this::onCheckFilterToggle);
-                this.filterSlot = new FilterSlot(0, 0, SLOT_FILTER);
+                        .create(0, 0, LEFT_ELEM_WIDTH, ELEM_HEIGHT, BUTTON_ACTION, this::onActionChange);
+                this.checkFilter = new IndicatorButton(0, 0, CHECKBOX_SIZE, CHECKBOX_SIZE, CHECK_FILTER, () -> useFilter, this::onCheckFilterToggle);
+                this.filterSlot = new FilterSlot(owner, 0, 0, SLOT_FILTER, FoupItem::canPlaceInFoup);
                 this.filterSlot.setFilter(entry.filter().orElse(ItemStack.EMPTY));
-                this.checkCount = new IndicatorButton(0, 0, 18, 18, CHECK_COUNT, () -> useCount, this::onCheckCountToggle);
-                this.boxCount = new StackSizeCycleBox(owner.font, 0, 0, 60, 18, CYCLE_COUNT);
+                this.checkCount = new IndicatorButton(0, 0, CHECKBOX_SIZE, CHECKBOX_SIZE, CHECK_COUNT, () -> useCount, this::onCheckCountToggle);
+                this.boxCount = new StackSizeCycleBox(owner.font, 0, 0, STACKSIZE_WIDTH, ELEM_HEIGHT, CYCLE_COUNT);
                 entry.count().ifPresent(this.boxCount::setValue);
                 this.buttonEdit = SpriteIconButton.builder(BUTTON_EDIT, this::edit, true)
-                        .size(18, 18)
-                        .sprite(ICON_EDIT, 18, 18)
+                        .size(SPRITE_SIZE, SPRITE_SIZE)
+                        .sprite(ICON_EDIT, SPRITE_SIZE, SPRITE_SIZE)
                         .build();
                 this.buttonSave = SpriteIconButton.builder(BUTTON_SAVE, this::save, true)
-                        .size(18, 18)
-                        .sprite(ICON_SAVE, 18, 18)
+                        .size(SPRITE_SIZE, SPRITE_SIZE)
+                        .sprite(ICON_SAVE, SPRITE_SIZE, SPRITE_SIZE)
                         .build();
-                this.buttonDelete = SpriteIconButton.builder(BUTTON_DELETE, this::delete, true).size(18, 18)
-                        .sprite(ICON_DELETE, 18, 18)
+                this.buttonDelete = SpriteIconButton.builder(BUTTON_DELETE, this::delete, true)
+                        .size(SPRITE_SIZE, SPRITE_SIZE)
+                        .sprite(ICON_DELETE, SPRITE_SIZE, SPRITE_SIZE)
                         .build();
                 this.children = List.of(buttonUp, buttonDown, boxStation, buttonAction, checkFilter, filterSlot, checkCount, boxCount, buttonEdit, buttonSave, buttonDelete);
                 this.validity = getValidity();
@@ -390,51 +468,51 @@ public final class OverheadCartScreen extends Screen
             public void render(GuiGraphics graphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTick)
             {
                 buttonUp.active = index != 0;
-                buttonUp.setPosition(left + 2, top + 2);
+                buttonUp.setPosition(left + MOVE_BTN_X, top + EDGE_PADDING);
 
                 buttonDown.active = index != list().children().size() - 1;
-                buttonDown.setPosition(left + 2, top + height - 16);
+                buttonDown.setPosition(left + MOVE_BTN_X, top + height - EDGE_PADDING - MOVE_BTN_HEIGHT);
 
                 boxStation.active = mutable;
                 boxStation.setEditable(mutable);
-                boxStation.setPosition(left + 22, top + 2);
+                boxStation.setPosition(left + LEFT_ELEM_X, top + EDGE_PADDING);
 
                 buttonAction.active = mutable;
-                buttonAction.setPosition(left + 22, top + height - 20);
+                buttonAction.setPosition(left + LEFT_ELEM_X, top + height - EDGE_PADDING - ELEM_HEIGHT);
 
                 checkFilter.visible = buttonAction.getValue() == StationAction.LOAD;
                 checkFilter.active = mutable;
-                checkFilter.setPosition(left + 158, top + 2);
+                checkFilter.setPosition(left + CHECKBOX_X, top + EDGE_PADDING);
 
                 filterSlot.visible = buttonAction.getValue() == StationAction.LOAD;
                 filterSlot.active = useFilter && mutable;
-                filterSlot.setPosition(left + 180, top + 2);
+                filterSlot.setPosition(left + FILTER_X, top + EDGE_PADDING);
 
                 checkCount.visible = type == StationType.LOADER;
                 checkCount.active = mutable;
-                checkCount.setPosition(left + 158, top + height - 20);
+                checkCount.setPosition(left + CHECKBOX_X, top + height - EDGE_PADDING - ELEM_HEIGHT);
 
                 boxCount.visible = type == StationType.LOADER;
                 boxCount.active = useCount && mutable;
                 boxCount.setEditable(useCount && mutable);
-                boxCount.setPosition(left + 180, top + height - 20);
+                boxCount.setPosition(left + FILTER_X, top + height - EDGE_PADDING - ELEM_HEIGHT);
 
                 buttonEdit.visible = !mutable;
-                buttonEdit.setPosition(left + width - 20, top + 2);
+                buttonEdit.setPosition(left + width - EDGE_PADDING - SPRITE_SIZE, top + EDGE_PADDING);
 
                 buttonSave.visible = mutable;
                 buttonSave.active = mutable && validity == EntryValidity.VALID;
-                buttonSave.setPosition(left + width - 20, top + 2);
+                buttonSave.setPosition(left + width - EDGE_PADDING - SPRITE_SIZE, top + EDGE_PADDING);
 
-                buttonDelete.setPosition(left + width - 20, top + height - 20);
+                buttonDelete.setPosition(left + width - EDGE_PADDING - SPRITE_SIZE, top + height - EDGE_PADDING - ELEM_HEIGHT);
 
                 if (filterSlot.visible)
                 {
-                    graphics.drawString(owner.font, LABEL_FILTER, left + 126, top + 7, 0xFFFFFF);
+                    graphics.drawString(owner.font, LABEL_FILTER, left + FILTER_LABEL_X, top + FILTER_LABEL_Y, 0xFFFFFF);
                 }
                 if (boxCount.visible)
                 {
-                    graphics.drawString(owner.font, LABEL_COUNT, left + 126, top + height - 14, 0xFFFFFF);
+                    graphics.drawString(owner.font, LABEL_COUNT, left + FILTER_LABEL_X, top + height - COUNT_LABEL_Y_OFF, 0xFFFFFF);
                 }
                 for (AbstractWidget child : children)
                 {
@@ -446,10 +524,10 @@ public final class OverheadCartScreen extends Screen
                 }
                 if (validity != EntryValidity.VALID)
                 {
-                    graphics.blitSprite(ICON_ERROR, left + 6, top + 17, 10, 10);
-                    if (mouseX >= left + 6 && mouseX < left + 16 && mouseY >= top + 17 && mouseY < top + 27)
+                    graphics.blitSprite(ICON_ERROR, left + ERROR_X, top + ERROR_Y, ERROR_SIZE, ERROR_SIZE);
+                    if (mouseX >= left + ERROR_X && mouseX < left + ERROR_X + ERROR_SIZE && mouseY >= top + ERROR_Y && mouseY < top + ERROR_Y + ERROR_SIZE)
                     {
-                        graphics.renderTooltip(owner.font, validity.description, mouseX, mouseY);
+                        owner.setTooltipForNextRenderPass(validity.description);
                     }
                 }
             }

@@ -24,6 +24,7 @@ import io.github.xfacthd.foup.common.item.OverheadCartItem;
 import io.github.xfacthd.foup.common.menu.FoupLoaderMenu;
 import io.github.xfacthd.foup.common.menu.FoupMenu;
 import io.github.xfacthd.foup.common.menu.FoupStorageLockerMenu;
+import io.github.xfacthd.foup.common.menu.OverheadCartMenu;
 import io.github.xfacthd.foup.common.util.registration.DeferredBlockEntity;
 import io.github.xfacthd.foup.common.util.registration.DeferredBlockEntityRegister;
 import io.github.xfacthd.foup.common.util.registration.DeferredDataComponentType;
@@ -136,6 +137,9 @@ public final class FoupContent
     );
     public static final DeferredMenuType<FoupMenu> MENU_TYPE_FOUP = MENU_TYPES.registerMenuType(
             "foup", FoupMenu::new
+    );
+    public static final DeferredMenuType<OverheadCartMenu> MENU_TYPE_OVERHEAD_CART = MENU_TYPES.registerAdvanceMenuType(
+            "overhead_cart", OverheadCartMenu::createClient
     );
     // endregion
 

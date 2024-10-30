@@ -1,7 +1,7 @@
 package io.github.xfacthd.foup.common.network.payload.serverbound;
 
 import io.github.xfacthd.foup.common.data.railnet.Schedule;
-import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
+import io.github.xfacthd.foup.common.menu.OverheadCartMenu;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRefreshStaleSchedulePayload;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.core.UUIDUtil;
@@ -30,11 +30,11 @@ public record ServerboundMoveScheduleEntryPayload(int cartId, int idx, boolean d
 
     public void handle(IPayloadContext ctx)
     {
-        if (ctx.player().level().getEntity(cartId) instanceof OverheadCartEntity cart && cart.isUsableByPlayer(ctx.player()))
+        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId)
         {
-            if (!cart.getSchedule().moveEntry(idx, down, entryUid))
+            if (!menu.getCart().getSchedule().moveEntry(idx, down, entryUid))
             {
-                ctx.reply(ClientboundRefreshStaleSchedulePayload.of(cart, Schedule.RejectedAction.MOVE));
+                ctx.reply(ClientboundRefreshStaleSchedulePayload.of(menu.getCart(), Schedule.RejectedAction.MOVE));
             }
         }
     }

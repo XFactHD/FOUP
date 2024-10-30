@@ -11,6 +11,7 @@ import io.github.xfacthd.foup.common.data.StationAction;
 import io.github.xfacthd.foup.common.entity.OverheadCartIssue;
 import io.github.xfacthd.foup.common.entity.OverheadCartState;
 import io.github.xfacthd.foup.common.item.FoupItem;
+import io.github.xfacthd.foup.common.menu.OverheadCartMenu;
 import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
@@ -70,7 +71,7 @@ public final class FoupLanguageProvider extends LanguageProvider
         add(FoupLoaderBlockEntity.MENU_TITLE, "FOUP Loader");
         add(FoupStorageLockerBlockEntity.MENU_TITLE, "FOUP Storage Locker");
         add(FoupItem.MENU_TITLE, "FOUP");
-        add(OverheadCartScreen.SCREEN_TITLE, "Overhead Hoist Cart");
+        add(OverheadCartMenu.MENU_TITLE, "Overhead Hoist Cart");
         add(OverheadCartScreen.EntryValidity.VALID.getDescription(), "Valid");
         add(OverheadCartScreen.EntryValidity.INVALID_STATION.getDescription(), "Specified station does not exist or is not linked");
         add(OverheadCartScreen.EntryValidity.LOADER_FILTER_EMPTY.getDescription(), "Loaders require a non-empty filter if filtering is enabled");

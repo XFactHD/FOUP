@@ -9,6 +9,7 @@ import io.github.xfacthd.foup.client.renderer.item.OverheadCartItemProperty;
 import io.github.xfacthd.foup.client.screen.FoupLoaderScreen;
 import io.github.xfacthd.foup.client.screen.FoupScreen;
 import io.github.xfacthd.foup.client.screen.FoupStorageLockerScreen;
+import io.github.xfacthd.foup.client.screen.OverheadCartScreen;
 import io.github.xfacthd.foup.common.FoupContent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -59,5 +60,6 @@ public final class FoupClient
         event.register(FoupContent.MENU_TYPE_FOUP_LOADER.value(), FoupLoaderScreen::new);
         event.register(FoupContent.MENU_TYPE_FOUP_STORAGE_LOCKER.value(), FoupStorageLockerScreen::new);
         event.register(FoupContent.MENU_TYPE_FOUP.value(), FoupScreen::new);
+        event.register(FoupContent.MENU_TYPE_OVERHEAD_CART.value(), OverheadCartScreen::new);
     }
 }

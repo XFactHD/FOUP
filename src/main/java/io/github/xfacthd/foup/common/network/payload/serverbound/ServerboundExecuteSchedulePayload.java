@@ -1,7 +1,7 @@
 package io.github.xfacthd.foup.common.network.payload.serverbound;
 
 import io.github.xfacthd.foup.common.data.railnet.Schedule;
-import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
+import io.github.xfacthd.foup.common.menu.OverheadCartMenu;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRefreshStaleSchedulePayload;
 import io.github.xfacthd.foup.common.util.Utils;
 import io.netty.buffer.ByteBuf;
@@ -18,11 +18,11 @@ public record ServerboundExecuteSchedulePayload(int cartId) implements CustomPac
 
     public void handle(IPayloadContext ctx)
     {
-        if (ctx.player().level().getEntity(cartId) instanceof OverheadCartEntity cart && cart.isUsableByPlayer(ctx.player()))
+        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId)
         {
-            if (!cart.executeSchedule())
+            if (!menu.getCart().executeSchedule())
             {
-                ctx.reply(ClientboundRefreshStaleSchedulePayload.of(cart, Schedule.RejectedAction.EXECUTE));
+                ctx.reply(ClientboundRefreshStaleSchedulePayload.of(menu.getCart(), Schedule.RejectedAction.EXECUTE));
             }
         }
     }
