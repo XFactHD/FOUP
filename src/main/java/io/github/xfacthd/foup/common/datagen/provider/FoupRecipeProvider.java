@@ -1,6 +1,8 @@
 package io.github.xfacthd.foup.common.datagen.provider;
 
 import io.github.xfacthd.foup.common.FoupContent;
+import io.github.xfacthd.foup.common.recipe.AddFoupToCartRecipe;
+import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
@@ -106,6 +108,8 @@ public final class FoupRecipeProvider extends RecipeProvider
                 .define('C', Tags.Items.CHESTS_WOODEN)
                 .unlockedBy("hasChest", has(Tags.Items.CHESTS_WOODEN))
                 .save(output);
+
+        output.accept(Utils.rl("add_foup_to_cart"), new AddFoupToCartRecipe(), null);
     }
 
     private static ShapedRecipeBuilder shaped(Holder<? extends ItemLike> result, int count)

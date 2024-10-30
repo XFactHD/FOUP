@@ -25,6 +25,8 @@ import io.github.xfacthd.foup.common.menu.FoupLoaderMenu;
 import io.github.xfacthd.foup.common.menu.FoupMenu;
 import io.github.xfacthd.foup.common.menu.FoupStorageLockerMenu;
 import io.github.xfacthd.foup.common.menu.OverheadCartMenu;
+import io.github.xfacthd.foup.common.recipe.AddFoupToCartRecipe;
+import io.github.xfacthd.foup.common.recipe.AddFoupToCartRecipeSerializer;
 import io.github.xfacthd.foup.common.util.registration.DeferredBlockEntity;
 import io.github.xfacthd.foup.common.util.registration.DeferredBlockEntityRegister;
 import io.github.xfacthd.foup.common.util.registration.DeferredDataComponentType;
@@ -40,6 +42,7 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -64,6 +67,7 @@ public final class FoupContent
     private static final DeferredEntityRegister ENTITIES = DeferredEntityRegister.create(Foup.MOD_ID);
     private static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Foup.MOD_ID);
     private static final DeferredMenuTypeRegister MENU_TYPES = DeferredMenuTypeRegister.create(Foup.MOD_ID);
+    private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, Foup.MOD_ID);
     private static final DeferredRegister<EntityDataSerializer<?>> ENTITY_DATA_SERIALIZERS = DeferredRegister.create(NeoForgeRegistries.ENTITY_DATA_SERIALIZERS, Foup.MOD_ID);
 
     // region Blocks
@@ -143,6 +147,12 @@ public final class FoupContent
     );
     // endregion
 
+    // region Recipe Serializers
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<AddFoupToCartRecipe>> RECIPE_SERIALIZER_ADD_FOUP_TO_CART = RECIPE_SERIALIZERS.register(
+            "add_foup_to_cart", AddFoupToCartRecipeSerializer::new
+    );
+    // endregion
+
     // region Entity Data Serializers
     public static final DeferredHolder<EntityDataSerializer<?>, EntityDataSerializer<OverheadCartAction>> ENTITY_DATA_SERIALIZER_CART_ACTION =
             ENTITY_DATA_SERIALIZERS.register("cart_action", () -> EntityDataSerializer.forValueType(OverheadCartAction.STREAM_CODEC));
@@ -175,6 +185,7 @@ public final class FoupContent
         ENTITIES.register(modBus);
         CREATIVE_TABS.register(modBus);
         MENU_TYPES.register(modBus);
+        RECIPE_SERIALIZERS.register(modBus);
         ENTITY_DATA_SERIALIZERS.register(modBus);
     }
 
