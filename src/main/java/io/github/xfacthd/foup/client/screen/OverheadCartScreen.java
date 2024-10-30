@@ -211,16 +211,15 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         boolean anyFocused = false;
         for (ScheduleList.ScheduleEntry child : scheduleList.children())
         {
-            if (child.getFocused() instanceof EditBox)
+            if (child.getFocused() instanceof EditBox || child.getFocused() instanceof StackSizeCycleBox)
             {
                 anyFocused = true;
                 break;
             }
         }
-        if (!(getFocused() instanceof EditBox) && !anyFocused && Objects.requireNonNull(minecraft).options.keyInventory.matches(keyCode, scanCode))
+        if ((getFocused() instanceof EditBox || anyFocused) && Objects.requireNonNull(minecraft).options.keyInventory.matches(keyCode, scanCode))
         {
-            onClose();
-            return true;
+            return false;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
