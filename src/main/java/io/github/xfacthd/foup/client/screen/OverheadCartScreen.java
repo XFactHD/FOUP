@@ -248,7 +248,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     @Override // For some reason AbstractContainerScreen doesn't forward dragging to widgets
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
     {
-        if (scheduleList.isMouseOver(mouseX, mouseY))
+        if (getFocused() == scheduleList && isDragging() && button == GLFW.GLFW_MOUSE_BUTTON_LEFT && scheduleList.isMouseOver(mouseX, mouseY))
         {
             return scheduleList.mouseDragged(mouseX, mouseY, button, dragX, dragY);
         }
