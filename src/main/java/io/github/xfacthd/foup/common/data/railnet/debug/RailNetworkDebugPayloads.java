@@ -64,7 +64,7 @@ public final class RailNetworkDebugPayloads
             {
                 neighbours.add(((TrackNode) neighbour).getPos());
             }
-            Optional<String> type = Optional.ofNullable(node.getStationType()).map(StationType::name);
+            Optional<StationType> type = Optional.ofNullable(node.getStationType());
             nodes.add(new RailNetworkDebugData.Node(node.getPos(), name, type, node.isOccupied(), neighbours));
         }
         return Optional.of(new RailNetworkDebugData(nodes));

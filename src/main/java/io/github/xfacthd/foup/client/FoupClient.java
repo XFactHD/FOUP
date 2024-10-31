@@ -6,10 +6,12 @@ import io.github.xfacthd.foup.client.renderer.debug.RailNetworkDebugRenderer;
 import io.github.xfacthd.foup.client.renderer.entity.OverheadCartModel;
 import io.github.xfacthd.foup.client.renderer.entity.OverheadCartRenderer;
 import io.github.xfacthd.foup.client.renderer.item.OverheadCartItemProperty;
+import io.github.xfacthd.foup.client.renderer.special.OverheadRailInfoRenderer;
 import io.github.xfacthd.foup.client.screen.FoupLoaderScreen;
 import io.github.xfacthd.foup.client.screen.FoupScreen;
 import io.github.xfacthd.foup.client.screen.FoupStorageLockerScreen;
 import io.github.xfacthd.foup.client.screen.OverheadCartScreen;
+import io.github.xfacthd.foup.client.util.ClientUtils;
 import io.github.xfacthd.foup.common.FoupContent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -30,10 +32,12 @@ public final class FoupClient
         modBus.addListener(FoupClient::onClientSetup);
         modBus.addListener(FoupClient::onRegisterMenuScreens);
         modBus.addListener(FoupStorageInterfaceRenderer::onTextureAtlasStitched);
+        modBus.addListener(ClientUtils::onRegisterRenderBuffers);
+
+        NeoForge.EVENT_BUS.addListener(OverheadRailInfoRenderer::onRenderLevelStage);
 
         if (!FMLEnvironment.production)
         {
-            modBus.addListener(RailNetworkDebugRenderer::onRegisterRenderBuffers);
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onRenderLevelStage);
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onPlayerDisconnect);
         }

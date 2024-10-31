@@ -2,6 +2,7 @@ package io.github.xfacthd.foup.common.data;
 
 import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ByIdMap;
@@ -30,6 +31,12 @@ public enum StationType implements StringRepresentable
     );
 
     private final String name = toString().toLowerCase(Locale.ROOT);
+    private final Component translation = Component.translatable("desc.foup.station_type." + name);
+
+    public Component getTranslation()
+    {
+        return translation;
+    }
 
     @Override
     public String getSerializedName()

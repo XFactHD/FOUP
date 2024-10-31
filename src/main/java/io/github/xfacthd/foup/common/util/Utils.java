@@ -7,11 +7,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Arrays;
@@ -28,6 +33,8 @@ public final class Utils
                     (sideA, sideB) -> { throw new IllegalArgumentException("Duplicate keys"); },
                     Long2ObjectOpenHashMap::new
             ));
+    public static final TagKey<Block> RAIL_BLOCKS = BlockTags.create(Utils.rl("overhead_rails"));
+    public static final TagKey<Item> RAIL_ITEMS = ItemTags.create(Utils.rl("overhead_rails"));
 
     public static ResourceLocation rl(String path)
     {

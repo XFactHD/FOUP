@@ -91,6 +91,8 @@ public final class FoupBlockStateProvider extends BlockStateProvider
         );
 
         registerStorageLocker();
+
+        itemModels().handheldItem(FoupContent.ITEM_RAIL_INSPECTOR.value());
     }
 
     private void registerStorageLocker()

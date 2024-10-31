@@ -4,6 +4,7 @@ import io.github.xfacthd.foup.Foup;
 import io.github.xfacthd.foup.common.datagen.provider.FoupBlockStateProvider;
 import io.github.xfacthd.foup.common.datagen.provider.FoupBlockTagsProvider;
 import io.github.xfacthd.foup.common.datagen.provider.FoupEntityTypeTagsProvider;
+import io.github.xfacthd.foup.common.datagen.provider.FoupItemTagsProvider;
 import io.github.xfacthd.foup.common.datagen.provider.FoupLanguageProvider;
 import io.github.xfacthd.foup.common.datagen.provider.FoupRecipeProvider;
 import io.github.xfacthd.foup.common.datagen.provider.FoupSpriteSourceProvider;
@@ -38,7 +39,9 @@ public final class GeneratorHandler
         gen.addProvider(client, new FoupBlockStateProvider(output, fileHelper));
         gen.addProvider(client, new FoupLanguageProvider(output));
 
-        gen.addProvider(server, new FoupBlockTagsProvider(output, lookupProvider, fileHelper));
+        FoupBlockTagsProvider blockTags = new FoupBlockTagsProvider(output, lookupProvider, fileHelper);
+        gen.addProvider(server, blockTags);
+        gen.addProvider(server, new FoupItemTagsProvider(output, lookupProvider, blockTags.contentsGetter(), fileHelper));
         gen.addProvider(server, new FoupEntityTypeTagsProvider(output, lookupProvider, fileHelper));
         gen.addProvider(server, new FoupRecipeProvider(output, lookupProvider));
     }

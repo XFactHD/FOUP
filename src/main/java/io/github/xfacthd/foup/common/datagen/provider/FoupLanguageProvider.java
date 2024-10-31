@@ -8,6 +8,7 @@ import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.blockentity.FoupLoaderBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.FoupStorageLockerBlockEntity;
 import io.github.xfacthd.foup.common.data.StationAction;
+import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.entity.OverheadCartIssue;
 import io.github.xfacthd.foup.common.entity.OverheadCartState;
 import io.github.xfacthd.foup.common.item.FoupItem;
@@ -38,6 +39,7 @@ public final class FoupLanguageProvider extends LanguageProvider
 
         add(FoupContent.ITEM_FOUP.value(), "FOUP");
         add(FoupContent.ITEM_CART.value(), "Overhead Hoist Cart");
+        add(FoupContent.ITEM_RAIL_INSPECTOR.value(), "Rail Inspector");
 
         add("item.foup.foup.desc", "Front Opening Unified Pod");
 
@@ -46,6 +48,10 @@ public final class FoupLanguageProvider extends LanguageProvider
         add("desc.foup.component.held_foup.contents", "FOUP Contents: %s x %s");
         add("desc.foup.component.held_foup.contents.empty", "FOUP Contents: Empty");
         add("desc.foup.component.item_contents.contents", "Contains: %s x %s");
+
+        add(StationType.UNKNOWN.getTranslation(), "Unknown");
+        add(StationType.LOADER.getTranslation(), "Loader");
+        add(StationType.STORAGE.getTranslation(), "Storage");
 
         add(StationAction.LOAD.getTranslation(), "Load");
         add(StationAction.UNLOAD.getTranslation(), "Unload");

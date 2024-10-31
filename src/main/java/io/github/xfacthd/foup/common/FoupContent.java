@@ -95,6 +95,7 @@ public final class FoupContent
     // region Items
     public static final DeferredItem<Item> ITEM_FOUP = ITEMS.registerItem("foup", FoupItem::new);
     public static final DeferredItem<Item> ITEM_CART = ITEMS.registerItem("overhead_cart", OverheadCartItem::new);
+    public static final DeferredItem<Item> ITEM_RAIL_INSPECTOR = ITEMS.registerItem("rail_inspector", Item::new);
     // endregion
 
     // region Block Entities

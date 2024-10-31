@@ -1,11 +1,11 @@
 package io.github.xfacthd.foup.client.renderer.debug;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Axis;
+import io.github.xfacthd.foup.client.renderer.special.OverheadRailInfoRenderer;
+import io.github.xfacthd.foup.client.util.ClientUtils;
+import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugData;
 import io.github.xfacthd.foup.common.util.Utils;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -13,35 +13,23 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
+import java.util.function.Function;
+
 public final class RailNetworkDebugRenderer
 {
     private static final Long2ObjectMap<RailNetworkDebugData> DEBUG_DATA = new Long2ObjectOpenHashMap<>();
-    private static final RenderType DEBUG_QUADS = RenderType.create(
-            "foup_debug_quads",
-            DefaultVertexFormat.POSITION_COLOR,
-            VertexFormat.Mode.QUADS,
-            1536,
-            false,
-            false,
-            RenderType.CompositeState.builder()
-                    .setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
-                    .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
-                    .setCullState(RenderStateShard.NO_CULL)
-                    .createCompositeState(false)
-    );
+    private static final Function<@Nullable StationType, @Nullable Component> STATION_FORMATTER = stationType ->
+            Component.literal(stationType != null ? stationType.name() : "NULL");
 
     public static void onRenderLevelStage(RenderLevelStageEvent event)
     {
@@ -54,12 +42,12 @@ public final class RailNetworkDebugRenderer
         {
             renderNetwork(entry, buffer, event.getPoseStack(), event.getCamera(), font);
         }
-        buffer.endBatch(DEBUG_QUADS);
+        buffer.endBatch(ClientUtils.INFO_QUADS);
     }
 
     private static void renderNetwork(RailNetworkDebugData entry, MultiBufferSource.BufferSource buffer, PoseStack poseStack, Camera camera, Font font)
     {
-        VertexConsumer builder = buffer.getBuffer(DEBUG_QUADS);
+        VertexConsumer builder = buffer.getBuffer(ClientUtils.INFO_QUADS);
         for (RailNetworkDebugData.Node node : entry.nodes())
         {
             poseStack.pushPose();
@@ -77,42 +65,17 @@ public final class RailNetworkDebugRenderer
             for (BlockPos neighbour : node.neighbours())
             {
                 Direction dir = Utils.getDirByNormal(node.pos(), neighbour);
-                if (dir == null) continue;
-
-                poseStack.pushPose();
-                poseStack.mulPose(Axis.YN.rotationDegrees(dir.toYRot()));
-
-                pose = poseStack.last().pose();
-                builder.addVertex(pose, -.05F, 0, .15F).setColor(0xFF0000FF);
-                builder.addVertex(pose, -.05F, 0,  .4F).setColor(0xFF0000FF);
-                builder.addVertex(pose,  .05F, 0,  .4F).setColor(0xFF0000FF);
-                builder.addVertex(pose,  .05F, 0, .15F).setColor(0xFF0000FF);
-
-                builder.addVertex(pose, -.1F, 0, .4F).setColor(0xFF0000FF);
-                builder.addVertex(pose,   0F, 0, .5F).setColor(0xFF0000FF);
-                builder.addVertex(pose,   0F, 0, .5F).setColor(0xFF0000FF);
-                builder.addVertex(pose,  .1F, 0, .4F).setColor(0xFF0000FF);
-
-                poseStack.popPose();
+                if (dir != null)
+                {
+                    OverheadRailInfoRenderer.renderArrow(poseStack, builder, dir, .15F, true);
+                }
             }
 
             if (node.stationName().isPresent())
             {
-                poseStack.pushPose();
-
-                poseStack.translate(0, .5, 0);
-                poseStack.mulPose(camera.rotation());
-                poseStack.mulPose(Axis.YP.rotationDegrees(180));
-                poseStack.mulPose(Axis.ZN.rotationDegrees(180));
-                poseStack.scale(1F/40F, 1F/40F, 1);
-
-                pose = poseStack.last().pose();
-                String name = node.stationName().get();
-                String type = node.stationType().orElse("NULL");
-                font.drawInBatch(name, -(font.width(name) / 2F), -9, 0xFFBB00FF, false, pose, buffer, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
-                font.drawInBatch(type, -(font.width(type) / 2F), 1, 0xFFBB00FF, false, pose, buffer, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
-
-                poseStack.popPose();
+                OverheadRailInfoRenderer.renderStationInfo(
+                        poseStack, camera, buffer, font, node.stationName().get(), node.stationType().orElse(null), STATION_FORMATTER
+                );
             }
 
             poseStack.popPose();
@@ -129,11 +92,6 @@ public final class RailNetworkDebugRenderer
         {
             DEBUG_DATA.remove(networkId);
         }
-    }
-
-    public static void onRegisterRenderBuffers(RegisterRenderBuffersEvent event)
-    {
-        event.registerRenderBuffer(DEBUG_QUADS);
     }
 
     public static void onPlayerDisconnect(@SuppressWarnings("unused") ClientPlayerNetworkEvent.LoggingOut event)

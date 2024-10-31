@@ -109,6 +109,16 @@ public final class FoupRecipeProvider extends RecipeProvider
                 .unlockedBy("hasChest", has(Tags.Items.CHESTS_WOODEN))
                 .save(output);
 
+        shaped(FoupContent.ITEM_RAIL_INSPECTOR, 1)
+                .pattern(" NG")
+                .pattern(" IN")
+                .pattern("I  ")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('N', Tags.Items.NUGGETS_IRON)
+                .define('G', Tags.Items.GLASS_PANES)
+                .unlockedBy("hasGlassPane", has(Tags.Items.GLASS_PANES))
+                .save(output);
+
         output.accept(Utils.rl("add_foup_to_cart"), new AddFoupToCartRecipe(), null);
     }
 
