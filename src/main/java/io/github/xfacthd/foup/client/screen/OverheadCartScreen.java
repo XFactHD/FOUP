@@ -98,6 +98,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     private final OverheadCartEntity cart;
     private final List<Schedule.Entry> scheduleEntries;
     private final Map<String, StationType> stations;
+    private Button buttonAddStation;
     private Button buttonExecute;
     private Button buttonStop;
     private ScheduleList scheduleList;
@@ -120,7 +121,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         imageHeight = Math.min(Math.max(MIN_HEIGHT, height), MAX_HEIGHT);
         super.init();
 
-        addRenderableWidget(Button.builder(BUTTON_ADD_ENTRY, this::addStation)
+        buttonAddStation = addRenderableWidget(Button.builder(BUTTON_ADD_ENTRY, this::addStation)
                 .pos(leftPos + ADD_ENTRY_X, topPos + BUTTON_Y)
                 .size(ADD_ENTRY_WIDTH, BUTTON_HEIGHT)
                 .build()
@@ -235,6 +236,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
 
         boolean lastIdle = cartIdle;
         cartIdle = cart.getState() == OverheadCartState.IDLE;
+        buttonAddStation.active = cartIdle;
         buttonExecute.visible = cartIdle;
         buttonStop.visible = !cartIdle;
         if (lastIdle != cartIdle)
