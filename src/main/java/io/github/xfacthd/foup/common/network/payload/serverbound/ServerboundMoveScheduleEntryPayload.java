@@ -30,7 +30,7 @@ public record ServerboundMoveScheduleEntryPayload(int cartId, int idx, boolean d
 
     public void handle(IPayloadContext ctx)
     {
-        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId)
+        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId && ctx.player().mayBuild())
         {
             if (!menu.getCart().getSchedule().moveEntry(idx, down, entryUid))
             {

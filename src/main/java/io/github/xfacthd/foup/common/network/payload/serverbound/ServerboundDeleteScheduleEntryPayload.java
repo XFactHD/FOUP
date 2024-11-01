@@ -28,7 +28,7 @@ public record ServerboundDeleteScheduleEntryPayload(int cartId, int idx, UUID en
 
     public void handle(IPayloadContext ctx)
     {
-        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId)
+        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId && ctx.player().mayBuild())
         {
             if (!menu.getCart().getSchedule().removeEntry(idx, entryUid))
             {

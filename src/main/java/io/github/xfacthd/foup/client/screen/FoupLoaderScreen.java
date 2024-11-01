@@ -9,6 +9,7 @@ import io.github.xfacthd.foup.common.menu.FoupLoaderMenu;
 import io.github.xfacthd.foup.common.menu.slot.LockableSlot;
 import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundToggleLoaderAutoEjectPayload;
 import io.github.xfacthd.foup.common.util.Utils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -19,6 +20,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMenu>
 {
@@ -45,6 +48,8 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
     public static final Component BUTTON_AUTO_EJECT = Component.translatable("button.foup.foup_loader.auto_eject");
     private static final int INTERACT_DURATION = AbstractCartInteractorBlockEntity.State.INTERACTING.getDuration(StationType.LOADER);
 
+    private Button autoEjectButton;
+
     public FoupLoaderScreen(FoupLoaderMenu menu, Inventory inventory, Component title)
     {
         super(menu, inventory, title);
@@ -58,7 +63,7 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
     {
         super.init();
 
-        addRenderableWidget(new IndicatorButton(
+        autoEjectButton = addRenderableWidget(new IndicatorButton(
                 leftPos + WIDTH - 5 - AUTO_EJECT_BUTTON_WIDTH,
                 topPos + 5,
                 AUTO_EJECT_BUTTON_WIDTH,
@@ -67,6 +72,8 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
                 menu::isAutoEject,
                 this::toggleAutoEject
         ));
+
+        checkButtonState();
     }
 
     @Override
@@ -134,6 +141,17 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
             graphics.blitSprite(LOCK_ICON, slot.x + SLOT_SIZE_INNER - 5, slot.y + SLOT_SIZE_INNER - 7, 5, 7);
             graphics.pose().popPose();
         }
+    }
+
+    @Override
+    protected void containerTick()
+    {
+        checkButtonState();
+    }
+
+    private void checkButtonState()
+    {
+        autoEjectButton.active = Objects.requireNonNull(Minecraft.getInstance().player).mayBuild();
     }
 
     private void toggleAutoEject(Button button)

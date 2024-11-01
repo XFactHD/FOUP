@@ -7,6 +7,7 @@ import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundRequ
 import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundRequestStationRenamePayload;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -159,9 +160,11 @@ public final class OverheadRailStationScreen extends Screen
 
     private void checkButtonStates()
     {
+        boolean canEdit = Objects.requireNonNull(Minecraft.getInstance().player).mayBuild();
         String editValue = nameEditBox.getValue();
-        setNameButton.active = !renameInProgress && !lastName.equals(editValue) && RailNetwork.isValidStationName(editValue);
-        linkButton.active = station.getLinkedType() == null && !linkInProgress;
+        nameEditBox.active = canEdit;
+        setNameButton.active = !renameInProgress && canEdit && !lastName.equals(editValue) && RailNetwork.isValidStationName(editValue);
+        linkButton.active = station.getLinkedType() == null && !linkInProgress && canEdit;
     }
 
     private void requestNameChange(Button button)

@@ -103,6 +103,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     private Button buttonStop;
     private ScheduleList scheduleList;
     private boolean cartIdle;
+    private boolean canEdit;
 
     public OverheadCartScreen(OverheadCartMenu menu, Inventory inventory, Component title)
     {
@@ -111,6 +112,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         this.scheduleEntries = menu.getInitialScheduleEntries();
         this.stations = menu.getInitialStations();
         this.cartIdle = cart.getState() == OverheadCartState.IDLE;
+        this.canEdit = Objects.requireNonNull(Minecraft.getInstance().player).mayBuild();
         this.imageHeight = MIN_HEIGHT;
         this.imageWidth = WIDTH;
     }
@@ -139,6 +141,9 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
 
         buttonExecute.visible = cartIdle;
         buttonStop.visible = !cartIdle;
+        buttonAddStation.active = canEdit;
+        buttonExecute.active = canEdit;
+        buttonStop.active = canEdit;
 
         ScheduleList oldList = scheduleList;
         int listHeight = imageHeight - LIST_Y - INVENTORY_Y_OFF - PADDING;
@@ -235,14 +240,16 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         }
 
         boolean lastIdle = cartIdle;
+        boolean lastCanEdit = canEdit;
         cartIdle = cart.getState() == OverheadCartState.IDLE;
-        buttonAddStation.active = cartIdle;
+        canEdit = Objects.requireNonNull(Minecraft.getInstance().player).mayBuild();
+        buttonAddStation.active = cartIdle && canEdit;
         buttonExecute.visible = cartIdle;
         buttonStop.visible = !cartIdle;
-        if (lastIdle != cartIdle)
+        if (lastIdle != cartIdle || lastCanEdit != canEdit)
         {
-            buttonExecute.active = true;
-            buttonStop.active = true;
+            buttonExecute.active = canEdit;
+            buttonStop.active = canEdit;
         }
     }
 
@@ -532,7 +539,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
                 }
                 for (AbstractWidget child : children)
                 {
-                    if (!owner.cartIdle)
+                    if (!owner.cartIdle || !owner.canEdit)
                     {
                         child.active = false;
                     }

@@ -30,7 +30,7 @@ public record ServerboundRequestStationRenamePayload(BlockPos pos, String name) 
         RenameResult result = RenameResult.UNKNOWN;
         if (level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity station)
         {
-            if (station.isUsableByPlayer(ctx.player()))
+            if (station.isUsableByPlayer(ctx.player()) && ctx.player().mayBuild())
             {
                 result = station.setName(name);
             }

@@ -24,7 +24,7 @@ public record ServerboundRequestStationLinkPayload(BlockPos pos) implements Cust
         TriState result = TriState.FALSE;
         if (level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity station)
         {
-            if (station.isUsableByPlayer(ctx.player()))
+            if (station.isUsableByPlayer(ctx.player()) && ctx.player().mayBuild())
             {
                 result = station.tryLink();
             }

@@ -21,7 +21,7 @@ public record ServerboundToggleLoaderAutoEjectPayload(int containerId, boolean a
 
     public void handle(IPayloadContext ctx)
     {
-        if (ctx.player().containerMenu instanceof FoupLoaderMenu menu && menu.containerId == containerId)
+        if (ctx.player().containerMenu instanceof FoupLoaderMenu menu && menu.containerId == containerId && ctx.player().mayBuild())
         {
             menu.setAutoEject(autoEject);
         }

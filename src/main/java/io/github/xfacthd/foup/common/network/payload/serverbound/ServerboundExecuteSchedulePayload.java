@@ -18,7 +18,7 @@ public record ServerboundExecuteSchedulePayload(int cartId) implements CustomPac
 
     public void handle(IPayloadContext ctx)
     {
-        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId)
+        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId && ctx.player().mayBuild())
         {
             if (!menu.getCart().executeSchedule())
             {
