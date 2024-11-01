@@ -32,12 +32,14 @@ public record ItemContents(ItemStack stack) implements TooltipProvider
     @Override
     public boolean equals(Object obj)
     {
-        return obj instanceof ItemContents other && ItemStack.isSameItemSameComponents(stack, other.stack);
+        return obj instanceof ItemContents other &&
+                ItemStack.isSameItemSameComponents(stack, other.stack) &&
+                other.stack.getCount() == stack.getCount();
     }
 
     @Override
     public int hashCode()
     {
-        return ItemStack.hashItemAndComponents(stack);
+        return ItemStack.hashItemAndComponents(stack) * 31 + stack.getCount();
     }
 }

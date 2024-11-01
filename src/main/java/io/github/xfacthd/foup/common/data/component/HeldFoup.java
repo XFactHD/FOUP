@@ -60,12 +60,15 @@ public record HeldFoup(boolean hasFoup, ItemStack stack) implements TooltipProvi
     @Override
     public boolean equals(Object obj)
     {
-        return obj instanceof HeldFoup other && other.hasFoup == hasFoup && ItemStack.isSameItemSameComponents(stack, other.stack);
+        return obj instanceof HeldFoup other &&
+                other.hasFoup == hasFoup &&
+                ItemStack.isSameItemSameComponents(stack, other.stack) &&
+                other.stack.getCount() == stack.getCount();
     }
 
     @Override
     public int hashCode()
     {
-        return Boolean.hashCode(hasFoup) * 31 + ItemStack.hashItemAndComponents(stack);
+        return Boolean.hashCode(hasFoup) * 31 + ItemStack.hashItemAndComponents(stack) * 31 + stack.getCount();
     }
 }
