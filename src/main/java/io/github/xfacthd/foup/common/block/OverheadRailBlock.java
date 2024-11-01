@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
 
@@ -38,7 +39,8 @@ public sealed class OverheadRailBlock extends AbstractOverheadRailBlock permits 
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext ctx)
+    @Nullable
+    public BlockState getStateForPlacement(BlockPlaceContext ctx, boolean simulate)
     {
         Level level = ctx.getLevel();
         BlockPos pos = ctx.getClickedPos();

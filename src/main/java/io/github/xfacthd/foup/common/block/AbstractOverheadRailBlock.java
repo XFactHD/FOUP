@@ -5,6 +5,7 @@ import io.github.xfacthd.foup.common.data.RailType;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
@@ -35,6 +36,16 @@ public abstract class AbstractOverheadRailBlock extends Block implements EntityB
         );
         this.type = type;
     }
+
+    @Override
+    @Nullable
+    public final BlockState getStateForPlacement(BlockPlaceContext ctx)
+    {
+        return getStateForPlacement(ctx, false);
+    }
+
+    @Nullable
+    public abstract BlockState getStateForPlacement(BlockPlaceContext ctx, boolean simulate);
 
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)

@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
 
@@ -40,7 +41,8 @@ public final class OverheadRailSwitchBlock extends AbstractOverheadRailBlock
     // FIXME: all orientations must be tested in case all three legs can connect in one of them
     // FIXME: a third leg being present must force the outward flag to the correct value
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext ctx)
+    @Nullable
+    public BlockState getStateForPlacement(BlockPlaceContext ctx, boolean simulate)
     {
         Level level = ctx.getLevel();
         BlockPos pos = ctx.getClickedPos();

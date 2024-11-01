@@ -37,7 +37,8 @@ public final class OverheadRailCurveBlock extends AbstractOverheadRailBlock
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext ctx)
+    @Nullable
+    public BlockState getStateForPlacement(BlockPlaceContext ctx, boolean simulate)
     {
         Level level = ctx.getLevel();
         BlockPos pos = ctx.getClickedPos();

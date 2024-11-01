@@ -10,7 +10,6 @@ import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.block.AbstractOverheadRailBlock;
 import io.github.xfacthd.foup.common.blockentity.OverheadRailStationBlockEntity;
 import io.github.xfacthd.foup.common.data.StationType;
-import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -64,16 +63,17 @@ public final class OverheadRailInfoRenderer
             ItemStack stack = mc.player.getMainHandItem();
             if (stack.is(FoupContent.ITEM_RAIL_INSPECTOR))
             {
-                BlockState state = Objects.requireNonNull(mc.level).getBlockState(hitResult.getBlockPos());
-                if (state.is(Utils.RAIL_BLOCKS))
+                BlockPos pos = hitResult.getBlockPos();
+                BlockState state = Objects.requireNonNull(mc.level).getBlockState(pos);
+                if (state.getBlock() instanceof AbstractOverheadRailBlock)
                 {
-                    renderRailInfoArround(event.getPoseStack(), event.getCamera(), mc.font, mc.level, hitResult.getBlockPos(), state, false);
+                    renderRailInfoArround(event.getPoseStack(), event.getCamera(), mc.font, mc.level, pos, state, false);
                 }
             }
-            else if (stack.is(Utils.RAIL_ITEMS))
+            else if (stack.getItem() instanceof BlockItem item && item.getBlock() instanceof AbstractOverheadRailBlock block)
             {
                 BlockPlaceContext context = new BlockPlaceContext(mc.player, InteractionHand.MAIN_HAND, stack, hitResult);
-                BlockState state = ((BlockItem) stack.getItem()).getBlock().getStateForPlacement(context);
+                BlockState state = block.getStateForPlacement(context, true);
                 BlockPos pos = context.getClickedPos();
                 if (canPlaceAt(Objects.requireNonNull(mc.level), pos, state, context, mc.player))
                 {
@@ -140,7 +140,7 @@ public final class OverheadRailInfoRenderer
             if (adjPos.equals(pos)) continue;
 
             BlockState adjState = level.getBlockState(adjPos);
-            if (adjState.is(Utils.RAIL_BLOCKS))
+            if (adjState.getBlock() instanceof AbstractOverheadRailBlock)
             {
                 renderRailInfo(poseStack, camera, buffers, quadBuilder, font, level, adjPos, adjState, true);
             }
