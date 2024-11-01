@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public final class RailNetwork implements Mergeable<RailNetwork>
 {
@@ -97,7 +98,10 @@ public final class RailNetwork implements Mergeable<RailNetwork>
     {
         return stations.entrySet()
                 .stream()
-                .map(e -> Pair.of(e.getKey(), e.getValue().getStationType()))
+                .map(e -> Pair.of(
+                        e.getKey(),
+                        Objects.requireNonNullElse(e.getValue().getStationType(), StationType.UNKNOWN)
+                ))
                 .collect(Pair.toMap());
     }
 
