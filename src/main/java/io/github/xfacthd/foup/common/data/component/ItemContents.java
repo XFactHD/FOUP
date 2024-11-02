@@ -25,7 +25,7 @@ public record ItemContents(ItemStack stack) implements TooltipProvider
     {
         if (!stack.isEmpty())
         {
-            tooltipAdder.accept(Component.translatable("desc.foup.component.item_contents.contents", stack.getCount(), stack.toString()));
+            tooltipAdder.accept(Component.translatable("desc.foup.component.item_contents.contents", stack.getCount(), stack.getHoverName()));
         }
     }
 
