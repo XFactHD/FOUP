@@ -177,7 +177,6 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     @Override
     public void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY)
     {
-        renderTransparentBackground(graphics);
         graphics.blitSprite(BACKGROUND, leftPos, topPos, WIDTH, imageHeight);
         graphics.blit(INVENTORY, leftPos + INVENTORY_X, topPos + imageHeight - INVENTORY_Y_OFF, INVENTORY_U, INVENTORY_V, INVENTORY_WIDTH, INVENTORY_HEIGHT);
         graphics.drawString(font, title, leftPos + EDGE_PADDING_X, topPos + EDGE_PADDING_Y, 0x404040, false);
