@@ -160,6 +160,11 @@ public final class OverheadCartEntity extends Entity
         behaviour.notifyReadyForDeparture();
     }
 
+    public void notifyRetry(boolean retry)
+    {
+        behaviour.notifyRetry(retry);
+    }
+
     /**
      * Returns the contents of the held FOUP, an empty stack if the FOUP is empty or null if no FOUP is present
      */

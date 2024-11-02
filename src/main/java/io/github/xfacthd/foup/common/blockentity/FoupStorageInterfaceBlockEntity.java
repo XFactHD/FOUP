@@ -16,7 +16,6 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.common.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
 public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteractorBlockEntity
@@ -34,26 +33,26 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     }
 
     @Override
-    protected TriState canStartAction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
+    protected StartCheck canStartAction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
     {
         FoupStorageLockerBlockEntity locker = getLocker();
-        if (locker == null) return TriState.DEFAULT;
+        if (locker == null) return StartCheck.RETRY;
 
         ItemStack foup = cart.getFoupContent();
         return switch (scheduleEntry.action())
         {
             case LOAD ->
             {
-                if (foup != null) yield TriState.DEFAULT;
+                if (foup != null) yield StartCheck.SKIP;
 
                 loadingTarget = locker.findMatching(scheduleEntry.filter());
-                yield loadingTarget > -1 ? TriState.TRUE : TriState.FALSE;
+                yield loadingTarget > -1 ? StartCheck.EXECUTE : StartCheck.WAIT;
             }
             case UNLOAD ->
             {
-                if (foup == null) yield TriState.DEFAULT;
-                if (locker.isFull()) yield TriState.FALSE;
-                yield TriState.TRUE;
+                if (foup == null) yield StartCheck.SKIP;
+                if (locker.isFull()) yield StartCheck.WAIT;
+                yield StartCheck.EXECUTE;
             }
         };
     }

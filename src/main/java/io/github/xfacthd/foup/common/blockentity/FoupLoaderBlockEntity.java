@@ -23,7 +23,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
@@ -69,13 +68,13 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     }
 
     @Override
-    protected TriState canStartAction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
+    protected StartCheck canStartAction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
     {
         ItemStack foup = cart.getFoupContent();
         if (foup == null)
         {
             // No FOUP -> skip interaction
-            return TriState.DEFAULT;
+            return StartCheck.SKIP;
         }
         return switch (scheduleEntry.action())
         {
@@ -84,21 +83,21 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
                 ItemStack stack = inventory.getStackInSlot(SLOT_INPUT);
                 if (stack.isEmpty())
                 {
-                    yield TriState.FALSE;
+                    yield StartCheck.WAIT;
                 }
                 if (!foup.isEmpty())
                 {
                     if (foup.getCount() >= foup.getMaxStackSize())
                     {
-                        yield TriState.DEFAULT;
+                        yield StartCheck.SKIP;
                     }
                     if (!scheduleEntry.matchesFilter(foup))
                     {
-                        yield TriState.DEFAULT;
+                        yield StartCheck.SKIP;
                     }
                     if (!ItemStack.isSameItemSameComponents(stack, foup))
                     {
-                        yield TriState.DEFAULT;
+                        yield StartCheck.RETRY;
                     }
                 }
                 if (scheduleEntry.count().isPresent())
@@ -106,39 +105,39 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
                     int count = Math.min(scheduleEntry.count().getAsInt(), Utils.getMaxStackSize(stack));
                     if (foup.getCount() >= count)
                     {
-                        yield TriState.DEFAULT;
+                        yield StartCheck.SKIP;
                     }
                     if (stack.getCount() < count)
                     {
-                        yield TriState.FALSE;
+                        yield StartCheck.WAIT;
                     }
                 }
                 if (!scheduleEntry.matchesFilter(stack))
                 {
-                    yield TriState.DEFAULT;
+                    yield StartCheck.RETRY;
                 }
-                yield TriState.TRUE;
+                yield StartCheck.EXECUTE;
             }
             case UNLOAD ->
             {
                 if (foup.isEmpty())
                 {
-                    yield TriState.DEFAULT;
+                    yield StartCheck.SKIP;
                 }
                 ItemStack stack = inventory.getStackInSlot(SLOT_OUTPUT);
                 if (!stack.isEmpty())
                 {
                     if (!ItemStack.isSameItemSameComponents(foup, stack))
                     {
-                        yield TriState.FALSE;
+                        yield StartCheck.WAIT;
                     }
                     int count = Math.min(scheduleEntry.getCount(), foup.getCount());
                     if (stack.getMaxStackSize() - stack.getCount() < count)
                     {
-                        yield TriState.FALSE;
+                        yield StartCheck.WAIT;
                     }
                 }
-                yield TriState.TRUE;
+                yield StartCheck.EXECUTE;
             }
         };
     }

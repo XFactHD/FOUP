@@ -13,7 +13,6 @@ import net.minecraft.util.ByIdMap;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.common.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -105,11 +104,7 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         return state == State.BLOCKED;
     }
 
-    /**
-     * Returns whether the action can be started ({@link TriState#TRUE}), the action cannot be started and can be skipped
-     * ({@link TriState#DEFAULT}) or the action cannot be started and the cart must be blocked ({@link TriState#FALSE}).
-     */
-    protected abstract TriState canStartAction(OverheadCartEntity cart, Schedule.Entry scheduleEntry);
+    protected abstract StartCheck canStartAction(OverheadCartEntity cart, Schedule.Entry scheduleEntry);
 
     protected abstract void startInteraction(OverheadCartEntity cart, Schedule.Entry scheduleEntry);
 
@@ -160,14 +155,16 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
 
     private boolean checkCanStartAction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
     {
-        switch (canStartAction(cart, scheduleEntry))
+        StartCheck startCheck = canStartAction(cart, scheduleEntry);
+        switch (startCheck)
         {
-            case TRUE -> setState(State.PRE_INTERACT_DELAY); // Continue
-            case DEFAULT -> setState(State.POST_INTERACT_DELAY); // Skip
-            case FALSE -> setState(State.BLOCKED); // Hold
+            case EXECUTE -> setState(State.PRE_INTERACT_DELAY);
+            case WAIT -> setState(State.BLOCKED);
+            case RETRY, SKIP -> setState(State.POST_INTERACT_DELAY);
         }
-        if (state == State.POST_INTERACT_DELAY)
+        if (startCheck.depart)
         {
+            cart.notifyRetry(startCheck.retry);
             currScheduleEntry = null;
             currAction = null;
             return false;
@@ -294,6 +291,24 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         public static State byId(int id)
         {
             return BY_ID.apply(id);
+        }
+    }
+
+    protected enum StartCheck
+    {
+        EXECUTE(false, false),
+        WAIT(false, false),
+        RETRY(true, true),
+        SKIP(true, false)
+        ;
+
+        private final boolean depart;
+        private final boolean retry;
+
+        StartCheck(boolean depart, boolean retry)
+        {
+            this.depart = depart;
+            this.retry = retry;
         }
     }
 }

@@ -48,6 +48,7 @@ final class OverheadCartBehaviour
     private TrackNode currNode;
     private boolean rotating = false;
     private boolean haltRequested = false;
+    private boolean retry = false;
 
     OverheadCartBehaviour(OverheadCartEntity cart)
     {
@@ -167,7 +168,11 @@ final class OverheadCartBehaviour
             {
                 if (cart.tickCount - actionStart > action.duration())
                 {
-                    schedule.advance();
+                    if (!retry)
+                    {
+                        schedule.advance();
+                    }
+                    retry = false;
 
                     if (haltRequested)
                     {
@@ -330,6 +335,11 @@ final class OverheadCartBehaviour
         startHoist(false, action.heightDiff());
     }
 
+    void notifyRetry(boolean retry)
+    {
+        this.retry = retry;
+    }
+
     private void startHoist(boolean downward, int heightDiff)
     {
         OverheadCartState state = downward ? OverheadCartState.LOWERING_HOIST : OverheadCartState.RAISING_HOIST;
@@ -428,6 +438,7 @@ final class OverheadCartBehaviour
         tag.putInt("height_diff", action.heightDiff());
         tag.putBoolean("rotating", rotating);
         tag.putBoolean("halt_requested", haltRequested);
+        tag.putBoolean("retry", retry);
         if (prevNode != null)
         {
             tag.putLong("prev_node", prevNode.getPos().asLong());
@@ -464,6 +475,7 @@ final class OverheadCartBehaviour
         setAction(state, tag.getInt("action_duration"), tag.getInt("height_diff"));
         rotating = tag.getBoolean("rotating");
         haltRequested = tag.getBoolean("halt_requested");
+        retry = tag.getBoolean("retry");
         if (tag.contains("prev_node"))
         {
             prevNodePos = BlockPos.of(tag.getLong("prev_node"));
