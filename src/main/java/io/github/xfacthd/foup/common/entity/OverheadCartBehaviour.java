@@ -371,7 +371,7 @@ final class OverheadCartBehaviour
         if (action.state() == OverheadCartState.IDLE && schedule.isValid(network))
         {
             TrackNode node = network.getStation(schedule.getActiveEntry().station());
-            if (node == currNode)
+            if (node == currNode && isOnPosition())
             {
                 setAction(OverheadCartState.PARK_AFTER_ARRIVAL, PARK_DURATION, 0);
             }
@@ -382,6 +382,11 @@ final class OverheadCartBehaviour
             return true;
         }
         return false;
+    }
+
+    private boolean isOnPosition()
+    {
+        return Mth.equal(Mth.frac(Math.abs(cart.getX())), .5) && Mth.equal(Mth.frac(Math.abs(cart.getZ())), .5);
     }
 
     public void stopSchedule()
