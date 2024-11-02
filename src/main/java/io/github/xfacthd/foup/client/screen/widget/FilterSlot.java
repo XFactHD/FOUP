@@ -36,7 +36,7 @@ public final class FilterSlot extends AbstractWidget
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button)
     {
-        if (active)
+        if (active && isMouseOver(mouseX, mouseY))
         {
             ItemStack carried = owner.getMenu().getCarried();
             if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT && carried.isEmpty())
