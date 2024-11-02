@@ -187,6 +187,16 @@ public final class Schedule
                 Entry::new
         );
 
+        public boolean matchesFilter(ItemStack stack)
+        {
+            return filter.isEmpty() || ItemStack.isSameItemSameComponents(stack, filter.get());
+        }
+
+        public int getCount()
+        {
+            return count.orElse(Item.ABSOLUTE_MAX_STACK_SIZE);
+        }
+
         public boolean isValid(RailNetwork network)
         {
             if (type == StationType.UNKNOWN)

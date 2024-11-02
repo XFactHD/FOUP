@@ -8,6 +8,7 @@ import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import io.github.xfacthd.foup.common.data.railnet.Schedule;
 import io.github.xfacthd.foup.common.item.FoupItem;
 import io.github.xfacthd.foup.common.menu.FoupLoaderMenu;
+import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -76,18 +77,67 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
             // No FOUP -> skip interaction
             return TriState.DEFAULT;
         }
-        return switch (scheduleEntry.action()) // TODO: check filter and count
+        return switch (scheduleEntry.action())
         {
             case LOAD ->
             {
-                if (!foup.isEmpty()) yield TriState.DEFAULT;
-                if (inventory.getStackInSlot(SLOT_INPUT).isEmpty()) yield TriState.FALSE;
+                ItemStack stack = inventory.getStackInSlot(SLOT_INPUT);
+                if (stack.isEmpty())
+                {
+                    yield TriState.FALSE;
+                }
+                if (!foup.isEmpty())
+                {
+                    if (foup.getCount() >= foup.getMaxStackSize())
+                    {
+                        yield TriState.DEFAULT;
+                    }
+                    if (!scheduleEntry.matchesFilter(foup))
+                    {
+                        yield TriState.DEFAULT;
+                    }
+                    if (!ItemStack.isSameItemSameComponents(stack, foup))
+                    {
+                        yield TriState.DEFAULT;
+                    }
+                }
+                if (scheduleEntry.count().isPresent())
+                {
+                    int count = Math.min(scheduleEntry.count().getAsInt(), Utils.getMaxStackSize(stack));
+                    if (foup.getCount() >= count)
+                    {
+                        yield TriState.DEFAULT;
+                    }
+                    if (stack.getCount() < count)
+                    {
+                        yield TriState.FALSE;
+                    }
+                }
+                if (!scheduleEntry.matchesFilter(stack))
+                {
+                    yield TriState.DEFAULT;
+                }
                 yield TriState.TRUE;
             }
             case UNLOAD ->
             {
-                if (foup.isEmpty()) yield TriState.DEFAULT;
-                if (!inventory.getStackInSlot(SLOT_OUTPUT).isEmpty()) yield TriState.FALSE;
+                if (foup.isEmpty())
+                {
+                    yield TriState.DEFAULT;
+                }
+                ItemStack stack = inventory.getStackInSlot(SLOT_OUTPUT);
+                if (!stack.isEmpty())
+                {
+                    if (!ItemStack.isSameItemSameComponents(foup, stack))
+                    {
+                        yield TriState.FALSE;
+                    }
+                    int count = Math.min(scheduleEntry.getCount(), foup.getCount());
+                    if (stack.getMaxStackSize() - stack.getCount() < count)
+                    {
+                        yield TriState.FALSE;
+                    }
+                }
                 yield TriState.TRUE;
             }
         };
@@ -99,17 +149,26 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     @Override
     protected void finishInteraction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
     {
-        switch (scheduleEntry.action()) // TODO: use filter and count
+        switch (scheduleEntry.action())
         {
             case LOAD ->
             {
-                cart.setFoupContent(inventory.getStackInSlot(SLOT_INPUT));
-                inventory.setStackInSlot(SLOT_INPUT, ItemStack.EMPTY);
+                ItemStack foup = Objects.requireNonNull(cart.getFoupContent());
+                ItemStack stack = inventory.getStackInSlot(SLOT_INPUT);
+
+                int count = Math.min(Math.min(stack.getCount(), Utils.getMaxStackSize(foup) - foup.getCount()), scheduleEntry.getCount());
+                cart.setFoupContent(stack.copyWithCount(count + foup.getCount()));
+                inventory.extractItem(SLOT_INPUT, count, false);
             }
             case UNLOAD ->
             {
-                inventory.setStackInSlot(SLOT_OUTPUT, Objects.requireNonNull(cart.getFoupContent()));
-                cart.setFoupContent(ItemStack.EMPTY);
+                ItemStack foup = Objects.requireNonNull(cart.getFoupContent());
+                ItemStack stack = inventory.getStackInSlot(SLOT_OUTPUT);
+
+                int count = Math.min(Math.min(foup.getCount(), Utils.getMaxStackSize(stack)), scheduleEntry.getCount());
+                inventory.insertItem(SLOT_OUTPUT, foup.copyWithCount(count), false);
+                foup.shrink(count);
+                cart.setFoupContent(foup);
             }
         }
     }

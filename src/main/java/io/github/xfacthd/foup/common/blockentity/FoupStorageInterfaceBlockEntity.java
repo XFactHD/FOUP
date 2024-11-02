@@ -1,5 +1,6 @@
 package io.github.xfacthd.foup.common.blockentity;
 
+import com.google.common.base.Preconditions;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.StationAction;
 import io.github.xfacthd.foup.common.data.StationType;
@@ -25,6 +26,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     @Nullable
     private ItemStack transferBuffer = null;
     private long actionStart = -1;
+    private int loadingTarget = -1;
 
     public FoupStorageInterfaceBlockEntity(BlockPos pos, BlockState state)
     {
@@ -38,13 +40,14 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
         if (locker == null) return TriState.DEFAULT;
 
         ItemStack foup = cart.getFoupContent();
-        return switch (scheduleEntry.action()) // TODO: check filter
+        return switch (scheduleEntry.action())
         {
             case LOAD ->
             {
                 if (foup != null) yield TriState.DEFAULT;
-                if (locker.isEmpty()) yield TriState.FALSE;
-                yield TriState.TRUE;
+
+                loadingTarget = locker.findMatching(scheduleEntry.filter());
+                yield loadingTarget > -1 ? TriState.TRUE : TriState.FALSE;
             }
             case UNLOAD ->
             {
@@ -58,14 +61,16 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     @Override
     protected void startInteraction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
     {
-        switch (scheduleEntry.action()) // TODO: use filter
+        switch (scheduleEntry.action())
         {
             case LOAD ->
             {
                 FoupStorageLockerBlockEntity locker = getLocker();
                 if (locker != null)
                 {
-                    transferBuffer = locker.removeFirst();
+                    Preconditions.checkState(loadingTarget > -1, "No loading target present");
+                    transferBuffer = locker.removeFrom(loadingTarget);
+                    loadingTarget = -1;
                     setChangedWithoutSignalUpdate();
                 }
             }

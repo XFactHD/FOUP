@@ -60,10 +60,7 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
             OverheadCartEntity cart = getCart();
             if (cart != null && level().getGameTime() % 20 == 0)
             {
-                if (canStartAction(cart, Objects.requireNonNull(currScheduleEntry)).isTrue())
-                {
-                    setState(State.PRE_INTERACT_DELAY);
-                }
+                checkCanStartAction(cart, Objects.requireNonNull(currScheduleEntry));
             }
             return;
         }
@@ -154,6 +151,15 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
     {
         currCart = cart;
         currCartUuid = cart.getUUID();
+        if (checkCanStartAction(cart, scheduleEntry))
+        {
+            currScheduleEntry = scheduleEntry;
+            currAction = scheduleEntry.action();
+        }
+    }
+
+    private boolean checkCanStartAction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
+    {
         switch (canStartAction(cart, scheduleEntry))
         {
             case TRUE -> setState(State.PRE_INTERACT_DELAY); // Continue
@@ -164,12 +170,9 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         {
             currScheduleEntry = null;
             currAction = null;
+            return false;
         }
-        else
-        {
-            currScheduleEntry = scheduleEntry;
-            currAction = scheduleEntry.action();
-        }
+        return true;
     }
 
     @Override

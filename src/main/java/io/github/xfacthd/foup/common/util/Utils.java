@@ -12,6 +12,8 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Arrays;
@@ -105,6 +107,11 @@ public final class Utils
     public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> payloadType(String name)
     {
         return new CustomPacketPayload.Type<>(Utils.rl(name));
+    }
+
+    public static int getMaxStackSize(ItemStack stack)
+    {
+        return stack.isEmpty() ? Item.ABSOLUTE_MAX_STACK_SIZE : stack.getMaxStackSize();
     }
 
     public static void addPlayerInvSlots(Consumer<Slot> slotConsumer, Inventory playerInv, int x, int y)

@@ -3,6 +3,7 @@ package io.github.xfacthd.foup.common.blockentity;
 import com.google.common.base.Preconditions;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.PropertyHolder;
+import io.github.xfacthd.foup.common.data.component.ItemContents;
 import io.github.xfacthd.foup.common.menu.FoupStorageLockerMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -15,6 +16,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.ItemStackHandler;
+
+import java.util.Optional;
 
 public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implements MenuProvider
 {
@@ -57,11 +60,6 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
         setChanged();
     }
 
-    boolean isEmpty()
-    {
-        return occupationState == 0;
-    }
-
     boolean isFull()
     {
         return occupationState == 0b11111111;
@@ -90,11 +88,32 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
         reservedSlot = -1;
     }
 
-    ItemStack removeFirst()
+    int findMatching(Optional<ItemStack> filter)
     {
-        int idx = Integer.numberOfTrailingZeros(occupationState);
-        if (idx > inventory.getSlots()) throw new IllegalStateException("No full slots");
+        if (filter.isEmpty())
+        {
+            int idx = Integer.numberOfTrailingZeros(occupationState);
+            return idx >= inventory.getSlots() ? -1 : idx;
+        }
+        for (int i = 0; i < 8; i++)
+        {
+            if ((occupationState & (1 << i)) == 0)
+            {
+                continue;
+            }
 
+            ItemStack stack = inventory.getStackInSlot(i);
+            ItemStack contents = stack.getOrDefault(FoupContent.DC_TYPE_ITEM_CONTENTS, ItemContents.EMPTY).stack();
+            if (ItemStack.isSameItemSameComponents(filter.get(), contents))
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    ItemStack removeFrom(int idx)
+    {
         ItemStack stack = inventory.getStackInSlot(idx);
         inventory.setStackInSlot(idx, ItemStack.EMPTY);
         return stack;
