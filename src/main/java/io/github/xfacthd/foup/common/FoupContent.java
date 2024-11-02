@@ -42,6 +42,7 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -55,6 +56,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -127,8 +129,26 @@ public final class FoupContent
     // region Creative Tabs
     public static final Holder<CreativeModeTab> TAB_MAIN = CREATIVE_TABS.register("main", () -> CreativeModeTab.builder()
             .title(Component.translatable("foup.itemGroup.main"))
-            .icon(ITEM_CART::toStack)
-            .displayItems((params, output) -> ITEMS.getEntries().stream().map(Holder::value).forEach(output::accept))
+            .icon(() ->
+            {
+                ItemStack stack = ITEM_CART.toStack();
+                stack.set(DC_TYPE_HELD_FOUP, HeldFoup.of(ItemStack.EMPTY));
+                return stack;
+            })
+            .displayItems((params, output) -> ITEMS.getEntries()
+                    .stream()
+                    .map(Holder::value)
+                    .mapMulti((Item item, Consumer<ItemStack> consumer) ->
+                    {
+                        consumer.accept(new ItemStack(item));
+                        if (item == ITEM_CART.value())
+                        {
+                            ItemStack stack = new ItemStack(item);
+                            stack.set(DC_TYPE_HELD_FOUP, HeldFoup.of(ItemStack.EMPTY));
+                            consumer.accept(stack);
+                        }
+                    }).forEach(output::accept)
+            )
             .build()
     );
     // endregion
