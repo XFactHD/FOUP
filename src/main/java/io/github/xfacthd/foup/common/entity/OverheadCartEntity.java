@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public final class OverheadCartEntity extends Entity
 {
@@ -46,6 +47,9 @@ public final class OverheadCartEntity extends Entity
     );
     private static final EntityDataAccessor<Boolean> HAS_FOUP = SynchedEntityData.defineId(
             OverheadCartEntity.class, EntityDataSerializers.BOOLEAN
+    );
+    private static final EntityDataAccessor<ItemStack> FOUP_CONTENT = SynchedEntityData.defineId(
+            OverheadCartEntity.class, EntityDataSerializers.ITEM_STACK
     );
     static final EntityDataAccessor<OverheadCartIssue> ISSUE = SynchedEntityData.defineId(
             OverheadCartEntity.class, FoupContent.ENTITY_DATA_SERIALIZER_CART_ISSUE.value()
@@ -73,6 +77,7 @@ public final class OverheadCartEntity extends Entity
     {
         builder.define(ACTION, OverheadCartAction.DEFAULT);
         builder.define(HAS_FOUP, false);
+        builder.define(FOUP_CONTENT, ItemStack.EMPTY);
         builder.define(ISSUE, OverheadCartIssue.NONE);
     }
 
@@ -145,11 +150,6 @@ public final class OverheadCartEntity extends Entity
         return entityData.get(HAS_FOUP);
     }
 
-    public void setHasFoup(boolean hasFoup)
-    {
-        entityData.set(HAS_FOUP, hasFoup);
-    }
-
     public static float calculateHoistDistance(float heightDiff)
     {
         return heightDiff * 16F + OverheadCartEntity.CART_BASE_DIST - OverheadCartEntity.STATION_BASE_HEIGHT;
@@ -169,9 +169,19 @@ public final class OverheadCartEntity extends Entity
         return foupContent;
     }
 
+    public ItemStack getFoupContentClient()
+    {
+        if (getHasFoup())
+        {
+            return entityData.get(FOUP_CONTENT);
+        }
+        return ItemStack.EMPTY;
+    }
+
     public void setFoupContent(@Nullable ItemStack stack)
     {
-        setHasFoup(stack != null);
+        entityData.set(HAS_FOUP, stack != null);
+        entityData.set(FOUP_CONTENT, Objects.requireNonNullElse(stack, ItemStack.EMPTY));
         foupContent = stack;
     }
 
@@ -343,8 +353,7 @@ public final class OverheadCartEntity extends Entity
     protected void readAdditionalSaveData(CompoundTag tag)
     {
         behaviour.load(tag, level().registryAccess());
-        foupContent = tag.contains("foup_content") ? ItemStack.parseOptional(level().registryAccess(), tag.getCompound("foup_content")) : null;
-        setHasFoup(foupContent != null);
+        setFoupContent(tag.contains("foup_content") ? ItemStack.parseOptional(level().registryAccess(), tag.getCompound("foup_content")) : null);
     }
 
     @Override

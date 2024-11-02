@@ -20,9 +20,9 @@ public final class OverheadCartModel extends EntityModel<OverheadCartEntity>
 
 	private final ModelPart root;
 	private final ModelPart body;
-	private final ModelPart hoistWire;
+	final ModelPart hoistWire;
 	private final ModelPart gripper;
-	private final ModelPart foup;
+	final ModelPart foup;
 
 	public OverheadCartModel(ModelPart root)
 	{
