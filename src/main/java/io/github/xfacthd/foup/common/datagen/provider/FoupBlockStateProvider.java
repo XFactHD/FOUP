@@ -10,6 +10,7 @@ import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
 import net.neoforged.neoforge.client.model.generators.MultiPartBlockStateBuilder;
+import net.neoforged.neoforge.client.model.generators.loaders.CompositeModelBuilder;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,10 +65,19 @@ public final class FoupBlockStateProvider extends BlockStateProvider
         });
         simpleBlockItem(FoupContent.BLOCK_RAIL_SWITCH.value(), switchRightOutModel);
 
-        ModelFile stationModelLinked = models().withExistingParent("overhead_rail_station_linked", modLoc("overhead_rail_station"))
-                .texture("indicator", modLoc("block/station_indicator_linked"));
-        ModelFile stationModelUnlinked = models().withExistingParent("overhead_rail_station_unlinked", modLoc("overhead_rail_station"))
-                .texture("indicator", modLoc("block/station_indicator_unlinked"));
+        ModelFile stationModelLinked = models().withExistingParent("overhead_rail_station_linked", mcLoc("block/block"))
+                .texture("particle", mcLoc("block/iron_block"))
+                .customLoader(CompositeModelBuilder::begin)
+                .child("rail", models().nested().parent(straightModel))
+                .child("shell", models().nested().parent(models().getExistingFile(modLoc("overhead_rail_station"))).texture("indicator", modLoc("block/station_indicator_linked")))
+                .end();
+        ModelFile stationModelUnlinked = models().withExistingParent("overhead_rail_station_unlinked", mcLoc("block/block"))
+                .texture("particle", mcLoc("block/iron_block"))
+                .customLoader(CompositeModelBuilder::begin)
+                .child("rail", models().nested().parent(straightModel))
+                .child("shell", models().nested().parent(models().getExistingFile(modLoc("overhead_rail_station"))).texture("indicator", modLoc("block/station_indicator_unlinked")))
+                .end();
+
         getVariantBuilder(FoupContent.BLOCK_RAIL_STATION.value()).forAllStates(state ->
         {
             boolean linked = state.getValue(PropertyHolder.LINKED);
