@@ -6,17 +6,25 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import org.jetbrains.annotations.Nullable;
 
 public abstract sealed class AbstractCartInteractorBlock extends Block implements EntityBlock permits FoupLoaderBlock, FoupStorageInterfaceBlock
 {
     protected AbstractCartInteractorBlock(Properties props)
     {
-        super(props);
+        super(props.mapColor(MapColor.METAL)
+                .pushReaction(PushReaction.BLOCK)
+                .requiresCorrectToolForDrops()
+                .strength(5.0F, 6.0F)
+                .sound(SoundType.METAL)
+        );
     }
 
     @Override

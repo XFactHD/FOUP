@@ -1,0 +1,11 @@
+{
+  "values": [
+    "foup:overhead_rail",
+    "foup:overhead_rail_curve",
+    "foup:overhead_rail_switch",
+    "foup:overhead_rail_station",
+    "foup:foup_loader",
+    "foup:foup_storage_interface",
+    "foup:foup_storage_locker"
+  ]
+}
