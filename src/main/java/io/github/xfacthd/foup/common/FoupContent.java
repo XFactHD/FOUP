@@ -16,6 +16,7 @@ import io.github.xfacthd.foup.common.blockentity.OverheadRailStationBlockEntity;
 import io.github.xfacthd.foup.common.data.component.HeldFoup;
 import io.github.xfacthd.foup.common.data.component.ItemContents;
 import io.github.xfacthd.foup.common.data.component.ScheduleSnapshot;
+import io.github.xfacthd.foup.common.data.component.LockerContents;
 import io.github.xfacthd.foup.common.entity.OverheadCartAction;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import io.github.xfacthd.foup.common.entity.OverheadCartIssue;
@@ -56,6 +57,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -91,6 +93,9 @@ public final class FoupContent
     );
     public static final DeferredDataComponentType<ScheduleSnapshot> DC_TYPE_SCHEDULE = DATA_COMPONENTS.registerComponentType(
             "schedule", builder -> builder.persistent(ScheduleSnapshot.CODEC).networkSynchronized(ScheduleSnapshot.STREAM_CODEC).cacheEncoding()
+    );
+    public static final DeferredDataComponentType<LockerContents> DC_TYPE_STORAGE_CONTENTS = DATA_COMPONENTS.registerComponentType(
+            "locker_contents", builder -> builder.persistent(LockerContents.CODEC).networkSynchronized(LockerContents.STREAM_CODEC).cacheEncoding()
     );
     // endregion
 
@@ -195,6 +200,11 @@ public final class FoupContent
     {
         Supplier<Block[]> blocks = () -> Arrays.stream(blockHolders).map(Holder::value).toArray(Block[]::new);
         return BLOCK_ENTITIES.registerBlockEntity(name, factory, blocks);
+    }
+
+    public static List<Block> getAllBlocks()
+    {
+        return BLOCKS.getEntries().stream().map(Holder::value).toList();
     }
 
     public static void init(IEventBus modBus)

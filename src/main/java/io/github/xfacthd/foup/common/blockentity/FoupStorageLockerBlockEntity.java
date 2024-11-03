@@ -4,9 +4,11 @@ import com.google.common.base.Preconditions;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.PropertyHolder;
 import io.github.xfacthd.foup.common.data.component.ItemContents;
+import io.github.xfacthd.foup.common.data.component.LockerContents;
 import io.github.xfacthd.foup.common.menu.FoupStorageLockerMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
@@ -22,8 +24,9 @@ import java.util.Optional;
 public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implements MenuProvider
 {
     public static final Component MENU_TITLE = Component.translatable("foup.container.foup_storage_locker");
+    public static final int SLOT_COUNT = 8;
 
-    private final ItemStackHandler inventory = new ItemStackHandler(8)
+    private final ItemStackHandler inventory = new ItemStackHandler(SLOT_COUNT)
     {
         @Override
         public boolean isItemValid(int slot, ItemStack stack)
@@ -68,7 +71,7 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
     boolean reserveSlot()
     {
         int slot = -1;
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < SLOT_COUNT; i++)
         {
             if ((occupationState & (1 << i)) == 0)
             {
@@ -95,7 +98,7 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
             int idx = Integer.numberOfTrailingZeros(occupationState);
             return idx >= inventory.getSlots() ? -1 : idx;
         }
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < SLOT_COUNT; i++)
         {
             if ((occupationState & (1 << i)) == 0)
             {
@@ -133,7 +136,35 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
 
     public int getAnalogSignal()
     {
-        return Integer.bitCount(occupationState) * 15 / 8;
+        return Integer.bitCount(occupationState) * 15 / SLOT_COUNT;
+    }
+
+    @Override
+    protected void collectImplicitComponents(DataComponentMap.Builder builder)
+    {
+        if (occupationState > 0)
+        {
+            builder.set(FoupContent.DC_TYPE_STORAGE_CONTENTS, LockerContents.of(inventory));
+        }
+    }
+
+    @Override
+    protected void applyImplicitComponents(DataComponentInput input)
+    {
+        LockerContents contents = input.get(FoupContent.DC_TYPE_STORAGE_CONTENTS);
+        if (contents != null)
+        {
+            contents.applyTo(inventory);
+            computeOccupationState();
+        }
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public void removeComponentsFromTag(CompoundTag tag)
+    {
+        tag.remove("inventory");
+        tag.remove("reserved_slot");
     }
 
     @Override
@@ -142,13 +173,7 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
         super.loadAdditional(tag, registries);
         inventory.deserializeNBT(registries, tag.getCompound("inventory"));
         reservedSlot = tag.contains("reserved_slot") ? tag.getInt("reserved_slot") : -1;
-        for (int i = 0; i < 8; i++)
-        {
-            if (!inventory.getStackInSlot(i).isEmpty())
-            {
-                occupationState |= 1 << i;
-            }
-        }
+        computeOccupationState();
     }
 
     @Override
@@ -157,6 +182,17 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
         super.saveAdditional(tag, registries);
         tag.put("inventory", inventory.serializeNBT(registries));
         tag.putInt("reserved_slot", reservedSlot);
+    }
+
+    private void computeOccupationState()
+    {
+        for (int i = 0; i < SLOT_COUNT; i++)
+        {
+            if (!inventory.getStackInSlot(i).isEmpty())
+            {
+                occupationState |= 1 << i;
+            }
+        }
     }
 
     public static boolean canPlaceInStorage(ItemStack stack)

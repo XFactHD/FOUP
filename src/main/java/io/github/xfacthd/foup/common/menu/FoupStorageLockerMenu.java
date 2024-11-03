@@ -17,7 +17,7 @@ import java.util.function.Predicate;
 
 public final class FoupStorageLockerMenu extends AbstractContainerMenu
 {
-    private static final int LOCKER_SLOTS = 8;
+    private static final int LOCKER_SLOTS = FoupStorageLockerBlockEntity.SLOT_COUNT;
 
     private final DataSlot lockedSlot;
     private final Predicate<Player> stillValid;

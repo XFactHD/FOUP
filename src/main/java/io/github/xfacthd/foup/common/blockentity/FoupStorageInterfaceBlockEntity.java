@@ -18,6 +18,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteractorBlockEntity
 {
     @Nullable
@@ -132,6 +134,14 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     public long getActionStart()
     {
         return actionStart;
+    }
+
+    public void addDrops(List<ItemStack> drops)
+    {
+        if (transferBuffer != null)
+        {
+            drops.add(transferBuffer);
+        }
     }
 
     @Override

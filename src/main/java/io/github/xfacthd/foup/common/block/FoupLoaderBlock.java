@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -15,11 +16,15 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+
+import java.util.List;
 
 public final class FoupLoaderBlock extends AbstractCartInteractorBlock
 {
@@ -59,6 +64,17 @@ public final class FoupLoaderBlock extends AbstractCartInteractorBlock
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context)
     {
         return SHAPES[state.getValue(PropertyHolder.FACING_HOR).get2DDataValue()];
+    }
+
+    @Override
+    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params)
+    {
+        List<ItemStack> drops = super.getDrops(state, params);
+        if (params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) instanceof FoupLoaderBlockEntity be)
+        {
+            be.addDrops(drops);
+        }
+        return drops;
     }
 
     @Override
