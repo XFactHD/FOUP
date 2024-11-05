@@ -167,8 +167,7 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
 
                 int count = Math.min(Math.min(foup.getCount(), Utils.getMaxStackSize(stack)), scheduleEntry.getCount());
                 inventory.insertItem(SLOT_OUTPUT, foup.copyWithCount(count), false);
-                foup.shrink(count);
-                cart.setFoupContent(foup);
+                cart.setFoupContent(count == foup.getCount() ? ItemStack.EMPTY : foup.copyWithCount(foup.getCount() - count));
             }
         }
     }
