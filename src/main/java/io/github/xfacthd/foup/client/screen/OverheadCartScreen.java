@@ -489,6 +489,11 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
             @Override
             public void render(GuiGraphics graphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTick)
             {
+                for (AbstractWidget child : children)
+                {
+                    child.active = true;
+                }
+
                 buttonUp.active = index != 0;
                 buttonUp.setPosition(left + MOVE_BTN_X, top + EDGE_PADDING);
 
