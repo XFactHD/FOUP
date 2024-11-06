@@ -153,10 +153,9 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
             rebuiltScheduleList();
         }
 
-        int invTop = topPos + imageHeight - INVENTORY_Y_OFF + 1;
+        int invTop = imageHeight - INVENTORY_Y_OFF + 1;
         for (Slot slot : menu.slots)
         {
-            slot.x = INVENTORY_X + 1 + (slot.index % 9 * 18);
             slot.y = invTop + (slot.index / 9 * 18) + (slot.index >= 27 ? 4 : 0);
         }
     }
