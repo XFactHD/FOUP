@@ -115,10 +115,11 @@ public final class RailNetworkSavedData extends SavedData
         return networks.get(network);
     }
 
-    void removeNetwork(long network)
+    public boolean removeNetwork(long network)
     {
-        networks.remove(network);
+        boolean removed = networks.remove(network) != null;
         setDirty();
+        return removed;
     }
 
     @Nullable

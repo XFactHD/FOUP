@@ -7,6 +7,7 @@ import io.github.xfacthd.foup.common.data.RenameResult;
 import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
@@ -167,6 +168,6 @@ public final class RailNetwork implements Mergeable<RailNetwork>
     @Override
     public RailNetwork copy()
     {
-        return new RailNetwork(level, -1, nodes, stations);
+        return new RailNetwork(level, -1, Long2ObjectMaps.emptyMap(), Map.of());
     }
 }
