@@ -82,6 +82,11 @@ final class OverheadCartBehaviour
                 prevNodePos = null;
             }
         }
+        if (prevNode != null && prevNode.isInvalid())
+        {
+            // Rail block of previous node broken and node removed from graph
+            prevNode = null;
+        }
 
         switch (action.state())
         {

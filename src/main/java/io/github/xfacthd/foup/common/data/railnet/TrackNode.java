@@ -98,6 +98,11 @@ public final class TrackNode implements GraphObject<RailNetwork>
         return station ? 5 : 1;
     }
 
+    public boolean isInvalid()
+    {
+        return graph == null;
+    }
+
     public void attach(AbstractOverheadRailBlockEntity blockEntity)
     {
         this.blockEntity = blockEntity;
