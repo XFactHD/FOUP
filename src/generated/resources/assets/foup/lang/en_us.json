@@ -28,6 +28,7 @@
   "desc.foup.station_type.loader": "Loader",
   "desc.foup.station_type.storage": "Storage",
   "desc.foup.station_type.unknown": "Unknown",
+  "entity.foup.overhead_cart": "Overhead Hoist Cart",
   "foup.container.foup": "FOUP",
   "foup.container.foup_loader": "FOUP Loader",
   "foup.container.foup_storage_locker": "FOUP Storage Locker",

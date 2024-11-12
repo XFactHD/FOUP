@@ -41,6 +41,8 @@ public final class FoupLanguageProvider extends LanguageProvider
         add(FoupContent.ITEM_CART.value(), "Overhead Hoist Cart");
         add(FoupContent.ITEM_RAIL_INSPECTOR.value(), "Rail Inspector");
 
+        add(FoupContent.ENTITY_TYPE_CART.value(), "Overhead Hoist Cart");
+
         add("item.foup.foup.desc", "Front Opening Unified Pod");
 
         add(FoupContent.TAB_MAIN.value().getDisplayName(), "FOUP");
