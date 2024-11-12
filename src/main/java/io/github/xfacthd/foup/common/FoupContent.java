@@ -118,7 +118,7 @@ public final class FoupContent
     public static final DeferredBlockEntity<FoupStorageInterfaceBlockEntity> BE_TYPE_FOUP_STORAGE_INTERFACE = registerBlockEntity(
             "foup_storage_interface", FoupStorageInterfaceBlockEntity::new, BLOCK_FOUP_STORAGE_INTERFACE
     );
-    public static final Holder<BlockEntityType<?>> BE_TYPE_FOUP_STORAGE_LOCKER = registerBlockEntity(
+    public static final DeferredBlockEntity<FoupStorageLockerBlockEntity> BE_TYPE_FOUP_STORAGE_LOCKER = registerBlockEntity(
             "foup_storage_locker", FoupStorageLockerBlockEntity::new, BLOCK_FOUP_STORAGE_LOCKER
     );
     // endregion

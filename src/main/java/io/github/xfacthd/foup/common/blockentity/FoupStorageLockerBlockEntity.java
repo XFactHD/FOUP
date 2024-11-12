@@ -3,6 +3,7 @@ package io.github.xfacthd.foup.common.blockentity;
 import com.google.common.base.Preconditions;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.PropertyHolder;
+import io.github.xfacthd.foup.common.data.capability.itemhandler.ExternalItemHandler;
 import io.github.xfacthd.foup.common.data.component.ItemContents;
 import io.github.xfacthd.foup.common.data.component.LockerContents;
 import io.github.xfacthd.foup.common.menu.FoupStorageLockerMenu;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 import java.util.Optional;
@@ -40,6 +42,9 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
             FoupStorageLockerBlockEntity.this.onInventoryChanged(slot);
         }
     };
+    private final ExternalItemHandler externalItemHandler = new ExternalItemHandler(
+            inventory, this::isSlotUnlocked, this::isSlotUnlocked
+    );
     private int occupationState = 0;
     private int reservedSlot = -1;
 
@@ -61,6 +66,11 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
             level().setBlockAndUpdate(worldPosition, newState);
         }
         setChanged();
+    }
+
+    private boolean isSlotUnlocked(int slot)
+    {
+        return slot != reservedSlot;
     }
 
     boolean isFull()
@@ -137,6 +147,11 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
     public int getAnalogSignal()
     {
         return Integer.bitCount(occupationState) * 15 / SLOT_COUNT;
+    }
+
+    public IItemHandler getExternalItemHandler()
+    {
+        return externalItemHandler;
     }
 
     @Override

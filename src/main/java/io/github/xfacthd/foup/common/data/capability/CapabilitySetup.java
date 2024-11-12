@@ -22,6 +22,14 @@ public final class CapabilitySetup
             }
             return null;
         });
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, FoupContent.BE_TYPE_FOUP_STORAGE_LOCKER.value(), (be, side) ->
+        {
+            if (side != null && side != Direction.UP && side.getAxis() != be.getBlockState().getValue(PropertyHolder.FACING_HOR).getAxis())
+            {
+                return be.getExternalItemHandler();
+            }
+            return null;
+        });
     }
 
     private CapabilitySetup() { }
