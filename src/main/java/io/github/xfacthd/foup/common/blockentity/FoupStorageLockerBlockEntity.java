@@ -37,6 +37,12 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
         }
 
         @Override
+        public int getSlotLimit(int slot)
+        {
+            return 1;
+        }
+
+        @Override
         protected void onContentsChanged(int slot)
         {
             FoupStorageLockerBlockEntity.this.onInventoryChanged(slot);
