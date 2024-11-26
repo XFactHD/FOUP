@@ -24,12 +24,13 @@ import java.util.Set;
 
 public final class RailNetworkDebugPayloads
 {
+    public static final boolean ENABLE_IN_PROD = true;
     private static final Set<ServerPlayer> RECEIVERS = Sets.newIdentityHashSet();
     private static final Set<PendingNetwork> PENDING_UPDATES = new HashSet<>();
 
     public static void enqueueNetworkDebugUpdate(ServerLevel level, long id)
     {
-        if (!FMLEnvironment.production && !RECEIVERS.isEmpty())
+        if ((!FMLEnvironment.production || ENABLE_IN_PROD) && !RECEIVERS.isEmpty())
         {
             PENDING_UPDATES.add(new PendingNetwork(level, id));
         }
@@ -37,7 +38,7 @@ public final class RailNetworkDebugPayloads
 
     public static void sendImmediateNetworkDebugUpdate(ServerLevel level, long id)
     {
-        if (!FMLEnvironment.production && !RECEIVERS.isEmpty())
+        if ((!FMLEnvironment.production || ENABLE_IN_PROD) && !RECEIVERS.isEmpty())
         {
             sendNetworkDebugUpdate(level, id);
         }

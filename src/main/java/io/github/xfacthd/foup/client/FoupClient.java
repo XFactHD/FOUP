@@ -13,6 +13,7 @@ import io.github.xfacthd.foup.client.screen.FoupStorageLockerScreen;
 import io.github.xfacthd.foup.client.screen.OverheadCartScreen;
 import io.github.xfacthd.foup.client.util.ClientUtils;
 import io.github.xfacthd.foup.common.FoupContent;
+import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -36,7 +37,7 @@ public final class FoupClient
 
         NeoForge.EVENT_BUS.addListener(OverheadRailInfoRenderer::onRenderLevelStage);
 
-        if (!FMLEnvironment.production)
+        if ((!FMLEnvironment.production || RailNetworkDebugPayloads.ENABLE_IN_PROD))
         {
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onRenderLevelStage);
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onPlayerDisconnect);
