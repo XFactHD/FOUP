@@ -10,6 +10,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ByIdMap;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
 public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlockEntity implements AbstractCartInteractorMenu.StateProvider
@@ -217,6 +219,8 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
     {
         return type;
     }
+
+    public abstract void dropContents(Consumer<ItemStack> dropper);
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)

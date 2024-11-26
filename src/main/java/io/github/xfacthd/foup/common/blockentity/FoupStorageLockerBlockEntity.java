@@ -22,6 +22,7 @@ import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implements MenuProvider
 {
@@ -158,6 +159,19 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
     public IItemHandler getExternalItemHandler()
     {
         return externalItemHandler;
+    }
+
+    public void dropContents(Consumer<ItemStack> dropper)
+    {
+        for (int i = 0; i < inventory.getSlots(); i++)
+        {
+            ItemStack stack = inventory.getStackInSlot(i);
+            if (!stack.isEmpty())
+            {
+                dropper.accept(stack);
+                inventory.setStackInSlot(i, ItemStack.EMPTY);
+            }
+        }
     }
 
     @Override

@@ -72,6 +72,16 @@ public final class FoupStorageLockerBlock extends Block implements EntityBlock
     }
 
     @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
+    {
+        if (!newState.is(state.getBlock()) && !level.isClientSide() && level.getBlockEntity(pos) instanceof FoupStorageLockerBlockEntity be)
+        {
+            be.dropContents(stack -> popResource(level, pos, stack));
+        }
+        super.onRemove(state, level, pos, newState, movedByPiston);
+    }
+
+    @Override
     protected boolean hasAnalogOutputSignal(BlockState state)
     {
         return true;

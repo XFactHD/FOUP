@@ -28,8 +28,8 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEntity implements MenuProvider, FoupLoaderMenu.LoaderStateProvider
 {
@@ -219,10 +219,18 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
         setChangedWithoutSignalUpdate();
     }
 
-    public void addDrops(List<ItemStack> drops)
+    @Override
+    public void dropContents(Consumer<ItemStack> dropper)
     {
-        drops.add(inventory.getStackInSlot(SLOT_INPUT));
-        drops.add(inventory.getStackInSlot(SLOT_OUTPUT));
+        for (int i = 0; i < inventory.getSlots(); i++)
+        {
+            ItemStack stack = inventory.getStackInSlot(i);
+            if (!stack.isEmpty())
+            {
+                dropper.accept(stack);
+                inventory.setStackInSlot(i, ItemStack.EMPTY);
+            }
+        }
     }
 
     @Override

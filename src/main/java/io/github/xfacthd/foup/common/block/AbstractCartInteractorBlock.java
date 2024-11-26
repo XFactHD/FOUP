@@ -33,6 +33,7 @@ public abstract sealed class AbstractCartInteractorBlock extends Block implement
         if (!newState.is(state.getBlock()) && !level.isClientSide() && level.getBlockEntity(pos) instanceof AbstractCartInteractorBlockEntity be)
         {
             be.unlink();
+            be.dropContents(stack -> popResource(level, pos, stack));
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }
