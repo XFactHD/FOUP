@@ -231,7 +231,7 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
         super.onLoad();
         if (level instanceof ServerLevel serverLevel)
         {
-            outputTargetCache = BlockCapabilityCache.create(Capabilities.ItemHandler.BLOCK, serverLevel, worldPosition.below(), Direction.DOWN, () -> !isRemoved(), () -> {});
+            outputTargetCache = BlockCapabilityCache.create(Capabilities.ItemHandler.BLOCK, serverLevel, worldPosition.below(), Direction.UP, () -> !isRemoved(), () -> {});
         }
     }
 
