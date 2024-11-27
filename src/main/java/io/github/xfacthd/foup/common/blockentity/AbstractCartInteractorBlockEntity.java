@@ -38,6 +38,7 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
     private OverheadCartEntity currCart = null;
     @Nullable
     private UUID currCartUuid = null;
+    private boolean delayCartResolveOnFail = false;
 
     protected AbstractCartInteractorBlockEntity(BlockEntityType<?> beType, BlockPos pos, BlockState state, StationType type)
     {
@@ -118,9 +119,13 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         if (currCart == null && currCartUuid != null && level instanceof ServerLevel serverLevel)
         {
             currCart = serverLevel.getEntity(currCartUuid) instanceof OverheadCartEntity cart ? cart : null;
-            if (currCart == null)
+            if (currCart == null && !delayCartResolveOnFail)
             {
                 clearCart(false);
+            }
+            else if (currCart != null)
+            {
+                delayCartResolveOnFail = false;
             }
         }
         if (currCart != null && currCart.isRemoved())
@@ -236,6 +241,7 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         }
         currAction = currScheduleEntry != null ? currScheduleEntry.action() : null;
         currCartUuid = tag.contains("current_cart") ? tag.getUUID("current_cart") : null;
+        delayCartResolveOnFail = currCartUuid != null;
     }
 
     @Override
