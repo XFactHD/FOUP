@@ -3,6 +3,7 @@ package io.github.xfacthd.foup.client.renderer.debug;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import io.github.xfacthd.foup.client.renderer.special.OverheadRailInfoRenderer;
 import io.github.xfacthd.foup.client.util.ClientUtils;
 import io.github.xfacthd.foup.common.data.StationType;
@@ -13,6 +14,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -23,6 +25,7 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 public final class RailNetworkDebugRenderer
@@ -38,16 +41,17 @@ public final class RailNetworkDebugRenderer
         RenderSystem.disableDepthTest();
         MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
         Font font = Minecraft.getInstance().font;
-        for (RailNetworkDebugData entry : DEBUG_DATA.values())
+        for (Long2ObjectMap.Entry<RailNetworkDebugData> entry : DEBUG_DATA.long2ObjectEntrySet())
         {
-            renderNetwork(entry, buffer, event.getPoseStack(), event.getCamera(), font);
+            renderNetwork(entry.getLongKey(), entry.getValue(), buffer, event.getPoseStack(), event.getCamera(), font);
         }
         buffer.endBatch(ClientUtils.INFO_QUADS);
     }
 
-    private static void renderNetwork(RailNetworkDebugData entry, MultiBufferSource.BufferSource buffer, PoseStack poseStack, Camera camera, Font font)
+    private static void renderNetwork(long netId, RailNetworkDebugData entry, MultiBufferSource.BufferSource buffer, PoseStack poseStack, Camera camera, Font font)
     {
         VertexConsumer builder = buffer.getBuffer(ClientUtils.INFO_QUADS);
+        boolean showNetId = Objects.requireNonNull(Minecraft.getInstance().player).isShiftKeyDown();
         for (RailNetworkDebugData.Node node : entry.nodes())
         {
             poseStack.pushPose();
@@ -61,6 +65,11 @@ public final class RailNetworkDebugRenderer
             builder.addVertex(pose, -.15F, 0,  .15F).setColor(color);
             builder.addVertex(pose,  .15F, 0,  .15F).setColor(color);
             builder.addVertex(pose,  .15F, 0, -.15F).setColor(color);
+
+            if (showNetId)
+            {
+                renderNetworkId(buffer, poseStack, camera, font, netId);
+            }
 
             for (BlockPos neighbour : node.neighbours())
             {
@@ -80,6 +89,23 @@ public final class RailNetworkDebugRenderer
 
             poseStack.popPose();
         }
+    }
+
+    private static void renderNetworkId(MultiBufferSource.BufferSource buffer, PoseStack poseStack, Camera camera, Font font, long netId)
+    {
+        poseStack.pushPose();
+
+        poseStack.translate(0, 0, 0);
+        poseStack.mulPose(camera.rotation());
+        poseStack.mulPose(Axis.YP.rotationDegrees(180));
+        poseStack.mulPose(Axis.ZN.rotationDegrees(180));
+        poseStack.scale(1F/40F, 1F/40F, 1);
+
+        String name = Long.toString(netId);
+        Matrix4f pose = poseStack.last().pose();
+        font.drawInBatch(name, -(font.width(name) / 2F), -9, 0xFFFFFFFF, false, pose, buffer, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+
+        poseStack.popPose();
     }
 
     public static void handleData(long networkId, @Nullable RailNetworkDebugData data)
