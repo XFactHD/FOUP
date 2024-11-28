@@ -1,6 +1,5 @@
 package io.github.xfacthd.foup.common.entity;
 
-import com.google.common.base.Preconditions;
 import dev.gigaherz.graph3.Graph;
 import io.github.xfacthd.foup.common.blockentity.AbstractOverheadRailBlockEntity;
 import io.github.xfacthd.foup.common.data.TrackShape;
@@ -336,8 +335,10 @@ final class OverheadCartBehaviour
 
     void notifyReadyForDeparture()
     {
-        Preconditions.checkState(action.state() == OverheadCartState.POD_IN_LOADER_OR_STORAGE);
-        startHoist(false, action.heightDiff());
+        if (action.state() == OverheadCartState.POD_IN_LOADER_OR_STORAGE)
+        {
+            startHoist(false, action.heightDiff());
+        }
     }
 
     void notifyRetry(boolean retry)
