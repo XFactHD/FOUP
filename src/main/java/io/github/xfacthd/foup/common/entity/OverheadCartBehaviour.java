@@ -404,7 +404,7 @@ final class OverheadCartBehaviour
         return Mth.equal(Mth.frac(Math.abs(cart.getX())), .5) && Mth.equal(Mth.frac(Math.abs(cart.getZ())), .5);
     }
 
-    public void stopSchedule()
+    void stopSchedule()
     {
         OverheadCartState state = action.state();
         if (state == OverheadCartState.IDLE) return;
@@ -416,6 +416,15 @@ final class OverheadCartBehaviour
         else
         {
             haltRequested = true;
+        }
+    }
+
+    void rescue()
+    {
+        if (action.state() == OverheadCartState.POD_IN_LOADER_OR_STORAGE)
+        {
+            startHoist(false, action.heightDiff());
+            retry = true;
         }
     }
 

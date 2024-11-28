@@ -52,7 +52,7 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     }
 
     @Nullable
-    private AbstractCartInteractorBlockEntity getLinkedBlock()
+    public AbstractCartInteractorBlockEntity getLinkedBlock()
     {
         if (linkedBlock == null && linkedPos != null)
         {

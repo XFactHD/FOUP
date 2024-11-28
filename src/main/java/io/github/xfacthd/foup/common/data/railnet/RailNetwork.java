@@ -15,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -104,6 +105,11 @@ public final class RailNetwork implements Mergeable<RailNetwork>
                         Objects.requireNonNullElse(e.getValue().getStationType(), StationType.UNKNOWN)
                 ))
                 .collect(Pair.toMap());
+    }
+
+    public Collection<TrackNode> getStationNodes()
+    {
+        return stations.values();
     }
 
     void addStation(String name, TrackNode node)

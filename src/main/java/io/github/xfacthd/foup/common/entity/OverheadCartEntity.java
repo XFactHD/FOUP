@@ -344,6 +344,11 @@ public final class OverheadCartEntity extends Entity
         return issue == OverheadCartIssue.NONE ? null : issue;
     }
 
+    public void rescue()
+    {
+        behaviour.rescue();
+    }
+
     @Override
     public void remove(RemovalReason reason)
     {
