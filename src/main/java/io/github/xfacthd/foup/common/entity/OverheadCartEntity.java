@@ -247,25 +247,28 @@ public final class OverheadCartEntity extends Entity
     @Override
     public InteractionResult interact(Player player, InteractionHand hand)
     {
-        if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty() && player.isShiftKeyDown())
+        if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty())
         {
-            if (!level().isClientSide())
+            if (player.isShiftKeyDown() && player.mayBuild())
             {
-                killAndDrop(player);
+                if (!level().isClientSide())
+                {
+                    killAndDrop(player);
+                }
+                return InteractionResult.sidedSuccess(level().isClientSide());
             }
-            return InteractionResult.sidedSuccess(level().isClientSide());
-        }
-        if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty() && !player.isShiftKeyDown())
-        {
-            if (player instanceof ServerPlayer)
+            if (!player.isShiftKeyDown())
             {
-                RailNetwork network = behaviour.getOwningNetwork();
-                CartMenuProvider menuProvider = new CartMenuProvider(
-                        this, behaviour.getSchedule().getEntriesCopy(), network.getStations()
-                );
-                player.openMenu(menuProvider, menuProvider::encodeClientData);
+                if (player instanceof ServerPlayer)
+                {
+                    RailNetwork network = behaviour.getOwningNetwork();
+                    CartMenuProvider menuProvider = new CartMenuProvider(
+                            this, behaviour.getSchedule().getEntriesCopy(), network.getStations()
+                    );
+                    player.openMenu(menuProvider, menuProvider::encodeClientData);
+                }
+                return InteractionResult.sidedSuccess(level().isClientSide());
             }
-            return InteractionResult.sidedSuccess(level().isClientSide());
         }
         return InteractionResult.PASS;
     }
