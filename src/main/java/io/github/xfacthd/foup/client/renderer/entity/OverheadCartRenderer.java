@@ -68,12 +68,28 @@ public final class OverheadCartRenderer extends EntityRenderer<OverheadCartEntit
 
     private void renderFoupContents(ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight)
     {
+        renderFoupContents(itemRenderer, stack, poseStack, bufferSource, model.foup.x, model.foup.y + model.hoistWire.yScale, model.foup.z, packedLight, true);
+    }
+
+    public static void renderFoupContents(
+            ItemRenderer itemRenderer,
+            ItemStack stack,
+            PoseStack poseStack,
+            MultiBufferSource bufferSource,
+            float x,
+            float y,
+            float z,
+            int packedLight,
+            boolean scaleInverse
+    )
+    {
         poseStack.pushPose();
 
-        poseStack.translate(model.foup.x, model.foup.y + model.hoistWire.yScale, model.foup.z);
+        poseStack.translate(x, y, z);
 
         poseStack.translate(0, .5, 0);
-        poseStack.scale(-.5F, -.5F, .5F);
+        float xyScale = scaleInverse ? -.5F : .5F;
+        poseStack.scale(xyScale, xyScale, .5F);
         poseStack.translate(0, -.5, 0);
 
         int passes;

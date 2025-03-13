@@ -2,11 +2,14 @@ package io.github.xfacthd.foup.client.renderer.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
+import io.github.xfacthd.foup.client.renderer.entity.OverheadCartRenderer;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
 import io.github.xfacthd.foup.common.blockentity.FoupStorageInterfaceBlockEntity;
 import io.github.xfacthd.foup.common.data.StationAction;
 import io.github.xfacthd.foup.common.data.StationType;
+import io.github.xfacthd.foup.common.data.component.ItemContents;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -17,6 +20,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
 import org.jetbrains.annotations.Nullable;
@@ -113,8 +117,22 @@ public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<F
         {
             poseStack.pushPose();
             poseStack.translate(.5, FOUP_BASE_OFFSET + (FOUP_MOVE_DIST * factor), .5);
+
+            poseStack.pushPose();
             poseStack.scale(1.995F, 1.995F, 1.995F);
             itemRenderer.renderStatic(FoupContent.ITEM_FOUP.toStack(), ItemDisplayContext.FIXED, light, OverlayTexture.NO_OVERLAY, poseStack, bufferSource, level, 0);
+            poseStack.popPose();
+
+            ItemStack foup = be.getFoupInFlight();
+            ItemStack foupContent;
+            if (foup != null && !(foupContent = foup.getOrDefault(FoupContent.DC_TYPE_ITEM_CONTENTS, ItemContents.EMPTY).stack()).isEmpty())
+            {
+                poseStack.pushPose();
+                poseStack.mulPose(Axis.YP.rotationDegrees(180F - be.getCartRotation()));
+                OverheadCartRenderer.renderFoupContents(itemRenderer, foupContent, poseStack, bufferSource, 0, -1, 0, light, false);
+                poseStack.popPose();
+            }
+
             poseStack.popPose();
         }
     }

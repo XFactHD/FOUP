@@ -28,6 +28,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     private ItemStack transferBuffer = null;
     private long actionStart = -1;
     private int loadingTarget = -1;
+    private float cartRotation = 0;
 
     public FoupStorageInterfaceBlockEntity(BlockPos pos, BlockState state)
     {
@@ -72,6 +73,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
                     Preconditions.checkState(loadingTarget > -1, "No loading target present");
                     transferBuffer = locker.removeFrom(loadingTarget);
                     loadingTarget = -1;
+                    cartRotation = cart.getYRot();
                     setChangedWithoutSignalUpdate();
                 }
             }
@@ -83,6 +85,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
                     transferBuffer = FoupContent.ITEM_FOUP.toStack();
                     transferBuffer.set(FoupContent.DC_TYPE_ITEM_CONTENTS, new ItemContents(cart.getFoupContent()));
                     cart.setFoupContent(null);
+                    cartRotation = cart.getYRot();
                     setChangedWithoutSignalUpdate();
                 }
             }
@@ -103,6 +106,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
                     ItemContents contents = transferBuffer.getOrDefault(FoupContent.DC_TYPE_ITEM_CONTENTS, ItemContents.EMPTY);
                     cart.setFoupContent(contents.stack());
                     transferBuffer = null;
+                    cartRotation = 0;
                     setChangedWithoutSignalUpdate();
                 }
             }
@@ -113,6 +117,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
                 {
                     locker.insertReserved(transferBuffer);
                     transferBuffer = null;
+                    cartRotation = 0;
                     setChangedWithoutSignalUpdate();
                 }
             }
@@ -136,6 +141,17 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
         return actionStart;
     }
 
+    @Nullable
+    public ItemStack getFoupInFlight()
+    {
+        return transferBuffer;
+    }
+
+    public float getCartRotation()
+    {
+        return cartRotation;
+    }
+
     @Override
     public void dropContents(Consumer<ItemStack> dropper)
     {
@@ -144,18 +160,6 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
             dropper.accept(transferBuffer);
             transferBuffer = null;
         }
-    }
-
-    @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
-    {
-        CompoundTag tag = new CompoundTag();
-        if (currAction != null)
-        {
-            tag.putInt("action", currAction.ordinal());
-        }
-        tag.putLong("action_start", actionStart);
-        return tag;
     }
 
     @Override
@@ -171,10 +175,29 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider)
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
+    {
+        CompoundTag tag = new CompoundTag();
+        if (currAction != null)
+        {
+            tag.putInt("action", currAction.ordinal());
+        }
+        tag.putLong("action_start", actionStart);
+        if (transferBuffer != null)
+        {
+            tag.put("transfer_buf", transferBuffer.saveOptional(registries));
+        }
+        tag.putFloat("cart_rotation", cartRotation);
+        return tag;
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries)
     {
         currAction = tag.contains("action") ? StationAction.byId(tag.getInt("action")) : null;
         actionStart = tag.getLong("action_start");
+        transferBuffer = tag.contains("transfer_buf") ? ItemStack.parseOptional(registries, tag.getCompound("transfer_buf")) : null;
+        cartRotation = tag.getFloat("cart_rotation");
     }
 
     @Override
@@ -183,6 +206,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
         super.loadAdditional(tag, registries);
         transferBuffer = tag.contains("transfer_buf") ? ItemStack.parseOptional(registries, tag.getCompound("transfer_buf")) : null;
         actionStart = tag.contains("action_start") ? tag.getLong("action_start") : -1;
+        cartRotation = tag.getFloat("cart_rotation");
     }
 
     @Override
@@ -194,5 +218,6 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
             tag.put("transfer_buf", transferBuffer.saveOptional(registries));
         }
         tag.putLong("action_start", actionStart);
+        tag.putFloat("cart_rotation", cartRotation);
     }
 }
