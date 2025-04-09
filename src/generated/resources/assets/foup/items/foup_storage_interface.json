@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "foup:item/foup_storage_interface"
+  }
+}

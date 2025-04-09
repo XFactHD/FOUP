@@ -73,7 +73,7 @@ public final class TrackPath
         Queue<PathNode> nodes = new ArrayDeque<>();
         for (Tag nodeTag : tag)
         {
-            long pos = ((LongTag) nodeTag).getAsLong();
+            long pos = ((LongTag) nodeTag).longValue();
             nodes.offer(new PathNode(BlockPos.of(pos), null));
         }
         return new TrackPath(nodes);

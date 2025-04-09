@@ -12,10 +12,11 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.common.util.TriState;
+import net.minecraft.util.TriState;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
@@ -93,7 +94,7 @@ public final class OverheadRailStationScreen extends Screen
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
     {
         renderTransparentBackground(graphics);
-        graphics.blit(BACKGROUND, leftPos, topPos, 0, 0, WIDTH, HEIGHT);
+        graphics.blit(RenderType::guiTextured, BACKGROUND, leftPos, topPos, 0, 0, WIDTH, HEIGHT, 256, 256);
         graphics.drawString(font, title, leftPos + TITLE_X, topPos + TITLE_Y, 0x404040, false);
 
         graphics.drawString(font, LABEL_NAME, leftPos + 8, topPos + 24, 0x404040, false);

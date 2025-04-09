@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -22,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,14 +48,16 @@ public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<F
     private static TextureAtlasSprite sprite;
 
     private final ItemRenderer itemRenderer;
+    private final ItemModelResolver itemModelResolver;
 
     public FoupStorageInterfaceRenderer(BlockEntityRendererProvider.Context ctx)
     {
-        itemRenderer = ctx.getItemRenderer();
+        this.itemRenderer = ctx.getItemRenderer();
+        this.itemModelResolver = ctx.getItemModelResolver();
     }
 
     @Override
-    public void render(FoupStorageInterfaceBlockEntity be, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int light, int overlay)
+    public void render(FoupStorageInterfaceBlockEntity be, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int light, int overlay, Vec3 camera)
     {
         Level level = be.getLevel();
         if (level == null || sprite == null) return;
@@ -129,7 +133,7 @@ public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<F
             {
                 poseStack.pushPose();
                 poseStack.mulPose(Axis.YP.rotationDegrees(180F - be.getCartRotation()));
-                OverheadCartRenderer.renderFoupContents(itemRenderer, foupContent, poseStack, bufferSource, 0, -1, 0, light, false);
+                OverheadCartRenderer.renderFoupContents(itemModelResolver, foupContent, poseStack, bufferSource, 0, -1, 0, light, false);
                 poseStack.popPose();
             }
 

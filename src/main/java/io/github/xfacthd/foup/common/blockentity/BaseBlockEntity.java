@@ -46,7 +46,7 @@ public abstract class BaseBlockEntity extends BlockEntity
     {
         if (owningChunk != null)
         {
-            owningChunk.setUnsaved(true);
+            owningChunk.markUnsaved();
         }
     }
 

@@ -74,7 +74,7 @@ public enum TrackShape
 
     private static Vec3 computeEntryPoint(Direction dir)
     {
-        Vec3i normal = dir.getNormal();
+        Vec3i normal = dir.getUnitVec3i();
         Direction.Axis axis = dir.getAxis();
         Direction.Axis perpAxis = dir.getClockWise().getAxis();
         double x = axis.choose(Math.clamp(normal.getX(), 0, 1), 0, 0) + perpAxis.choose(.5, 0, 0);

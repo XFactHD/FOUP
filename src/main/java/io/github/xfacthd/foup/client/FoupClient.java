@@ -1,11 +1,12 @@
 package io.github.xfacthd.foup.client;
 
 import io.github.xfacthd.foup.Foup;
+import io.github.xfacthd.foup.client.renderer.PipelineModifiers;
 import io.github.xfacthd.foup.client.renderer.block.FoupStorageInterfaceRenderer;
 import io.github.xfacthd.foup.client.renderer.debug.RailNetworkDebugRenderer;
 import io.github.xfacthd.foup.client.renderer.entity.OverheadCartModel;
 import io.github.xfacthd.foup.client.renderer.entity.OverheadCartRenderer;
-import io.github.xfacthd.foup.client.renderer.item.OverheadCartItemProperty;
+import io.github.xfacthd.foup.client.renderer.item.OverheadCartHasFoup;
 import io.github.xfacthd.foup.client.renderer.special.OverheadRailInfoRenderer;
 import io.github.xfacthd.foup.client.screen.FoupLoaderScreen;
 import io.github.xfacthd.foup.client.screen.FoupScreen;
@@ -14,12 +15,13 @@ import io.github.xfacthd.foup.client.screen.OverheadCartScreen;
 import io.github.xfacthd.foup.client.util.ClientUtils;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
+import io.github.xfacthd.foup.common.util.Utils;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterConditionalItemModelPropertyEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -30,10 +32,12 @@ public final class FoupClient
     {
         modBus.addListener(FoupClient::onRegisterLayerDefinitions);
         modBus.addListener(FoupClient::onRegisterRenderers);
-        modBus.addListener(FoupClient::onClientSetup);
+        modBus.addListener(FoupClient::onRegisterConditionalItemModelProperties);
         modBus.addListener(FoupClient::onRegisterMenuScreens);
         modBus.addListener(FoupStorageInterfaceRenderer::onTextureAtlasStitched);
+        modBus.addListener(ClientUtils::onRegisterRenderPipelines);
         modBus.addListener(ClientUtils::onRegisterRenderBuffers);
+        modBus.addListener(PipelineModifiers::onRegisterPipelineModifiers);
 
         NeoForge.EVENT_BUS.addListener(OverheadRailInfoRenderer::onRenderLevelStage);
 
@@ -55,9 +59,9 @@ public final class FoupClient
         event.registerBlockEntityRenderer(FoupContent.BE_TYPE_FOUP_STORAGE_INTERFACE.value(), FoupStorageInterfaceRenderer::new);
     }
 
-    private static void onClientSetup(FMLClientSetupEvent event)
+    private static void onRegisterConditionalItemModelProperties(RegisterConditionalItemModelPropertyEvent event)
     {
-        event.enqueueWork(OverheadCartItemProperty::register);
+        event.register(Utils.rl("has_foup"), OverheadCartHasFoup.CODEC);
     }
 
     private static void onRegisterMenuScreens(RegisterMenuScreensEvent event)

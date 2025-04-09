@@ -7,6 +7,7 @@ import io.github.xfacthd.foup.common.data.railnet.Schedule;
 import io.github.xfacthd.foup.common.menu.AbstractCartInteractorMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ByIdMap;
@@ -231,16 +232,16 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag, registries);
-        linkedStation = tag.contains("linked_station") ? BlockPos.of(tag.getLong("linked_station")) : null;
-        state = State.BY_ID.apply(tag.getInt("state"));
-        delayCounter = tag.getInt("delay_counter");
+        linkedStation = tag.contains("linked_station") ? BlockPos.of(tag.getLongOr("linked_station", 0)) : null;
+        state = State.BY_ID.apply(tag.getIntOr("state", 0));
+        delayCounter = tag.getIntOr("delay_counter", 0);
         currScheduleEntry = null;
         if (tag.contains("current_schedule_entry"))
         {
-            currScheduleEntry = Schedule.Entry.load(tag.getCompound("current_schedule_entry"), registries);
+            currScheduleEntry = Schedule.Entry.load(tag.getCompoundOrEmpty("current_schedule_entry"), registries);
         }
         currAction = currScheduleEntry != null ? currScheduleEntry.action() : null;
-        currCartUuid = tag.contains("current_cart") ? tag.getUUID("current_cart") : null;
+        currCartUuid = tag.read("current_cart", UUIDUtil.CODEC).orElse(null);
         delayCartResolveOnFail = currCartUuid != null;
     }
 
@@ -260,7 +261,7 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
         }
         if (currCartUuid != null)
         {
-            tag.putUUID("current_cart", currCartUuid);
+            tag.storeNullable("current_cart", UUIDUtil.CODEC, currCartUuid);
         }
     }
 

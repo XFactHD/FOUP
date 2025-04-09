@@ -7,15 +7,17 @@ import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 public final class OverheadCartItem extends Item
 {
@@ -32,7 +34,7 @@ public final class OverheadCartItem extends Item
         BlockState state = level.getBlockState(pos);
         if (state.is(FoupContent.BLOCK_RAIL) || state.is(FoupContent.BLOCK_RAIL_STATION))
         {
-            OverheadCartEntity cart = FoupContent.ENTITY_TYPE_CART.value().create(level);
+            OverheadCartEntity cart = FoupContent.ENTITY_TYPE_CART.value().create(level, EntitySpawnReason.SPAWN_ITEM_USE);
             if (cart == null) return InteractionResult.FAIL;
 
             cart.setPos(Vec3.atBottomCenterOf(pos).add(0, OverheadCartEntity.PLACEMENT_Y_OFFSET, 0));
@@ -55,8 +57,9 @@ public final class OverheadCartItem extends Item
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext ctx, List<Component> lines, TooltipFlag flag)
+    @SuppressWarnings("deprecation")
+    public void appendHoverText(ItemStack stack, TooltipContext ctx, TooltipDisplay display, Consumer<Component> lines, TooltipFlag flag)
     {
-        stack.addToTooltip(FoupContent.DC_TYPE_HELD_FOUP, ctx, lines::add, flag);
+        stack.addToTooltip(FoupContent.DC_TYPE_HELD_FOUP, ctx, lines, flag);
     }
 }

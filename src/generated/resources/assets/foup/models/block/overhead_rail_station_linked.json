@@ -1,11 +1,10 @@
 {
   "parent": "minecraft:block/block",
   "children": {
-    "rail": {
-      "parent": "foup:block/overhead_rail"
-    },
+    "rail": "foup:block/overhead_rail",
     "shell": {
       "parent": "foup:block/overhead_rail_station",
+      "render_type": "minecraft:cutout",
       "textures": {
         "indicator": "foup:block/station_indicator_linked"
       }
@@ -16,6 +15,7 @@
     "shell"
   ],
   "loader": "neoforge:composite",
+  "render_type": "minecraft:cutout",
   "textures": {
     "particle": "minecraft:block/iron_block"
   }

@@ -5,6 +5,7 @@ import io.github.xfacthd.foup.common.data.RailType;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -48,22 +49,18 @@ public abstract class AbstractOverheadRailBlock extends Block implements EntityB
     public abstract BlockState getStateForPlacement(BlockPlaceContext ctx, boolean simulate);
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean moved)
     {
-        if (!newState.is(state.getBlock()) && !level.isClientSide())
+        AABB area = AABB.encapsulatingFullBlocks(pos, pos.below());
+        for (OverheadCartEntity entity : level.getEntitiesOfClass(OverheadCartEntity.class, area))
         {
-            AABB area = AABB.encapsulatingFullBlocks(pos, pos.below());
-            for (OverheadCartEntity entity : level.getEntitiesOfClass(OverheadCartEntity.class, area))
-            {
-                entity.killAndDrop(null);
-            }
-
-            if (level.getBlockEntity(pos) instanceof AbstractOverheadRailBlockEntity be)
-            {
-                be.destroyNode();
-            }
+            entity.killAndDrop(level, null);
         }
-        super.onRemove(state, level, pos, newState, movedByPiston);
+
+        if (level.getBlockEntity(pos) instanceof AbstractOverheadRailBlockEntity be)
+        {
+            be.destroyNode();
+        }
     }
 
     @Override

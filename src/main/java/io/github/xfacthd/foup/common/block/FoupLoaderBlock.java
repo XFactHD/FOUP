@@ -52,7 +52,7 @@ public final class FoupLoaderBlock extends AbstractCartInteractorBlock
         {
             player.openMenu(be);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide());
+        return InteractionResult.SUCCESS;
     }
 
     @Override

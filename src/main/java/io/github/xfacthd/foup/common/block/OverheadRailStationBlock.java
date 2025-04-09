@@ -7,6 +7,7 @@ import io.github.xfacthd.foup.common.data.RailType;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundOpenOverheadRailStationScreenPayload;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -48,19 +49,18 @@ public final class OverheadRailStationBlock extends OverheadRailBlock
             {
                 PacketDistributor.sendToPlayer(serverPlayer, new ClientboundOpenOverheadRailStationScreenPayload(pos));
             }
-            return InteractionResult.sidedSuccess(level.isClientSide());
+            return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean moved)
     {
-        if (!newState.is(state.getBlock()) && !level.isClientSide() && level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity be)
+        if (level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity be)
         {
             be.unlink(true);
         }
-        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     @Override

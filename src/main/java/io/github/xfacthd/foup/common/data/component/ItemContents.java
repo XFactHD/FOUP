@@ -2,6 +2,7 @@ package io.github.xfacthd.foup.common.data.component;
 
 import com.mojang.serialization.Codec;
 import io.github.xfacthd.foup.common.item.FoupItem;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -21,7 +22,7 @@ public record ItemContents(ItemStack stack) implements TooltipProvider
     public static final ItemContents EMPTY = new ItemContents(ItemStack.EMPTY);
 
     @Override
-    public void addToTooltip(Item.TooltipContext ctx, Consumer<Component> tooltipAdder, TooltipFlag flag)
+    public void addToTooltip(Item.TooltipContext ctx, Consumer<Component> tooltipAdder, TooltipFlag flag, DataComponentGetter componentGetter)
     {
         if (!stack.isEmpty())
         {
@@ -32,9 +33,9 @@ public record ItemContents(ItemStack stack) implements TooltipProvider
     @Override
     public boolean equals(Object obj)
     {
-        return obj instanceof ItemContents other &&
-                ItemStack.isSameItemSameComponents(stack, other.stack) &&
-                other.stack.getCount() == stack.getCount();
+        return obj instanceof ItemContents(ItemStack otherStack) &&
+                ItemStack.isSameItemSameComponents(stack, otherStack) &&
+                otherStack.getCount() == stack.getCount();
     }
 
     @Override

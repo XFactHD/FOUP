@@ -8,17 +8,23 @@ import io.github.xfacthd.foup.common.data.railnet.RailNetwork;
 import io.github.xfacthd.foup.common.data.railnet.Schedule;
 import io.github.xfacthd.foup.common.menu.OverheadCartMenu;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.InterpolationHandler;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -26,7 +32,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.Nullable;
@@ -42,6 +47,7 @@ public final class OverheadCartEntity extends Entity
     public static final float CART_BASE_DIST = 8.5F;
     // Height in "pixels" of the base of loader and storage
     public static final float STATION_BASE_HEIGHT = 2F;
+    private static final int INTERPOLATION_STEPS = 4;
     static final EntityDataAccessor<OverheadCartAction> ACTION = SynchedEntityData.defineId(
             OverheadCartEntity.class, FoupContent.ENTITY_DATA_SERIALIZER_CART_ACTION.value()
     );
@@ -56,13 +62,8 @@ public final class OverheadCartEntity extends Entity
     );
 
     private final OverheadCartBehaviour behaviour = new OverheadCartBehaviour(this);
+    private final InterpolationHandler interpolation = new OverheadCartInterpolationHandler(this);
     private int actionStart = -1;
-    private int lerpSteps;
-    private double lerpX;
-    private double lerpY;
-    private double lerpZ;
-    private double lerpYRot;
-    private double lerpXRot;
 
     @Nullable
     private ItemStack foupContent;
@@ -101,26 +102,14 @@ public final class OverheadCartEntity extends Entity
         }
         else
         {
-            if (lerpSteps > 0) // Lerping code copied from AbstractMinecart
+            if (isInterpolating()) // Lerping code copied from AbstractMinecart
             {
-                lerpPositionAndRotationStep(lerpSteps, lerpX, lerpY, lerpZ, lerpYRot, lerpXRot);
-                lerpSteps--;
+                interpolation.interpolate();
             }
             else
             {
                 reapplyPosition();
                 setRot(getYRot(), getXRot());
-            }
-
-            // Handle rotation wrapping around and causing interpolation hitch
-            double diff = getYRot() - yRotO;
-            if (diff < -270F)
-            {
-                yRotO -= 360F;
-            }
-            else if (diff > 270F)
-            {
-                yRotO += 360F;
             }
         }
     }
@@ -191,57 +180,9 @@ public final class OverheadCartEntity extends Entity
     }
 
     @Override
-    public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps)
+    public InterpolationHandler getInterpolation()
     {
-        lerpX = x;
-        lerpY = y;
-        lerpZ = z;
-        lerpYRot = yRot;
-        lerpXRot = xRot;
-        lerpSteps = steps + 1;
-    }
-
-    @Override
-    public double lerpTargetX()
-    {
-        return lerpSteps > 0 ? lerpX : getX();
-    }
-
-    @Override
-    public double lerpTargetY()
-    {
-        return lerpSteps > 0 ? lerpY : getY();
-    }
-
-    @Override
-    public double lerpTargetZ()
-    {
-        return lerpSteps > 0 ? lerpZ : getZ();
-    }
-
-    @Override
-    public float lerpTargetXRot()
-    {
-        return lerpSteps > 0 ? (float) lerpXRot : getXRot();
-    }
-
-    @Override
-    public float lerpTargetYRot()
-    {
-        return lerpSteps > 0 ? (float) lerpYRot : getYRot();
-    }
-
-    @Override
-    public AABB getBoundingBoxForCulling()
-    {
-        AABB aabb = super.getBoundingBoxForCulling();
-        OverheadCartState state = getState();
-        if (state != null && state.hasMovingHoist())
-        {
-            double diff = getHeightDiff() + (CART_BASE_DIST / 16F) - (STATION_BASE_HEIGHT / 16F);
-            aabb = aabb.expandTowards(0, -diff, 0);
-        }
-        return aabb;
+        return interpolation;
     }
 
     @Override
@@ -251,11 +192,11 @@ public final class OverheadCartEntity extends Entity
         {
             if (player.isShiftKeyDown() && player.mayBuild())
             {
-                if (!level().isClientSide())
+                if (level() instanceof ServerLevel level)
                 {
-                    killAndDrop(player);
+                    killAndDrop(level, player);
                 }
-                return InteractionResult.sidedSuccess(level().isClientSide());
+                return InteractionResult.SUCCESS;
             }
             if (!player.isShiftKeyDown())
             {
@@ -267,7 +208,7 @@ public final class OverheadCartEntity extends Entity
                     );
                     player.openMenu(menuProvider, menuProvider::encodeClientData);
                 }
-                return InteractionResult.sidedSuccess(level().isClientSide());
+                return InteractionResult.SUCCESS;
             }
         }
         return InteractionResult.PASS;
@@ -276,15 +217,15 @@ public final class OverheadCartEntity extends Entity
     @Override
     public void move(MoverType type, Vec3 pos)
     {
-        if (!level().isClientSide && !isRemoved() && pos.lengthSqr() > 0D)
+        if (level() instanceof ServerLevel level && !isRemoved() && pos.lengthSqr() > 0D)
         {
-            killAndDrop(null);
+            killAndDrop(level, null);
         }
     }
 
-    public void killAndDrop(@Nullable Player player)
+    public void killAndDrop(ServerLevel level, @Nullable Player player)
     {
-        kill();
+        kill(level);
 
         ItemStack stack = FoupContent.ITEM_CART.toStack();
         stack.set(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.of(foupContent));
@@ -304,9 +245,9 @@ public final class OverheadCartEntity extends Entity
                 player.drop(stack, false);
             }
         }
-        else if (level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS))
+        else if (level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS))
         {
-            spawnAtLocation(stack);
+            spawnAtLocation(level, stack);
         }
     }
 
@@ -363,20 +304,25 @@ public final class OverheadCartEntity extends Entity
     }
 
     @Override
+    public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount)
+    {
+        return false;
+    }
+
+    @Override
     protected void readAdditionalSaveData(CompoundTag tag)
     {
-        behaviour.load(tag, level().registryAccess());
-        setFoupContent(tag.contains("foup_content") ? ItemStack.parseOptional(level().registryAccess(), tag.getCompound("foup_content")) : null);
+        behaviour.load(tag, registryAccess());
+        RegistryOps<Tag> regOps = registryAccess().createSerializationContext(NbtOps.INSTANCE);
+        setFoupContent(tag.read("foup_content", ItemStack.OPTIONAL_CODEC, regOps).orElse(null));
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag)
     {
-        behaviour.save(tag, level().registryAccess());
-        if (foupContent != null)
-        {
-            tag.put("foup_content", foupContent.saveOptional(level().registryAccess()));
-        }
+        behaviour.save(tag, registryAccess());
+        RegistryOps<Tag> regOps = registryAccess().createSerializationContext(NbtOps.INSTANCE);
+        tag.storeNullable("foup_content", ItemStack.OPTIONAL_CODEC, regOps, foupContent);
     }
 
     @Override
@@ -405,9 +351,39 @@ public final class OverheadCartEntity extends Entity
     }
 
     @Override
-    public boolean canChangeDimensions(Level oldLevel, Level newLevel)
+    public boolean canTeleport(Level fromLevel, Level toLevel)
     {
         return false;
+    }
+
+    private static final class OverheadCartInterpolationHandler extends InterpolationHandler
+    {
+        private final OverheadCartEntity entity;
+
+        public OverheadCartInterpolationHandler(OverheadCartEntity entity)
+        {
+            super(entity, INTERPOLATION_STEPS);
+            this.entity = entity;
+        }
+
+        // Pos-only and rot-only packets overwrite the existing target rotation and position respectively with the
+        // last interpolation result instead of the existing interpolation target
+        @Override
+        public void interpolateTo(Vec3 pos, float yRot, float xRot)
+        {
+            if (hasActiveInterpolation())
+            {
+                if (pos.equals(entity.position()))
+                {
+                    pos = position();
+                }
+                if (yRot == entity.getYRot())
+                {
+                    yRot = yRot();
+                }
+            }
+            super.interpolateTo(pos, yRot, xRot);
+        }
     }
 
     private record CartMenuProvider(

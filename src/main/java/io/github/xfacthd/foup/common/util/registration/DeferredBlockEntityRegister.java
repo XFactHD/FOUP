@@ -33,7 +33,7 @@ public final class DeferredBlockEntityRegister extends DeferredRegister<BlockEnt
     )
     {
         //noinspection ConstantConditions
-        return (DeferredBlockEntity<T>) register(name, () -> BlockEntityType.Builder.of(factory, blocks.get()).build(null));
+        return (DeferredBlockEntity<T>) register(name, () -> new BlockEntityType<>(factory, blocks.get()));
     }
 
 

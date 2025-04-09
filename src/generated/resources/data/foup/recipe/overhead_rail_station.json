@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "D": {
-      "tag": "c:dusts/redstone"
-    },
-    "G": {
-      "tag": "c:ingots/gold"
-    },
-    "R": {
-      "item": "foup:overhead_rail"
-    }
+    "D": "#c:dusts/redstone",
+    "G": "#c:ingots/gold",
+    "R": "foup:overhead_rail"
   },
   "pattern": [
     "DGD",

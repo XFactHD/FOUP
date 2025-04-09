@@ -13,7 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -233,7 +232,7 @@ final class OverheadCartBehaviour
         if (shape.isStraight())
         {
             boolean done = false;
-            Vec3 diff = Vec3.atLowerCornerOf(dirOne.getNormal()).multiply(MOVE_BLOCKS_PER_TICK, 0, MOVE_BLOCKS_PER_TICK);
+            Vec3 diff = dirOne.getUnitVec3().multiply(MOVE_BLOCKS_PER_TICK, 0, MOVE_BLOCKS_PER_TICK);
             newPos = pos.add(diff);
             if (nextNode == null || nextNode.isOccupied())
             {
@@ -283,7 +282,7 @@ final class OverheadCartBehaviour
             else
             {
                 Direction dir = Utils.getDirByViewVec(cart);
-                Vec3 diff = Vec3.atLowerCornerOf(dir.getNormal()).multiply(MOVE_BLOCKS_PER_TICK, 0, MOVE_BLOCKS_PER_TICK);
+                Vec3 diff = dir.getUnitVec3().multiply(MOVE_BLOCKS_PER_TICK, 0, MOVE_BLOCKS_PER_TICK);
                 newPos = pos.add(diff);
                 if (dir == dirOne)
                 {
@@ -485,41 +484,24 @@ final class OverheadCartBehaviour
 
     void load(CompoundTag tag, RegistryAccess registryAccess)
     {
-        actionStart = tag.contains("action_start") ? tag.getInt("action_start") : -1;
-        OverheadCartState state = OverheadCartState.of(tag.getInt("state"));
-        setAction(state, tag.getInt("action_duration"), tag.getInt("height_diff"));
-        rotating = tag.getBoolean("rotating");
-        haltRequested = tag.getBoolean("halt_requested");
-        retry = tag.getBoolean("retry");
-        if (tag.contains("prev_node"))
+        actionStart = tag.getIntOr("action_start", -1);
+        OverheadCartState state = OverheadCartState.of(tag.getIntOr("state", 0));
+        setAction(state, tag.getIntOr("action_duration", 0), tag.getIntOr("height_diff", 0));
+        rotating = tag.getBooleanOr("rotating", false);
+        haltRequested = tag.getBooleanOr("halt_requested", false);
+        retry = tag.getBooleanOr("retry", false);
+        prevNodePos = tag.getLong("prev_node").map(BlockPos::of).orElse(null);
+        currNodePos = tag.getLong("curr_node").map(BlockPos::of).orElse(null);
+        path = tag.getList("path").map(TrackPath::load).orElse(null);
+        tag.getCompound("schedule").ifPresent(scheduleTag -> schedule.load(scheduleTag, registryAccess));
+        tag.getCompound("issue").ifPresent(issueTag ->
         {
-            prevNodePos = BlockPos.of(tag.getLong("prev_node"));
-        }
-        if (tag.contains("curr_node"))
-        {
-            currNodePos = BlockPos.of(tag.getLong("curr_node"));
-        }
-        if (tag.contains("path"))
-        {
-            path = TrackPath.load(tag.getList("path", Tag.TAG_LONG));
-        }
-        if (tag.contains("schedule"))
-        {
-            schedule.load(tag.getCompound("schedule"), registryAccess);
-        }
-        if (tag.contains("issue"))
-        {
-            CompoundTag issueTag = tag.getCompound("issue");
-            OverheadCartIssue.Type type = OverheadCartIssue.Type.byName(issueTag.getString("type"));
+            OverheadCartIssue.Type type = OverheadCartIssue.Type.byName(issueTag.getStringOr("type", ""));
             if (type != null)
             {
-                Optional<String> detail = Optional.empty();
-                if (tag.contains("detail", Tag.TAG_STRING))
-                {
-                    detail = Optional.of(tag.getString("detail"));
-                }
+                Optional<String> detail = issueTag.getString("detail");
                 cart.getEntityData().set(OverheadCartEntity.ISSUE, new OverheadCartIssue(type, detail));
             }
-        }
+        });
     }
 }

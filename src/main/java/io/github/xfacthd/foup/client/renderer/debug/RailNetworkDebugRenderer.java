@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import io.github.xfacthd.foup.client.renderer.PipelineModifiers;
 import io.github.xfacthd.foup.client.renderer.special.OverheadRailInfoRenderer;
 import io.github.xfacthd.foup.client.util.ClientUtils;
 import io.github.xfacthd.foup.common.data.StationType;
@@ -38,7 +39,7 @@ public final class RailNetworkDebugRenderer
     {
         if (DEBUG_DATA.isEmpty() || event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
 
-        RenderSystem.disableDepthTest();
+        RenderSystem.pushPipelineModifier(PipelineModifiers.NO_DEPTH_TEST);
         MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
         Font font = Minecraft.getInstance().font;
         for (Long2ObjectMap.Entry<RailNetworkDebugData> entry : DEBUG_DATA.long2ObjectEntrySet())
@@ -46,6 +47,7 @@ public final class RailNetworkDebugRenderer
             renderNetwork(entry.getLongKey(), entry.getValue(), buffer, event.getPoseStack(), event.getCamera(), font);
         }
         buffer.endBatch(ClientUtils.INFO_QUADS);
+        RenderSystem.popPipelineModifier();
     }
 
     private static void renderNetwork(long netId, RailNetworkDebugData entry, MultiBufferSource.BufferSource buffer, PoseStack poseStack, Camera camera, Font font)

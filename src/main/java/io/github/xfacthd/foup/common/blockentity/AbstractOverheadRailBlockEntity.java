@@ -67,6 +67,8 @@ public abstract class AbstractOverheadRailBlockEntity extends BaseBlockEntity
         }
     }
 
+    protected void postProcessNewNode(TrackNode node) { }
+
     @Override
     public void onLoad()
     {
@@ -102,6 +104,8 @@ public abstract class AbstractOverheadRailBlockEntity extends BaseBlockEntity
             {
                 RailNetworkSavedData.connectTracks((ServerLevel) level(), trackNode, null);
             }
+
+            postProcessNewNode(trackNode);
         }
     }
 

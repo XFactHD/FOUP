@@ -2,6 +2,7 @@ package io.github.xfacthd.foup.common.block;
 
 import io.github.xfacthd.foup.common.blockentity.AbstractCartInteractorBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -28,14 +29,13 @@ public abstract sealed class AbstractCartInteractorBlock extends Block implement
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean moved)
     {
-        if (!newState.is(state.getBlock()) && !level.isClientSide() && level.getBlockEntity(pos) instanceof AbstractCartInteractorBlockEntity be)
+        if (level.getBlockEntity(pos) instanceof AbstractCartInteractorBlockEntity be)
         {
             be.unlink();
             be.dropContents(stack -> popResource(level, pos, stack));
         }
-        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     protected abstract BlockEntityType<? extends AbstractCartInteractorBlockEntity> getBlockEntityType(BlockState state);

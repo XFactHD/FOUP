@@ -7,7 +7,7 @@ import io.github.xfacthd.foup.common.menu.FoupMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -15,9 +15,10 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 public final class FoupItem extends Item
 {
@@ -29,7 +30,7 @@ public final class FoupItem extends Item
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
+    public InteractionResult use(Level level, Player player, InteractionHand hand)
     {
         ItemStack stack = player.getItemInHand(hand);
         if (hand == InteractionHand.MAIN_HAND)
@@ -38,9 +39,9 @@ public final class FoupItem extends Item
             {
                 player.openMenu(new FoupMenuProvider(stack));
             }
-            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+            return InteractionResult.SUCCESS;
         }
-        return InteractionResultHolder.pass(stack);
+        return InteractionResult.PASS;
     }
 
     @Override
@@ -50,10 +51,11 @@ public final class FoupItem extends Item
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext ctx, List<Component> lines, TooltipFlag flag)
+    @SuppressWarnings("deprecation")
+    public void appendHoverText(ItemStack stack, TooltipContext ctx, TooltipDisplay display, Consumer<Component> lines, TooltipFlag flag)
     {
-        lines.add(Component.translatable("item.foup.foup.desc").withStyle(ChatFormatting.GRAY));
-        stack.addToTooltip(FoupContent.DC_TYPE_ITEM_CONTENTS, ctx, lines::add, flag);
+        lines.accept(Component.translatable("item.foup.foup.desc").withStyle(ChatFormatting.GRAY));
+        stack.addToTooltip(FoupContent.DC_TYPE_ITEM_CONTENTS, ctx, lines, flag);
     }
 
     public static boolean canPlaceInFoup(ItemStack stack)

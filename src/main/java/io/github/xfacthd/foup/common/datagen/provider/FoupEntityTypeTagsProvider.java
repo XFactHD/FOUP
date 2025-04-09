@@ -6,15 +6,14 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.EntityTypeTagsProvider;
 import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 import java.util.concurrent.CompletableFuture;
 
 public final class FoupEntityTypeTagsProvider extends EntityTypeTagsProvider
 {
-    public FoupEntityTypeTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> provider, ExistingFileHelper existingFileHelper)
+    public FoupEntityTypeTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> provider)
     {
-        super(output, provider, Foup.MOD_ID, existingFileHelper);
+        super(output, provider, Foup.MOD_ID);
     }
 
     @Override

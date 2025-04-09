@@ -3,7 +3,8 @@
 	"texture_size": [128, 64],
 	"parent": "minecraft:block/thin_block",
 	"textures": {
-		"0": "foup:entity/overhead_cart"
+		"0": "foup:entity/overhead_cart",
+		"particle": "#0"
 	},
 	"elements": [
 		{

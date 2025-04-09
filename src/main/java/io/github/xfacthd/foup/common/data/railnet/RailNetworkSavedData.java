@@ -1,22 +1,19 @@
 package io.github.xfacthd.foup.common.data.railnet;
 
-import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
 import io.github.xfacthd.foup.common.data.RenameResult;
-import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -28,6 +25,11 @@ import java.util.function.BiConsumer;
 public final class RailNetworkSavedData extends SavedData
 {
     private static final String NAME = "foup_rail_networks";
+    private static final SavedDataType<RailNetworkSavedData> TYPE = new SavedDataType<>(
+            NAME,
+            ctx -> new RailNetworkSavedData(ctx.levelOrThrow()),
+            ctx -> PackedData.CODEC.xmap(data -> unpack(data, ctx), RailNetworkSavedData::pack)
+    );
 
     private final ServerLevel level;
     private final Long2ObjectMap<Graph<RailNetwork>> networks;
@@ -48,7 +50,7 @@ public final class RailNetworkSavedData extends SavedData
 
     public static RailNetworkSavedData get(ServerLevel level)
     {
-        return level.getDataStorage().computeIfAbsent(new Factory<>(() -> new RailNetworkSavedData(level), (tag, registries) -> load(tag, level)), NAME);
+        return level.getDataStorage().computeIfAbsent(TYPE);
     }
 
     public static void connectTracks(ServerLevel level, TrackNode node, @Nullable TrackNode neighbour)
@@ -144,98 +146,90 @@ public final class RailNetworkSavedData extends SavedData
         }
     }
 
-    @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries)
+    private PackedData pack()
     {
-        ListTag netList = new ListTag();
+        List<PackedNetwork> netList = new ArrayList<>();
         for (Long2ObjectMap.Entry<Graph<RailNetwork>> entry : networks.long2ObjectEntrySet())
         {
             Graph<RailNetwork> graph = entry.getValue();
             if (graph.getObjects().isEmpty()) continue;
 
-            CompoundTag netTag = new CompoundTag();
-            netTag.putLong("id", entry.getLongKey());
-
-            ListTag nodeList = new ListTag();
+            List<PackedNode> nodeList = new ArrayList<>();
             List<GraphObject<?>> nodes = new ArrayList<>(graph.getObjects());
             for (GraphObject<?> obj : nodes)
             {
-                CompoundTag nodeTag = new CompoundTag();
-
                 TrackNode node = (TrackNode) obj;
-                nodeTag.putString("name", node.getName());
-                nodeTag.putLong("pos", node.getPos().asLong());
-                nodeTag.putBoolean("station", node.isStation());
-                if (node.getStationType() != null)
-                {
-                    nodeTag.putString("station_type", node.getStationType().getSerializedName());
-                }
-                nodeTag.putBoolean("occupied", node.isOccupied());
 
                 IntList neighbours = new IntArrayList();
                 for (GraphObject<RailNetwork> neighbour : graph.getNeighbours(node))
                 {
                     neighbours.add(nodes.indexOf(neighbour));
                 }
-                nodeTag.putIntArray("neighbours", neighbours);
 
-                nodeList.add(nodeTag);
+                nodeList.add(new PackedNode(node, neighbours));
             }
-            netTag.put("nodes", nodeList);
 
-            netList.add(netTag);
+            netList.add(new PackedNetwork(entry.getLongKey(), nodeList));
         }
-        tag.putLong("id_counter", idCounter);
-        tag.put("networks", netList);
-        return tag;
+        return new PackedData(netList, idCounter);
     }
 
-    private static RailNetworkSavedData load(CompoundTag tag, ServerLevel level)
+    private static RailNetworkSavedData unpack(PackedData data, Context ctx)
     {
-        ListTag netList = tag.getList("networks", Tag.TAG_COMPOUND);
-        Long2ObjectMap<Graph<RailNetwork>> networks = new Long2ObjectOpenHashMap<>(netList.size());
-        for (int i = 0; i < netList.size(); i++)
+        ServerLevel Level = ctx.levelOrThrow();
+        Long2ObjectMap<Graph<RailNetwork>> networks = new Long2ObjectOpenHashMap<>(data.networks.size());
+        for (PackedNetwork net : data.networks)
         {
-            CompoundTag netTag = netList.getCompound(i);
-
-            ListTag nodeList = netTag.getList("nodes", Tag.TAG_COMPOUND);
-            List<Pair<TrackNode, int[]>> nodes = new ArrayList<>(nodeList.size());
-            for (int j = 0; j < nodeList.size(); j++)
+            if (net.nodes.isEmpty())
             {
-                CompoundTag nodeTag = nodeList.getCompound(j);
-
-                String name = nodeTag.getString("name");
-                BlockPos pos = BlockPos.of(nodeTag.getLong("pos"));
-                boolean station = nodeTag.getBoolean("station");
-                StationType stationType = StationType.byName(nodeTag.getString("station_type"));
-                boolean occupied = nodeTag.getBoolean("occupied");
-                TrackNode node = new TrackNode(name, pos, station, stationType, occupied);
-
-                nodes.add(Pair.of(node, nodeTag.getIntArray("neighbours")));
+                continue;
             }
 
             TrackNode.inhibitDataAccess = true;
 
             // Ensure that a graph exists even if no neighbors exist
-            connectTracks(level, nodes.getFirst().getFirst(), null);
+            connectTracks(Level, net.nodes.getFirst().node, null);
 
-            for (Pair<TrackNode, int[]> nodeData : nodes)
+            for (PackedNode nodeData : net.nodes)
             {
-                TrackNode node = nodeData.getFirst();
-                for (int neighbour : nodeData.getSecond())
+                TrackNode node = nodeData.node;
+                for (int neighbour : nodeData.neighbors)
                 {
-                    connectTracks(level, node, nodes.get(neighbour).getFirst());
+                    connectTracks(Level, node, net.nodes.get(neighbour).node);
                 }
             }
 
             TrackNode.inhibitDataAccess = false;
 
-            long id = netTag.getLong("id");
-            Graph<RailNetwork> graph = nodes.getFirst().getFirst().getGraph();
+            Graph<RailNetwork> graph = net.nodes.getFirst().node.getGraph();
             Objects.requireNonNull(graph);
-            graph.getContextData().setId(id);
-            networks.put(id, graph);
+            graph.getContextData().setId(net.id);
+            networks.put(net.id, graph);
         }
-        return new RailNetworkSavedData(level, tag.getLong("id_counter"), networks);
+        return new RailNetworkSavedData(Level, data.idCounter, networks);
+    }
+
+    private record PackedData(List<PackedNetwork> networks, long idCounter)
+    {
+        private static final Codec<PackedData> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+                PackedNetwork.CODEC.listOf().fieldOf("networks").forGetter(PackedData::networks),
+                Codec.LONG.fieldOf("id_counter").forGetter(PackedData::idCounter)
+        ).apply(inst, PackedData::new));
+    }
+
+    private record PackedNetwork(long id, List<PackedNode> nodes)
+    {
+        private static final Codec<PackedNetwork> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+                Codec.LONG.fieldOf("id").forGetter(PackedNetwork::id),
+                PackedNode.CODEC.listOf().fieldOf("nodes").forGetter(PackedNetwork::nodes)
+        ).apply(inst, PackedNetwork::new));
+    }
+
+    private record PackedNode(TrackNode node, List<Integer> neighbors)
+    {
+        private static final Codec<PackedNode> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+                TrackNode.CODEC.forGetter(PackedNode::node),
+                Codec.INT.listOf().fieldOf("neighbors").forGetter(PackedNode::neighbors)
+        ).apply(inst, PackedNode::new));
     }
 }

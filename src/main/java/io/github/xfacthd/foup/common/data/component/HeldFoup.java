@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import io.github.xfacthd.foup.common.item.FoupItem;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -43,7 +44,7 @@ public record HeldFoup(boolean hasFoup, ItemStack stack) implements TooltipProvi
     }
 
     @Override
-    public void addToTooltip(Item.TooltipContext ctx, Consumer<Component> tooltipAdder, TooltipFlag flag)
+    public void addToTooltip(Item.TooltipContext ctx, Consumer<Component> tooltipAdder, TooltipFlag flag, DataComponentGetter componentGetter)
     {
         if (!hasFoup) return;
 
@@ -60,10 +61,10 @@ public record HeldFoup(boolean hasFoup, ItemStack stack) implements TooltipProvi
     @Override
     public boolean equals(Object obj)
     {
-        return obj instanceof HeldFoup other &&
-                other.hasFoup == hasFoup &&
-                ItemStack.isSameItemSameComponents(stack, other.stack) &&
-                other.stack.getCount() == stack.getCount();
+        return obj instanceof HeldFoup(boolean otherHasFoup, ItemStack otherStack) &&
+                otherHasFoup == hasFoup &&
+                ItemStack.isSameItemSameComponents(stack, otherStack) &&
+                otherStack.getCount() == stack.getCount();
     }
 
     @Override

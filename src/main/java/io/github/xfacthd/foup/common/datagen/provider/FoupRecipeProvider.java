@@ -5,12 +5,15 @@ import io.github.xfacthd.foup.common.recipe.AddFoupToCartRecipe;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.common.Tags;
 
@@ -18,13 +21,13 @@ import java.util.concurrent.CompletableFuture;
 
 public final class FoupRecipeProvider extends RecipeProvider
 {
-    public FoupRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries)
+    private FoupRecipeProvider(HolderLookup.Provider registries, RecipeOutput output)
     {
-        super(output, registries);
+        super(registries, output);
     }
 
     @Override
-    protected void buildRecipes(RecipeOutput output)
+    protected void buildRecipes()
     {
         shaped(FoupContent.BLOCK_RAIL, 3)
                 .pattern("III")
@@ -119,11 +122,36 @@ public final class FoupRecipeProvider extends RecipeProvider
                 .unlockedBy("hasGlassPane", has(Tags.Items.GLASS_PANES))
                 .save(output);
 
-        output.accept(Utils.rl("add_foup_to_cart"), new AddFoupToCartRecipe(), null);
+        output.accept(key("add_foup_to_cart"), new AddFoupToCartRecipe(), null);
     }
 
-    private static ShapedRecipeBuilder shaped(Holder<? extends ItemLike> result, int count)
+    private ShapedRecipeBuilder shaped(Holder<? extends ItemLike> result, int count)
     {
-        return ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, result.value(), count);
+        return ShapedRecipeBuilder.shaped(items, RecipeCategory.TRANSPORTATION, result.value(), count);
+    }
+
+    private static ResourceKey<Recipe<?>> key(String path)
+    {
+        return ResourceKey.create(Registries.RECIPE, Utils.rl(path));
+    }
+
+    public static final class Runner extends RecipeProvider.Runner
+    {
+        public Runner(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries)
+        {
+            super(packOutput, registries);
+        }
+
+        @Override
+        protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output)
+        {
+            return new FoupRecipeProvider(registries, output);
+        }
+
+        @Override
+        public String getName()
+        {
+            return "FOUP Recipes";
+        }
     }
 }

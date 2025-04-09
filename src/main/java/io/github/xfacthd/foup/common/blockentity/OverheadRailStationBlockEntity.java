@@ -16,8 +16,8 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.TriState;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.common.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -166,6 +166,15 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     }
 
     @Override
+    protected void postProcessNewNode(TrackNode node)
+    {
+        if (linkedType != null)
+        {
+            node.setLinkedStationType(linkedType);
+        }
+    }
+
+    @Override
     public Packet<ClientGamePacketListener> getUpdatePacket()
     {
         return ClientboundBlockEntityDataPacket.create(this);
@@ -189,17 +198,17 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     @Override
     public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider)
     {
-        name = tag.getString("name");
-        linkedType = StationType.byId(tag.getInt("linked_type"));
+        name = tag.getStringOr("name", "");
+        linkedType = StationType.byId(tag.getIntOr("linked_type", -1));
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag, registries);
-        name = tag.getString("name");
-        linkedPos = tag.contains("linked_pos") ? BlockPos.of(tag.getLong("linked_pos")) : null;
-        linkedType = StationType.byName(tag.getString("linked_type"));
+        name = tag.getStringOr("name", "");
+        linkedPos = tag.contains("linked_pos") ? BlockPos.of(tag.getLongOr("linked_pos", 0)) : null;
+        linkedType = StationType.byName(tag.getStringOr("linked_type", ""));
     }
 
     @Override

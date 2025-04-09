@@ -15,10 +15,11 @@ public final class FoupEmiPlugin implements EmiPlugin
     {
         registry.addDragDropHandler(OverheadCartScreen.class, new OverheadCartDragDropHandler());
 
-        registry.getRecipeManager()
-                .getAllRecipesFor(RecipeType.CRAFTING)
-                .stream()
-                .filter(holder -> holder.value() instanceof AddFoupToCartRecipe)
-                .forEach(holder -> registry.addRecipe(new AddFoupToCartEmiRecipe(holder.id())));
+        // FIXME: requires EMI update
+        //registry.getRecipeManager()
+        //        .getAllRecipesFor(RecipeType.CRAFTING)
+        //        .stream()
+        //        .filter(holder -> holder.value() instanceof AddFoupToCartRecipe)
+        //        .forEach(holder -> registry.addRecipe(new AddFoupToCartEmiRecipe(holder.id())));
     }
 }

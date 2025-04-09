@@ -9,6 +9,7 @@ import io.github.xfacthd.foup.common.data.component.LockerContents;
 import io.github.xfacthd.foup.common.menu.FoupStorageLockerMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -184,7 +185,7 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
     }
 
     @Override
-    protected void applyImplicitComponents(DataComponentInput input)
+    protected void applyImplicitComponents(DataComponentGetter input)
     {
         LockerContents contents = input.get(FoupContent.DC_TYPE_STORAGE_CONTENTS);
         if (contents != null)
@@ -206,8 +207,8 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag, registries);
-        inventory.deserializeNBT(registries, tag.getCompound("inventory"));
-        reservedSlot = tag.contains("reserved_slot") ? tag.getInt("reserved_slot") : -1;
+        inventory.deserializeNBT(registries, tag.getCompoundOrEmpty("inventory"));
+        reservedSlot = tag.getIntOr("reserved_slot", -1);
         computeOccupationState();
     }
 

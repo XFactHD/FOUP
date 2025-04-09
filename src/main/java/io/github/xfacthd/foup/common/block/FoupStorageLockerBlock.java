@@ -3,6 +3,7 @@ package io.github.xfacthd.foup.common.block;
 import io.github.xfacthd.foup.common.blockentity.FoupStorageLockerBlockEntity;
 import io.github.xfacthd.foup.common.data.PropertyHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -68,17 +69,16 @@ public final class FoupStorageLockerBlock extends Block implements EntityBlock
         {
             player.openMenu(be);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide());
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean moved)
     {
-        if (!newState.is(state.getBlock()) && !level.isClientSide() && level.getBlockEntity(pos) instanceof FoupStorageLockerBlockEntity be)
+        if (level.getBlockEntity(pos) instanceof FoupStorageLockerBlockEntity be)
         {
             be.dropContents(stack -> popResource(level, pos, stack));
         }
-        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     @Override

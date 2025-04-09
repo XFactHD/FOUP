@@ -25,7 +25,7 @@ public final class Utils
 {
     private static final Long2ObjectMap<Direction> DIRECTION_BY_NORMAL = Arrays.stream(Direction.values())
             .collect(Collectors.toMap(
-                    side -> new BlockPos(side.getNormal()).asLong(),
+                    side -> new BlockPos(side.getUnitVec3i()).asLong(),
                     Function.identity(),
                     (sideA, sideB) -> { throw new IllegalArgumentException("Duplicate keys"); },
                     Long2ObjectOpenHashMap::new
@@ -92,7 +92,7 @@ public final class Utils
     public static Direction getDirByViewVec(Entity entity)
     {
         Vec3 view = entity.getViewVector(1F);
-        return Direction.getNearest(view);
+        return Direction.getApproximateNearest(view);
     }
 
     public static Vec3 setAlongAxis(Vec3 vec, double value, Direction dir)

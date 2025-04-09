@@ -1,9 +1,7 @@
 plugins {
     id 'java-library'
-    id 'eclipse'
-    id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.36-beta'
+    id 'net.neoforged.moddev' version '2.0.80'
 }
 
 version = mod_version
@@ -17,6 +15,8 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 neoForge {
     version = project.neo_version
+
+    validateAccessTransformers = true
 
     parchment {
         mappingsVersion = project.parchment_mappings_version
@@ -43,7 +43,7 @@ neoForge {
         }
 
         data {
-            data()
+            clientData()
             programArguments.addAll '--mod', 'foup', '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
 
@@ -92,7 +92,7 @@ dependencies {
     }
 
     compileOnly("dev.emi:emi-neoforge:${emi_version}+${emi_mc_version}:api")
-    runtimeOnly("dev.emi:emi-neoforge:${emi_version}+${emi_mc_version}")
+    //runtimeOnly("dev.emi:emi-neoforge:${emi_version}+${emi_mc_version}")
 }
 
 tasks.withType(ProcessResources).configureEach {
@@ -126,4 +126,5 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+    options.compilerArgs << "-Xmaxerrs" << "10000"
 }

@@ -78,12 +78,6 @@ public final class AddFoupToCartRecipe extends CustomRecipe
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height)
-    {
-        return width * height == SIZE;
-    }
-
-    @Override
     public RecipeSerializer<AddFoupToCartRecipe> getSerializer()
     {
         return FoupContent.RECIPE_SERIALIZER_ADD_FOUP_TO_CART.value();

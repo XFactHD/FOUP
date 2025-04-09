@@ -1,26 +1,31 @@
 package io.github.xfacthd.foup.client.util;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.renderer.RenderStateShard;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.DepthTestFunction;
+import io.github.xfacthd.foup.common.util.Utils;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderType;
 import net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent;
+import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 
 public final class ClientUtils
 {
+    private static final RenderPipeline INFO_QUADS_PIPELINE = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+            .withLocation(Utils.rl("info_quads"))
+            .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+            .withCull(false)
+            .build();
     public static final RenderType INFO_QUADS = RenderType.create(
             "foup_info_quads",
-            DefaultVertexFormat.POSITION_COLOR,
-            VertexFormat.Mode.QUADS,
             RenderType.TRANSIENT_BUFFER_SIZE,
-            false,
-            false,
-            RenderType.CompositeState.builder()
-                    .setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
-                    .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
-                    .setCullState(RenderStateShard.NO_CULL)
-                    .createCompositeState(false)
+            INFO_QUADS_PIPELINE,
+            RenderType.CompositeState.builder().createCompositeState(false)
     );
+
+    public static void onRegisterRenderPipelines(RegisterRenderPipelinesEvent event)
+    {
+        event.registerPipeline(INFO_QUADS_PIPELINE);
+    }
 
     public static void onRegisterRenderBuffers(RegisterRenderBuffersEvent event)
     {

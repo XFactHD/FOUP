@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "R": {
-      "item": "foup:overhead_rail"
-    }
+    "R": "foup:overhead_rail"
   },
   "pattern": [
     "RR",

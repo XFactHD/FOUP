@@ -1,5 +1,8 @@
 package io.github.xfacthd.foup.common.data.railnet;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
 import io.github.xfacthd.foup.common.blockentity.AbstractOverheadRailBlockEntity;
@@ -11,9 +14,17 @@ import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public final class TrackNode implements GraphObject<RailNetwork>
 {
+    static final MapCodec<TrackNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+            Codec.STRING.fieldOf("name").forGetter(TrackNode::getName),
+            BlockPos.CODEC.fieldOf("pos").forGetter(TrackNode::getPos),
+            Codec.BOOL.fieldOf("station").forGetter(TrackNode::isStation),
+            StationType.CODEC.optionalFieldOf("station_type").forGetter(node -> Optional.ofNullable(node.stationType)),
+            Codec.BOOL.fieldOf("occupied").forGetter(TrackNode::isOccupied)
+    ).apply(inst, TrackNode::of));
     // Ensure that nodes being attached to a graph during RailNetworkSavedData construction
     // from NBT data don't try to add/remove that graph from the storage
     static boolean inhibitDataAccess = false;
@@ -28,6 +39,11 @@ public final class TrackNode implements GraphObject<RailNetwork>
     private Graph<RailNetwork> graph = null;
     @Nullable
     private AbstractOverheadRailBlockEntity blockEntity = null;
+
+    private static TrackNode of(String name, BlockPos pos, boolean station, Optional<StationType> stationType, boolean occupied)
+    {
+        return new TrackNode(name, pos, station, stationType.orElse(null), occupied);
+    }
 
     public TrackNode(String name, BlockPos pos, boolean station)
     {

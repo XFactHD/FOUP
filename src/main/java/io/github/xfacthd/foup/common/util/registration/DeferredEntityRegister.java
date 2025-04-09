@@ -32,7 +32,7 @@ public final class DeferredEntityRegister extends DeferredRegister<EntityType<?>
             String name, EntityType.EntityFactory<T> factory, MobCategory category, UnaryOperator<EntityType.Builder<T>> builder
     )
     {
-        String dfuKey = getNamespace() + ":" + name;
+        ResourceKey<EntityType<?>> dfuKey = ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(getNamespace(), name));
         //noinspection ConstantConditions
         return (DeferredEntity<T>) register(name, () -> builder.apply(EntityType.Builder.of(factory, category)).build(dfuKey));
     }

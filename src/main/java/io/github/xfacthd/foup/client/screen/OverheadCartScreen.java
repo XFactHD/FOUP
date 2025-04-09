@@ -29,6 +29,7 @@ import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -176,8 +177,8 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     @Override
     public void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY)
     {
-        graphics.blitSprite(BACKGROUND, leftPos, topPos, WIDTH, imageHeight);
-        graphics.blit(INVENTORY, leftPos + INVENTORY_X, topPos + imageHeight - INVENTORY_Y_OFF, INVENTORY_U, INVENTORY_V, INVENTORY_WIDTH, INVENTORY_HEIGHT);
+        graphics.blitSprite(RenderType::guiTextured, BACKGROUND, leftPos, topPos, WIDTH, imageHeight);
+        graphics.blit(RenderType::guiTextured, INVENTORY, leftPos + INVENTORY_X, topPos + imageHeight - INVENTORY_Y_OFF, INVENTORY_U, INVENTORY_V, INVENTORY_WIDTH, INVENTORY_HEIGHT, 256, 256);
         graphics.drawString(font, title, leftPos + EDGE_PADDING_X, topPos + EDGE_PADDING_Y, 0x404040, false);
 
         OverheadCartIssue issue = cart.getIssue();
@@ -259,6 +260,16 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
             return scheduleList.mouseDragged(mouseX, mouseY, button, dragX, dragY);
         }
         return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
+    {
+        if (getChildAt(mouseX, mouseY).orElse(null) == scheduleList)
+        {
+            return scheduleList.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     private static Component formatIssue(OverheadCartIssue issue)
@@ -363,25 +374,19 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         }
 
         @Override
-        protected int getRealRowLeft()
-        {
-            return super.getRealRowLeft() - 3;
-        }
-
-        @Override
         public int getRowWidth()
         {
             return LIST_ENTRY_WIDTH;
         }
 
         @Override
-        protected int getListOutlinePadding()
+        protected int scrollBarX()
         {
-            return 4;
+            return getRowRight() + 4;
         }
 
         @Override
-        protected boolean isValidMouseClick(int button)
+        protected boolean isValidClickButton(int button)
         {
             return button == GLFW.GLFW_MOUSE_BUTTON_LEFT || button == GLFW.GLFW_MOUSE_BUTTON_RIGHT;
         }
@@ -550,7 +555,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
                 }
                 if (validity != EntryValidity.VALID)
                 {
-                    graphics.blitSprite(ICON_ERROR, left + ERROR_X, top + ERROR_Y, ERROR_SIZE, ERROR_SIZE);
+                    graphics.blitSprite(RenderType::guiTextured, ICON_ERROR, left + ERROR_X, top + ERROR_Y, ERROR_SIZE, ERROR_SIZE);
                     if (mouseX >= left + ERROR_X && mouseX < left + ERROR_X + ERROR_SIZE && mouseY >= top + ERROR_Y && mouseY < top + ERROR_Y + ERROR_SIZE)
                     {
                         owner.setTooltipForNextRenderPass(validity.description);

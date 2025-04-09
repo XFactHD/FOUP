@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "C": {
-      "tag": "c:chests/wooden"
-    },
-    "F": {
-      "item": "foup:foup"
-    },
-    "H": {
-      "item": "minecraft:hopper"
-    },
-    "I": {
-      "tag": "c:ingots/iron"
-    }
+    "C": "#c:chests/wooden",
+    "F": "foup:foup",
+    "H": "minecraft:hopper",
+    "I": "#c:ingots/iron"
   },
   "pattern": [
     "IFI",

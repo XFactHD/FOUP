@@ -38,7 +38,7 @@ public final class FoupMenu extends AbstractContainerMenu
     private FoupMenu(int containerId, Inventory inventory, FoupSlotFactory foupSlotFactory, @Nullable ItemStack foupStack)
     {
         super(FoupContent.MENU_TYPE_FOUP.value(), containerId);
-        this.hotbarSlot = inventory.selected;
+        this.hotbarSlot = inventory.getSelectedSlot();
         this.foupStack = foupStack;
         addSlot(foupSlotFactory.create(80, 35));
         Utils.addPlayerInvSlots(this::addSlot, inventory, 8, 84, this::makeInventorySlot);
@@ -92,7 +92,7 @@ public final class FoupMenu extends AbstractContainerMenu
         Objects.requireNonNull(foupStack, "FoupMenu#stillValid() called on client");
 
         Inventory inv = player.getInventory();
-        return inv.selected == hotbarSlot && inv.getSelected() == foupStack;
+        return inv.getSelectedSlot() == hotbarSlot && inv.getSelectedItem() == foupStack;
     }
 
     @FunctionalInterface

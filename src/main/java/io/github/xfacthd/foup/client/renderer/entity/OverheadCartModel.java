@@ -1,7 +1,5 @@
 package io.github.xfacthd.foup.client.renderer.entity;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.client.model.EntityModel;
@@ -14,21 +12,19 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 
-public final class OverheadCartModel extends EntityModel<OverheadCartEntity>
+public final class OverheadCartModel extends EntityModel<OverheadCartRenderState>
 {
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Utils.rl("overheadcart"), "main");
 
-	private final ModelPart root;
-	private final ModelPart body;
-	final ModelPart hoistWire;
+    final ModelPart hoistWire;
 	private final ModelPart gripper;
 	final ModelPart foup;
 
 	public OverheadCartModel(ModelPart root)
 	{
-		this.body = root.getChild("body");
-        this.root = root;
-		this.hoistWire = body.getChild("hoist_wire");
+		super(root);
+        ModelPart body = root.getChild("body");
+        this.hoistWire = body.getChild("hoist_wire");
 		this.gripper = body.getChild("gripper");
 		this.foup = gripper.getChild("foup");
 	}
@@ -110,17 +106,17 @@ public final class OverheadCartModel extends EntityModel<OverheadCartEntity>
 	}
 
 	@Override
-	public void setupAnim(OverheadCartEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch)
+	public void setupAnim(OverheadCartRenderState renderState)
 	{
-		root.getAllParts().forEach(ModelPart::resetPose);
+		allParts().forEach(ModelPart::resetPose);
 
-		foup.visible = entity.getHasFoup();
+		foup.visible = renderState.hasFoup;
 
-		float off = switch (entity.getState())
+		float off = switch (renderState.state)
 		{
-			case LOWERING_HOIST -> computeDistance(entity, computeMultiplier(entity, ageInTicks, false));
-			case RAISING_HOIST -> computeDistance(entity, computeMultiplier(entity, ageInTicks, true));
-			case POD_IN_LOADER_OR_STORAGE -> computeDistance(entity, 1F);
+			case LOWERING_HOIST -> computeDistance(renderState, computeMultiplier(renderState, false));
+			case RAISING_HOIST -> computeDistance(renderState, computeMultiplier(renderState, true));
+			case POD_IN_LOADER_OR_STORAGE -> computeDistance(renderState, 1F);
 			default -> 0F;
 		};
 
@@ -128,26 +124,20 @@ public final class OverheadCartModel extends EntityModel<OverheadCartEntity>
 		hoistWire.yScale = off / 16F;
 	}
 
-	private static float computeMultiplier(OverheadCartEntity entity, float ageInTicks, boolean inverse)
+	private static float computeMultiplier(OverheadCartRenderState renderState, boolean inverse)
 	{
-		int start = entity.getActionStart();
-		int duration = entity.getActionDuration();
+		int start = renderState.actionStart;
+		int duration = renderState.actionDuration;
 		if (start != -1 && duration != 0)
 		{
-			float mult = (ageInTicks - start) / duration;
+			float mult = (renderState.ageInTicks - start) / duration;
 			return Math.clamp(inverse ? (1F - mult) : mult, 0F, 1F);
 		}
 		return inverse ? 1F : 0F;
 	}
 
-	private static float computeDistance(OverheadCartEntity entity, float mult)
+	private static float computeDistance(OverheadCartRenderState renderState, float mult)
 	{
-		return OverheadCartEntity.calculateHoistDistance(entity.getHeightDiff()) * mult;
-	}
-
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color)
-	{
-		body.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
+		return OverheadCartEntity.calculateHoistDistance(renderState.heightDiff) * mult;
 	}
 }

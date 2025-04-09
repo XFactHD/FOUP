@@ -259,8 +259,8 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag, registries);
-        inventory.deserializeNBT(registries, tag.getCompound("inventory"));
-        autoEject = tag.getBoolean("auto_eject");
+        inventory.deserializeNBT(registries, tag.getCompoundOrEmpty("inventory"));
+        autoEject = tag.getBooleanOr("auto_eject", false);
     }
 
     @Override

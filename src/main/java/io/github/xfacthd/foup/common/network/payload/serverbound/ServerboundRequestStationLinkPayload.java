@@ -7,8 +7,8 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.util.TriState;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record ServerboundRequestStationLinkPayload(BlockPos pos) implements CustomPacketPayload

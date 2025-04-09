@@ -4,12 +4,15 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import io.github.xfacthd.foup.client.renderer.PipelineModifiers;
 import io.github.xfacthd.foup.client.util.ClientUtils;
 import io.github.xfacthd.foup.client.util.GhostVertexConsumer;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.block.AbstractOverheadRailBlock;
 import io.github.xfacthd.foup.common.blockentity.OverheadRailStationBlockEntity;
 import io.github.xfacthd.foup.common.data.StationType;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -18,7 +21,8 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -36,7 +40,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.neoforged.neoforge.client.NeoForgeRenderTypes;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
@@ -50,6 +53,7 @@ public final class OverheadRailInfoRenderer
     private static final int GHOST_OPACITY = 170;
     private static final Function<@Nullable StationType, @Nullable Component> STATION_FORMATTER = type ->
             type != null && type != StationType.UNKNOWN ? type.getTranslation() : null;
+    private static final ObjectList<BlockModelPart> SCRATCH_PART_LIST = new ObjectArrayList<>();
 
     public static void onRenderLevelStage(RenderLevelStageEvent event)
     {
@@ -96,7 +100,7 @@ public final class OverheadRailInfoRenderer
             PoseStack poseStack, Camera camera, Font font, ClientLevel level, BlockPos pos, @Nullable BlockState state, boolean renderGhost
     )
     {
-        RenderSystem.disableDepthTest();
+        RenderSystem.pushPipelineModifier(PipelineModifiers.NO_DEPTH_TEST);
 
         MultiBufferSource.BufferSource buffers = Minecraft.getInstance().renderBuffers().bufferSource();
 
@@ -112,22 +116,12 @@ public final class OverheadRailInfoRenderer
                 RenderType bufferType = NeoForgeRenderTypes.TRANSLUCENT_ON_PARTICLES_TARGET.get();
                 VertexConsumer builder = new GhostVertexConsumer(buffers.getBuffer(bufferType), GHOST_OPACITY);
 
+                SCRATCH_PART_LIST.clear();
                 BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
-                BakedModel model = blockRenderer.getBlockModel(state);
-                for (RenderType type : model.getRenderTypes(state, RANDOM, ModelData.EMPTY))
-                {
-                    blockRenderer.renderBatched(
-                            state,
-                            pos,
-                            level,
-                            poseStack,
-                            builder,
-                            false,
-                            RANDOM,
-                            ModelData.EMPTY,
-                            type
-                    );
-                }
+                BlockStateModel model = blockRenderer.getBlockModel(state);
+                model.collectParts(level, pos, state, RANDOM, SCRATCH_PART_LIST);
+
+                blockRenderer.renderBatched(state, pos, level, poseStack, $ -> builder, false, SCRATCH_PART_LIST);
 
                 poseStack.popPose();
             }
@@ -151,6 +145,8 @@ public final class OverheadRailInfoRenderer
         {
             buffers.endBatch(NeoForgeRenderTypes.TRANSLUCENT_ON_PARTICLES_TARGET.get());
         }
+
+        RenderSystem.popPipelineModifier();
     }
 
     private static void renderRailInfo(
