@@ -12,9 +12,7 @@ import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.component.ItemContents;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -23,12 +21,13 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
 import org.jetbrains.annotations.Nullable;
 
-public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<FoupStorageInterfaceBlockEntity>
+import java.util.Objects;
+
+public final class FoupStorageInterfaceRenderer extends ExtractingBlockEntityRenderer<FoupStorageInterfaceBlockEntity, FoupStorageInterfaceRenderState>
 {
     private static final ResourceLocation DOOR_TEXTURE = ResourceLocation.withDefaultNamespace("block/vault_top");
     private static final float MIN_XZ = 3F/16F;
@@ -44,28 +43,24 @@ public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<F
     private static final float FOUP_END_LOWER = DOOR_TIME + DELAY_TIME + FOUP_TIME;
     private static final float FOUP_BASE_OFFSET = -1F/16F;
     private static final float FOUP_MOVE_DIST = 11F/16F;
-    private static final ItemStackRenderState ITEM_SCRATCH_STATE = new ItemStackRenderState();
 
     @Nullable
     private static TextureAtlasSprite sprite;
 
-    private final ItemRenderer itemRenderer;
     private final ItemModelResolver itemModelResolver;
 
     public FoupStorageInterfaceRenderer(BlockEntityRendererProvider.Context ctx)
     {
-        this.itemRenderer = ctx.getItemRenderer();
         this.itemModelResolver = ctx.getItemModelResolver();
     }
 
     @Override
-    public void render(FoupStorageInterfaceBlockEntity be, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int light, int overlay, Vec3 camera)
+    public void render(FoupStorageInterfaceRenderState renderState, PoseStack poseStack, MultiBufferSource bufferSource, int light, int overlay, Vec3 camera)
     {
-        Level level = be.getLevel();
-        if (level == null || sprite == null) return;
+        if (sprite == null) return;
 
-        long start = be.getActionStart();
-        float time = computeTime(level, start, partialTick);
+        long start = renderState.actionStart;
+        float time = computeTime(renderState.gameTime, start, renderState.partialTick);
         if (time < DOOR_END_OPEN || time > DOOR_START_CLOSE)
         {
             VertexConsumer buffer = bufferSource.getBuffer(Sheets.solidBlockSheet());
@@ -110,7 +105,7 @@ public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<F
         }
 
         float factor = 0F;
-        StationAction action = start > -1 ? be.getActiveAction() : null;
+        StationAction action = start > -1 ? renderState.activeAction : null;
         if (action == StationAction.LOAD && time > FOUP_START_RAISE)
         {
             factor = Math.min(time - FOUP_START_RAISE, FOUP_TIME) / FOUP_TIME;
@@ -126,19 +121,16 @@ public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<F
 
             poseStack.pushPose();
             poseStack.scale(1.995F, 1.995F, 1.995F);
-            itemRenderer.renderStatic(FoupContent.ITEM_FOUP.toStack(), ItemDisplayContext.FIXED, light, OverlayTexture.NO_OVERLAY, poseStack, bufferSource, level, 0);
+            renderState.inflightFoup.render(poseStack, bufferSource, light, overlay);
             poseStack.popPose();
 
-            ItemStack foup = be.getFoupInFlight();
-            ItemStack foupContent;
-            if (foup != null && !(foupContent = foup.getOrDefault(FoupContent.DC_TYPE_ITEM_CONTENTS, ItemContents.EMPTY).stack()).isEmpty())
+            ItemStackRenderState foupContent = renderState.inflightFoupContent;
+            if (!foupContent.isEmpty())
             {
                 poseStack.pushPose();
-                poseStack.mulPose(Axis.YP.rotationDegrees(180F - be.getCartRotation()));
+                poseStack.mulPose(Axis.YP.rotationDegrees(180F - renderState.cartRotation));
 
-                ITEM_SCRATCH_STATE.clear();
-                itemModelResolver.updateForTopItem(ITEM_SCRATCH_STATE, foupContent, ItemDisplayContext.FIXED, null, null, 0);
-                OverheadCartRenderer.renderFoupContents(ITEM_SCRATCH_STATE, foupContent.getCount(), poseStack, bufferSource, 0, -1, 0, light, false);
+                OverheadCartRenderer.renderFoupContents(foupContent, renderState.inflightFoupContentSize, poseStack, bufferSource, 0, -1, 0, light, false);
 
                 poseStack.popPose();
             }
@@ -147,11 +139,38 @@ public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<F
         }
     }
 
-    private static float computeTime(Level level, long start, float partialTick)
+    @Override
+    public FoupStorageInterfaceRenderState createRenderState()
+    {
+        return new FoupStorageInterfaceRenderState();
+    }
+
+    @Override
+    public void extractRenderState(FoupStorageInterfaceBlockEntity be, FoupStorageInterfaceRenderState renderState, float partialTick)
+    {
+        super.extractRenderState(be, renderState, partialTick);
+
+        renderState.gameTime = Objects.requireNonNull(be.getLevel()).getGameTime();
+        renderState.actionStart = be.getActionStart();
+        renderState.activeAction = be.getActiveAction();
+        renderState.cartRotation = be.getCartRotation();
+
+        itemModelResolver.updateForTopItem(renderState.inflightFoup, FoupContent.ITEM_FOUP.toStack(), ItemDisplayContext.FIXED, null, null, 0);
+
+        renderState.inflightFoupContent.clear();
+        ItemStack foup = be.getFoupInFlight();
+        ItemStack foupContent;
+        if (foup != null && !(foupContent = foup.getOrDefault(FoupContent.DC_TYPE_ITEM_CONTENTS, ItemContents.EMPTY).stack()).isEmpty())
+        {
+            itemModelResolver.updateForTopItem(renderState.inflightFoupContent, foupContent, ItemDisplayContext.FIXED, null, null, 0);
+        }
+    }
+
+    private static float computeTime(long gameTime, long start, float partialTick)
     {
         if (start != -1)
         {
-            float diff = (float) (level.getGameTime() - start);
+            float diff = (float) (gameTime - start);
             return Math.clamp(diff + partialTick, 0F, TOTAL_TIME);
         }
         return 0F;
