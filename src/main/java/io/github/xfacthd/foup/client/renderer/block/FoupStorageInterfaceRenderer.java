@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -43,6 +44,7 @@ public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<F
     private static final float FOUP_END_LOWER = DOOR_TIME + DELAY_TIME + FOUP_TIME;
     private static final float FOUP_BASE_OFFSET = -1F/16F;
     private static final float FOUP_MOVE_DIST = 11F/16F;
+    private static final ItemStackRenderState ITEM_SCRATCH_STATE = new ItemStackRenderState();
 
     @Nullable
     private static TextureAtlasSprite sprite;
@@ -133,7 +135,11 @@ public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<F
             {
                 poseStack.pushPose();
                 poseStack.mulPose(Axis.YP.rotationDegrees(180F - be.getCartRotation()));
-                OverheadCartRenderer.renderFoupContents(itemModelResolver, foupContent, poseStack, bufferSource, 0, -1, 0, light, false);
+
+                ITEM_SCRATCH_STATE.clear();
+                itemModelResolver.updateForTopItem(ITEM_SCRATCH_STATE, foupContent, ItemDisplayContext.FIXED, null, null, 0);
+                OverheadCartRenderer.renderFoupContents(ITEM_SCRATCH_STATE, foupContent.getCount(), poseStack, bufferSource, 0, -1, 0, light, false);
+
                 poseStack.popPose();
             }
 

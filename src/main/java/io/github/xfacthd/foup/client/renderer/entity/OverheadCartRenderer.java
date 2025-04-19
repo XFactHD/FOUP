@@ -35,7 +35,6 @@ public final class OverheadCartRenderer extends EntityRenderer<OverheadCartEntit
         int zFactor = ((passCount & 1) == 0 || pass != passCount - 1) ? (pass & 1) * 2 - 1 : 0;
         poseStack.translate(xFactor * .3F, 0, zFactor * .3F);
     };
-    private static final ItemStackRenderState ITEM_SCRATCH_STATE = new ItemStackRenderState();
 
     private final OverheadCartModel model;
     private final ItemModelResolver itemModelResolver;
@@ -59,10 +58,10 @@ public final class OverheadCartRenderer extends EntityRenderer<OverheadCartEntit
         VertexConsumer buffer = bufferSource.getBuffer(model.renderType(TEXTURE));
         model.renderToBuffer(poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY);
 
-        ItemStack stack = renderState.foupContent;
-        if (!stack.isEmpty())
+        ItemStackRenderState foupContent = renderState.foupContent;
+        if (!foupContent.isEmpty())
         {
-            renderFoupContents(stack, poseStack, bufferSource, packedLight);
+            renderFoupContents(foupContent, renderState.foupContentSize, poseStack, bufferSource, packedLight);
         }
 
         poseStack.popPose();
@@ -70,14 +69,14 @@ public final class OverheadCartRenderer extends EntityRenderer<OverheadCartEntit
         super.render(renderState, poseStack, bufferSource, packedLight);
     }
 
-    private void renderFoupContents(ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight)
+    private void renderFoupContents(ItemStackRenderState renderState, int stackSize, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight)
     {
-        renderFoupContents(itemModelResolver, stack, poseStack, bufferSource, model.foup.x, model.foup.y + model.hoistWire.yScale, model.foup.z, packedLight, true);
+        renderFoupContents(renderState, stackSize, poseStack, bufferSource, model.foup.x, model.foup.y + model.hoistWire.yScale, model.foup.z, packedLight, true);
     }
 
     public static void renderFoupContents(
-            ItemModelResolver itemModelResolver,
-            ItemStack stack,
+            ItemStackRenderState renderState,
+            int stackSize,
             PoseStack poseStack,
             MultiBufferSource bufferSource,
             float x,
@@ -96,15 +95,13 @@ public final class OverheadCartRenderer extends EntityRenderer<OverheadCartEntit
         poseStack.scale(xyScale, xyScale, .5F);
         poseStack.translate(0, -.5, 0);
 
-        itemModelResolver.updateForTopItem(ITEM_SCRATCH_STATE, stack, ItemDisplayContext.FIXED, null, null, 0);
-
         int passes;
         ItemTransformer transformer;
-        if (ITEM_SCRATCH_STATE.usesBlockLight())
+        if (renderState.usesBlockLight())
         {
             poseStack.translate(0, Y_OFFSET_3D, 0);
 
-            passes = Math.min((int) Math.ceil(stack.getCount() / 16F), 4);
+            passes = Math.min((int) Math.ceil(stackSize / 16F), 4);
             transformer = TRANSFORMER_3D;
         }
         else
@@ -112,7 +109,7 @@ public final class OverheadCartRenderer extends EntityRenderer<OverheadCartEntit
             poseStack.translate(0, Y_OFFSET_FLAT, 0);
             poseStack.mulPose(FLAT_PRE_ROTATION);
 
-            passes = (int) Math.ceil(stack.getCount() / 8F);
+            passes = (int) Math.ceil(stackSize / 8F);
             transformer = TRANSFORMER_FLAT;
         }
 
@@ -120,7 +117,7 @@ public final class OverheadCartRenderer extends EntityRenderer<OverheadCartEntit
         {
             poseStack.pushPose();
             transformer.transform(poseStack, i, passes);
-            ITEM_SCRATCH_STATE.render(poseStack, bufferSource, packedLight, OverlayTexture.NO_OVERLAY);
+            renderState.render(poseStack, bufferSource, packedLight, OverlayTexture.NO_OVERLAY);
             poseStack.popPose();
         }
 
@@ -140,11 +137,18 @@ public final class OverheadCartRenderer extends EntityRenderer<OverheadCartEntit
 
         renderState.yRot = cart.getYRot(partialTick);
         renderState.hasFoup = cart.getHasFoup();
-        renderState.foupContent = cart.getFoupContentClient();
         renderState.state = cart.getState();
         renderState.actionStart = cart.getActionStart();
         renderState.actionDuration = cart.getActionDuration();
         renderState.heightDiff = cart.getHeightDiff();
+
+        renderState.foupContent.clear();
+        ItemStack foupContent = cart.getFoupContentClient();
+        if (!foupContent.isEmpty())
+        {
+            itemModelResolver.updateForTopItem(renderState.foupContent, foupContent, ItemDisplayContext.FIXED, null, null, 0);
+            renderState.foupContentSize = foupContent.getCount();
+        }
     }
 
     @Override
