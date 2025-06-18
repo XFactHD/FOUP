@@ -29,7 +29,7 @@ import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -171,33 +171,33 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY)
     {
-        graphics.drawString(font, title, titleLabelX, titleLabelY, 0x404040, false);
+        graphics.drawString(font, title, titleLabelX, titleLabelY, 0xFF404040, false);
     }
 
     @Override
     public void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY)
     {
-        graphics.blitSprite(RenderType::guiTextured, BACKGROUND, leftPos, topPos, WIDTH, imageHeight);
-        graphics.blit(RenderType::guiTextured, INVENTORY, leftPos + INVENTORY_X, topPos + imageHeight - INVENTORY_Y_OFF, INVENTORY_U, INVENTORY_V, INVENTORY_WIDTH, INVENTORY_HEIGHT, 256, 256);
-        graphics.drawString(font, title, leftPos + EDGE_PADDING_X, topPos + EDGE_PADDING_Y, 0x404040, false);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, WIDTH, imageHeight);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, INVENTORY, leftPos + INVENTORY_X, topPos + imageHeight - INVENTORY_Y_OFF, INVENTORY_U, INVENTORY_V, INVENTORY_WIDTH, INVENTORY_HEIGHT, 256, 256);
+        graphics.drawString(font, title, leftPos + EDGE_PADDING_X, topPos + EDGE_PADDING_Y, 0xFF404040, false);
 
         OverheadCartIssue issue = cart.getIssue();
         boolean hasIssue = issue != null;
 
-        graphics.drawString(font, LABEL_STATE, leftPos + EDGE_PADDING_X, topPos + STATE_Y, 0x404040, false);
+        graphics.drawString(font, LABEL_STATE, leftPos + EDGE_PADDING_X, topPos + STATE_Y, 0xFF404040, false);
         if (hasIssue)
         {
-            graphics.drawString(font, LABEL_ISSUE, leftPos + EDGE_PADDING_X, topPos + ISSUE_Y, 0x404040, false);
+            graphics.drawString(font, LABEL_ISSUE, leftPos + EDGE_PADDING_X, topPos + ISSUE_Y, 0xFF404040, false);
         }
 
         int offset = Math.max(font.width(LABEL_STATE), hasIssue ? font.width(LABEL_ISSUE) : 0) + 4;
-        graphics.drawString(font, cart.getState().getTranslation(), leftPos + EDGE_PADDING_X + offset, topPos + STATE_Y, 0x404040, false);
+        graphics.drawString(font, cart.getState().getTranslation(), leftPos + EDGE_PADDING_X + offset, topPos + STATE_Y, 0xFF404040, false);
         if (hasIssue)
         {
-            graphics.drawString(font, formatIssue(issue), leftPos + EDGE_PADDING_X + offset, topPos + ISSUE_Y, 0x404040, false);
+            graphics.drawString(font, formatIssue(issue), leftPos + EDGE_PADDING_X + offset, topPos + ISSUE_Y, 0xFF404040, false);
         }
 
-        graphics.drawString(font, LABEL_SCHEDULE, leftPos + EDGE_PADDING_X, topPos + SCHEDULE_Y, 0x404040, false);
+        graphics.drawString(font, LABEL_SCHEDULE, leftPos + EDGE_PADDING_X, topPos + SCHEDULE_Y, 0xFF404040, false);
     }
 
     @Override
@@ -539,11 +539,11 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
 
                 if (filterSlot.visible)
                 {
-                    graphics.drawString(owner.font, LABEL_FILTER, left + FILTER_LABEL_X, top + FILTER_LABEL_Y, 0xFFFFFF);
+                    graphics.drawString(owner.font, LABEL_FILTER, left + FILTER_LABEL_X, top + FILTER_LABEL_Y, 0xFFFFFFFF);
                 }
                 if (boxCount.visible)
                 {
-                    graphics.drawString(owner.font, LABEL_COUNT, left + FILTER_LABEL_X, top + height - COUNT_LABEL_Y_OFF, 0xFFFFFF);
+                    graphics.drawString(owner.font, LABEL_COUNT, left + FILTER_LABEL_X, top + height - COUNT_LABEL_Y_OFF, 0xFFFFFFFF);
                 }
                 for (AbstractWidget child : children)
                 {
@@ -555,10 +555,10 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
                 }
                 if (validity != EntryValidity.VALID)
                 {
-                    graphics.blitSprite(RenderType::guiTextured, ICON_ERROR, left + ERROR_X, top + ERROR_Y, ERROR_SIZE, ERROR_SIZE);
+                    graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ICON_ERROR, left + ERROR_X, top + ERROR_Y, ERROR_SIZE, ERROR_SIZE);
                     if (mouseX >= left + ERROR_X && mouseX < left + ERROR_X + ERROR_SIZE && mouseY >= top + ERROR_Y && mouseY < top + ERROR_Y + ERROR_SIZE)
                     {
-                        owner.setTooltipForNextRenderPass(validity.description);
+                        graphics.setTooltipForNextFrame(validity.description, mouseX, mouseY);
                     }
                 }
             }

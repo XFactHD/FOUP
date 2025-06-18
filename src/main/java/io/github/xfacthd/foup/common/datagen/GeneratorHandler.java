@@ -40,7 +40,8 @@ public final class GeneratorHandler
         event.createProvider(FoupModelProvider::new);
         event.createProvider(FoupLanguageProvider::new);
 
-        event.createBlockAndItemTags(FoupBlockTagsProvider::new, FoupItemTagsProvider::new);
+        event.createProvider(FoupBlockTagsProvider::new);
+        event.createProvider(FoupItemTagsProvider::new);
         event.createProvider(FoupEntityTypeTagsProvider::new);
         event.createProvider(FoupRecipeProvider.Runner::new);
         event.addProvider(new LootTableProvider(output, Set.of(), List.of(

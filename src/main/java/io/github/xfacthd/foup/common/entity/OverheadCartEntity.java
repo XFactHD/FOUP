@@ -7,15 +7,11 @@ import io.github.xfacthd.foup.common.data.component.ScheduleSnapshot;
 import io.github.xfacthd.foup.common.data.railnet.RailNetwork;
 import io.github.xfacthd.foup.common.data.railnet.Schedule;
 import io.github.xfacthd.foup.common.menu.OverheadCartMenu;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -32,6 +28,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.Nullable;
@@ -310,19 +308,17 @@ public final class OverheadCartEntity extends Entity
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag)
+    protected void readAdditionalSaveData(ValueInput valueInput)
     {
-        behaviour.load(tag, registryAccess());
-        RegistryOps<Tag> regOps = registryAccess().createSerializationContext(NbtOps.INSTANCE);
-        setFoupContent(tag.read("foup_content", ItemStack.OPTIONAL_CODEC, regOps).orElse(null));
+        behaviour.load(valueInput);
+        setFoupContent(valueInput.read("foup_content", ItemStack.OPTIONAL_CODEC).orElse(null));
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag)
+    protected void addAdditionalSaveData(ValueOutput valueOutput)
     {
-        behaviour.save(tag, registryAccess());
-        RegistryOps<Tag> regOps = registryAccess().createSerializationContext(NbtOps.INSTANCE);
-        tag.storeNullable("foup_content", ItemStack.OPTIONAL_CODEC, regOps, foupContent);
+        behaviour.save(valueOutput);
+        valueOutput.storeNullable("foup_content", ItemStack.OPTIONAL_CODEC, foupContent);
     }
 
     @Override
@@ -332,7 +328,7 @@ public final class OverheadCartEntity extends Entity
     }
 
     @Override
-    public boolean canBeCollidedWith()
+    public boolean canBeCollidedWith(@Nullable Entity other)
     {
         return true;
     }

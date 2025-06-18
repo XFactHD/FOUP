@@ -27,7 +27,7 @@ import io.github.xfacthd.foup.common.menu.FoupMenu;
 import io.github.xfacthd.foup.common.menu.FoupStorageLockerMenu;
 import io.github.xfacthd.foup.common.menu.OverheadCartMenu;
 import io.github.xfacthd.foup.common.recipe.AddFoupToCartRecipe;
-import io.github.xfacthd.foup.common.recipe.AddFoupToCartRecipeSerializer;
+import io.github.xfacthd.foup.common.util.SimpleRecipeSerializer;
 import io.github.xfacthd.foup.common.util.registration.DeferredBlockEntity;
 import io.github.xfacthd.foup.common.util.registration.DeferredBlockEntityRegister;
 import io.github.xfacthd.foup.common.util.registration.DeferredDataComponentType;
@@ -175,7 +175,7 @@ public final class FoupContent
 
     // region Recipe Serializers
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<AddFoupToCartRecipe>> RECIPE_SERIALIZER_ADD_FOUP_TO_CART = RECIPE_SERIALIZERS.register(
-            "add_foup_to_cart", AddFoupToCartRecipeSerializer::new
+            "add_foup_to_cart", () -> new SimpleRecipeSerializer<>(AddFoupToCartRecipe.CODEC, AddFoupToCartRecipe.STREAM_CODEC)
     );
     // endregion
 

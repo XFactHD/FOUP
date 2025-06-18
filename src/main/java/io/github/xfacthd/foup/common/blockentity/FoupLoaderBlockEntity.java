@@ -11,8 +11,6 @@ import io.github.xfacthd.foup.common.menu.FoupLoaderMenu;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
@@ -21,6 +19,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -256,18 +256,18 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void loadAdditional(ValueInput valueInput)
     {
-        super.loadAdditional(tag, registries);
-        inventory.deserializeNBT(registries, tag.getCompoundOrEmpty("inventory"));
-        autoEject = tag.getBooleanOr("auto_eject", false);
+        super.loadAdditional(valueInput);
+        inventory.deserialize(valueInput.childOrEmpty("inventory"));
+        autoEject = valueInput.getBooleanOr("auto_eject", false);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(ValueOutput valueOutput)
     {
-        super.saveAdditional(tag, registries);
-        tag.put("inventory", inventory.serializeNBT(registries));
-        tag.putBoolean("auto_eject", autoEject);
+        super.saveAdditional(valueOutput);
+        inventory.serialize(valueOutput.child("inventory"));
+        valueOutput.putBoolean("auto_eject", autoEject);
     }
 }

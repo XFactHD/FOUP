@@ -13,7 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -87,13 +87,13 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY)
     {
-        graphics.blit(RenderType::guiTextured, BACKGROUND, leftPos, topPos, 0, 0, WIDTH, HEIGHT, 256, 256);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, 0, 0, WIDTH, HEIGHT, 256, 256);
 
-        graphics.pose().pushPose();
-        graphics.pose().translate(leftPos + FOUP_X, topPos + FOUP_Y, -200);
-        graphics.pose().scale(3F, 3F, 3F);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(leftPos + FOUP_X, topPos + FOUP_Y);
+        graphics.pose().scale(3F, 3F);
         graphics.renderFakeItem(FoupContent.ITEM_FOUP.toStack(), 0, 0, 0);
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
 
         StationAction action = menu.getActiveAction();
         if (action == null) return;
@@ -104,11 +104,11 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
         {
             float factor = 1F - (menu.getRemainingDuration() / (float) INTERACT_DURATION);
             int width = (int) (ARROW_WIDTH * factor);
-            graphics.blitSprite(RenderType::guiTextured, PROGRESS_ICON, ARROW_WIDTH, ARROW_HEIGHT, 0, 0, leftPos + x, topPos + ARROW_Y, width, ARROW_HEIGHT);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, PROGRESS_ICON, ARROW_WIDTH, ARROW_HEIGHT, 0, 0, leftPos + x, topPos + ARROW_Y, width, ARROW_HEIGHT);
         }
         else if (state == AbstractCartInteractorBlockEntity.State.BLOCKED)
         {
-            graphics.blitSprite(RenderType::guiTextured, CROSS_ICON, leftPos + x + CROSS_OFFSET_X, topPos + ARROW_Y + CROSS_OFFSET_Y, CROSS_SIZE, CROSS_SIZE);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, CROSS_ICON, leftPos + x + CROSS_OFFSET_X, topPos + ARROW_Y + CROSS_OFFSET_Y, CROSS_SIZE, CROSS_SIZE);
         }
     }
 
@@ -127,7 +127,7 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
         int minY = topPos + ARROW_Y + CROSS_OFFSET_Y;
         if (mouseX >= minX && mouseX < minX + CROSS_SIZE && mouseY >= minY && mouseY < minY + CROSS_SIZE)
         {
-            graphics.renderTooltip(font, load ? MSG_LOADING_BLOCKED : MSG_UNLOADING_BLOCKED, mouseX, mouseY);
+            graphics.setTooltipForNextFrame(font, load ? MSG_LOADING_BLOCKED : MSG_UNLOADING_BLOCKED, mouseX, mouseY);
         }
     }
 
@@ -137,10 +137,7 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
         super.renderSlotContents(graphics, stack, slot, countString);
         if (slot instanceof LockableSlot lockableSlot && lockableSlot.isLocked())
         {
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 200);
-            graphics.blitSprite(RenderType::guiTextured, LOCK_ICON, slot.x + SLOT_SIZE_INNER - 5, slot.y + SLOT_SIZE_INNER - 7, 5, 7);
-            graphics.pose().popPose();
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, LOCK_ICON, slot.x + SLOT_SIZE_INNER - 5, slot.y + SLOT_SIZE_INNER - 7, 5, 7);
         }
     }
 

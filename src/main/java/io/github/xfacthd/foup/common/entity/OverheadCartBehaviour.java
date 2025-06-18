@@ -8,12 +8,13 @@ import io.github.xfacthd.foup.common.data.railnet.RailNetwork;
 import io.github.xfacthd.foup.common.data.railnet.TrackNode;
 import io.github.xfacthd.foup.common.data.railnet.TrackPath;
 import io.github.xfacthd.foup.common.data.railnet.Schedule;
+import io.github.xfacthd.foup.common.util.FoupCodecs;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -444,62 +445,61 @@ final class OverheadCartBehaviour
         }
     }
 
-    void save(CompoundTag tag, RegistryAccess registryAccess)
+    void save(ValueOutput valueOutput)
     {
-        tag.putInt("state", action.state().ordinal());
-        tag.putInt("action_start", actionStart);
-        tag.putInt("action_duration", action.duration());
-        tag.putInt("height_diff", action.heightDiff());
-        tag.putBoolean("rotating", rotating);
-        tag.putBoolean("halt_requested", haltRequested);
-        tag.putBoolean("retry", retry);
+        valueOutput.putInt("state", action.state().ordinal());
+        valueOutput.putInt("action_start", actionStart);
+        valueOutput.putInt("action_duration", action.duration());
+        valueOutput.putInt("height_diff", action.heightDiff());
+        valueOutput.putBoolean("rotating", rotating);
+        valueOutput.putBoolean("halt_requested", haltRequested);
+        valueOutput.putBoolean("retry", retry);
         if (prevNode != null)
         {
-            tag.putLong("prev_node", prevNode.getPos().asLong());
+            valueOutput.putLong("prev_node", prevNode.getPos().asLong());
         }
         if (currNode != null)
         {
-            tag.putLong("curr_node", currNode.getPos().asLong());
+            valueOutput.putLong("curr_node", currNode.getPos().asLong());
         }
         if (path != null)
         {
-            tag.put("path", path.save());
+            path.save(valueOutput.list("path", FoupCodecs.POS_AS_LONG));
         }
         if (!schedule.isEmpty())
         {
-            tag.put("schedule", schedule.save(registryAccess));
+            schedule.save(valueOutput.child("schedule"));
         }
         OverheadCartIssue issue = cart.getIssue();
         if (issue != null)
         {
-            CompoundTag issueTag = new CompoundTag();
-            issueTag.putString("type", issue.type().getSerializedName());
+            ValueOutput issueOutput = valueOutput.child("issue");
+            issueOutput.putString("type", issue.type().getSerializedName());
             if (issue.detail().isPresent())
             {
-                issueTag.putString("detail", issue.detail().get());
+                issueOutput.putString("detail", issue.detail().get());
             }
-            tag.put("issue", issueTag);
         }
     }
 
-    void load(CompoundTag tag, RegistryAccess registryAccess)
+    void load(ValueInput valueInput)
     {
-        actionStart = tag.getIntOr("action_start", -1);
-        OverheadCartState state = OverheadCartState.of(tag.getIntOr("state", 0));
-        setAction(state, tag.getIntOr("action_duration", 0), tag.getIntOr("height_diff", 0));
-        rotating = tag.getBooleanOr("rotating", false);
-        haltRequested = tag.getBooleanOr("halt_requested", false);
-        retry = tag.getBooleanOr("retry", false);
-        prevNodePos = tag.getLong("prev_node").map(BlockPos::of).orElse(null);
-        currNodePos = tag.getLong("curr_node").map(BlockPos::of).orElse(null);
-        path = tag.getList("path").map(TrackPath::load).orElse(null);
-        tag.getCompound("schedule").ifPresent(scheduleTag -> schedule.load(scheduleTag, registryAccess));
-        tag.getCompound("issue").ifPresent(issueTag ->
+        actionStart = valueInput.getIntOr("action_start", -1);
+        OverheadCartState state = OverheadCartState.of(valueInput.getIntOr("state", 0));
+        setAction(state, valueInput.getIntOr("action_duration", 0), valueInput.getIntOr("height_diff", 0));
+        rotating = valueInput.getBooleanOr("rotating", false);
+        haltRequested = valueInput.getBooleanOr("halt_requested", false);
+        retry = valueInput.getBooleanOr("retry", false);
+        prevNodePos = valueInput.getLong("prev_node").map(BlockPos::of).orElse(null);
+        currNodePos = valueInput.getLong("curr_node").map(BlockPos::of).orElse(null);
+        path = valueInput.list("path", FoupCodecs.POS_AS_LONG).map(TrackPath::load).orElse(null);
+        valueInput.child("schedule").ifPresent(schedule::load);
+        valueInput.child("issue").ifPresent(issueInput ->
         {
-            OverheadCartIssue.Type type = OverheadCartIssue.Type.byName(issueTag.getStringOr("type", ""));
+            OverheadCartIssue.Type type = OverheadCartIssue.Type.byName(issueInput.getStringOr("type", ""));
             if (type != null)
             {
-                Optional<String> detail = issueTag.getString("detail");
+                Optional<String> detail = issueInput.getString("detail");
                 cart.getEntityData().set(OverheadCartEntity.ISSUE, new OverheadCartIssue(type, detail));
             }
         });

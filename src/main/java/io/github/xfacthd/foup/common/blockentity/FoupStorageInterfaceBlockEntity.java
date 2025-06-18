@@ -19,6 +19,8 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -172,9 +174,9 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries)
+    public void onDataPacket(Connection net, ValueInput valueInput)
     {
-        handleUpdateTag(pkt.getTag(), registries);
+        handleUpdateTag(valueInput);
     }
 
     @Override
@@ -193,30 +195,29 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries)
+    public void handleUpdateTag(ValueInput valueInput)
     {
-        currAction = StationAction.byId(tag.getIntOr("action", -1));
-        actionStart = tag.getLongOr("action_start", 0);
-        transferBuffer = tag.read("transfer_buf", ItemStack.OPTIONAL_CODEC).orElse(null);
-        cartRotation = tag.getFloatOr("cart_rotation", 0);
+        currAction = StationAction.byId(valueInput.getIntOr("action", -1));
+        actionStart = valueInput.getLongOr("action_start", 0);
+        transferBuffer = valueInput.read("transfer_buf", ItemStack.OPTIONAL_CODEC).orElse(null);
+        cartRotation = valueInput.getFloatOr("cart_rotation", 0);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void loadAdditional(ValueInput valueInput)
     {
-        super.loadAdditional(tag, registries);
-        transferBuffer = tag.read("transfer_buf", ItemStack.OPTIONAL_CODEC).orElse(null);
-        actionStart = tag.getLongOr("action_start", -1);
-        cartRotation = tag.getFloatOr("cart_rotation", 0);
+        super.loadAdditional(valueInput);
+        transferBuffer = valueInput.read("transfer_buf", ItemStack.OPTIONAL_CODEC).orElse(null);
+        actionStart = valueInput.getLongOr("action_start", -1);
+        cartRotation = valueInput.getFloatOr("cart_rotation", 0);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(ValueOutput valueOutput)
     {
-        super.saveAdditional(tag, registries);
-        RegistryOps<Tag> regOps = registries.createSerializationContext(NbtOps.INSTANCE);
-        tag.storeNullable("transfer_buf", ItemStack.OPTIONAL_CODEC, regOps, transferBuffer);
-        tag.putLong("action_start", actionStart);
-        tag.putFloat("cart_rotation", cartRotation);
+        super.saveAdditional(valueOutput);
+        valueOutput.storeNullable("transfer_buf", ItemStack.OPTIONAL_CODEC, transferBuffer);
+        valueOutput.putLong("action_start", actionStart);
+        valueOutput.putFloat("cart_rotation", cartRotation);
     }
 }

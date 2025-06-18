@@ -8,26 +8,20 @@ import io.github.xfacthd.foup.common.data.component.ScheduleSnapshot;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import io.github.xfacthd.foup.common.network.FoupStreamCodecs;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -135,29 +129,21 @@ public final class Schedule
                 .forEach(stations::add);
     }
 
-    public CompoundTag save(RegistryAccess registryAccess)
+    public void save(ValueOutput valueOutput)
     {
-        CompoundTag tag = new CompoundTag();
-        ListTag entriesTag = new ListTag();
-        for (Entry entry : entries)
-        {
-            entriesTag.add(entry.save(registryAccess));
-        }
-        tag.put("entries", entriesTag);
-        tag.putInt("active_entry", activeEntry);
-        return tag;
+        ValueOutput.TypedOutputList<Entry> entriesOutput = valueOutput.list("entries", Entry.CODEC);
+        entries.forEach(entriesOutput::add);
+        valueOutput.putInt("active_entry", activeEntry);
     }
 
-    public void load(CompoundTag tag, RegistryAccess registryAccess)
+    public void load(ValueInput valueInput)
     {
-        ListTag entriesTag = tag.getListOrEmpty("entries");
-        for (int i = 0; i < entriesTag.size(); i++)
+        for (Entry entry : valueInput.listOrEmpty("entries", Entry.CODEC))
         {
-            Entry entry = Entry.load(entriesTag.getCompoundOrEmpty(i), registryAccess);
             entries.add(entry);
             stations.add(entry.station);
         }
-        activeEntry = tag.getIntOr("active_entry", 0);
+        activeEntry = valueInput.getIntOr("active_entry", 0);
     }
 
     public record Entry(UUID uuid, String station, StationType type, StationAction action, Optional<ItemStack> filter, OptionalInt count)
@@ -166,7 +152,7 @@ public final class Schedule
                 UUIDUtil.CODEC.fieldOf("uuid").forGetter(Entry::uuid),
                 Codec.STRING.fieldOf("station").forGetter(Entry::station),
                 StationType.CODEC.fieldOf("type").forGetter(Entry::type),
-                StationAction.CODEC.fieldOf("action").forGetter(Entry::action),
+                Codec.withAlternative(StationAction.CODEC, Codec.INT, StationAction::byId).fieldOf("action").forGetter(Entry::action), //StationAction.CODEC.fieldOf("action").forGetter(Entry::action),
                 ItemStack.OPTIONAL_CODEC.optionalFieldOf("filter").forGetter(Entry::filter),
                 Codec.intRange(1, Item.ABSOLUTE_MAX_STACK_SIZE).optionalFieldOf("count").xmap(
                         opt -> opt.map(OptionalInt::of).orElse(OptionalInt.empty()),
@@ -242,38 +228,6 @@ public final class Schedule
                 }
             }
             return true;
-        }
-
-        public CompoundTag save(HolderLookup.Provider registries)
-        {
-            CompoundTag tag = new CompoundTag();
-            tag.store("uuid", UUIDUtil.CODEC, uuid);
-            tag.putString("station", station);
-            tag.putString("type", type.getSerializedName());
-            tag.putInt("action", action.ordinal());
-            filter.ifPresent(filter ->
-            {
-                RegistryOps<Tag> regOps = registries.createSerializationContext(NbtOps.INSTANCE);
-                tag.store("filter", ItemStack.OPTIONAL_CODEC, regOps, filter);
-            });
-            count.ifPresent(count -> tag.putInt("count", count));
-            return tag;
-        }
-
-        public static Entry load(CompoundTag tag, HolderLookup.Provider registries)
-        {
-            UUID uuid = tag.read("uuid", UUIDUtil.CODEC).orElseThrow();
-            String station = tag.getStringOr("station", "");
-            StationType type = Objects.requireNonNull(StationType.byName(tag.getStringOr("type", "")));
-            StationAction action = StationAction.byId(tag.getIntOr("action", 0));
-            RegistryOps<Tag> regOps = registries.createSerializationContext(NbtOps.INSTANCE);
-            Optional<ItemStack> filter = tag.read("filter", ItemStack.OPTIONAL_CODEC, regOps);
-            OptionalInt count = OptionalInt.empty();
-            if (tag.contains("count"))
-            {
-                count = OptionalInt.of(tag.getIntOr("count", 0));
-            }
-            return new Entry(uuid, station, type, action, filter, count);
         }
 
         @Override

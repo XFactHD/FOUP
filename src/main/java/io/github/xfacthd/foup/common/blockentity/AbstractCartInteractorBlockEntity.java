@@ -5,16 +5,17 @@ import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import io.github.xfacthd.foup.common.data.railnet.Schedule;
 import io.github.xfacthd.foup.common.menu.AbstractCartInteractorMenu;
+import io.github.xfacthd.foup.common.util.FoupCodecs;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -229,40 +230,27 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
     public abstract void dropContents(Consumer<ItemStack> dropper);
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void loadAdditional(ValueInput valueInput)
     {
-        super.loadAdditional(tag, registries);
-        linkedStation = tag.contains("linked_station") ? BlockPos.of(tag.getLongOr("linked_station", 0)) : null;
-        state = State.BY_ID.apply(tag.getIntOr("state", 0));
-        delayCounter = tag.getIntOr("delay_counter", 0);
-        currScheduleEntry = null;
-        if (tag.contains("current_schedule_entry"))
-        {
-            currScheduleEntry = Schedule.Entry.load(tag.getCompoundOrEmpty("current_schedule_entry"), registries);
-        }
+        super.loadAdditional(valueInput);
+        linkedStation = valueInput.read("linked_station", FoupCodecs.POS_AS_LONG).orElse(null);
+        state = State.BY_ID.apply(valueInput.getIntOr("state", 0));
+        delayCounter = valueInput.getIntOr("delay_counter", 0);
+        currScheduleEntry = valueInput.read("current_schedule_entry", Schedule.Entry.CODEC).orElse(null);
         currAction = currScheduleEntry != null ? currScheduleEntry.action() : null;
-        currCartUuid = tag.read("current_cart", UUIDUtil.CODEC).orElse(null);
+        currCartUuid = valueInput.read("current_cart", UUIDUtil.CODEC).orElse(null);
         delayCartResolveOnFail = currCartUuid != null;
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(ValueOutput valueOutput)
     {
-        super.saveAdditional(tag, registries);
-        if (linkedStation != null)
-        {
-            tag.putLong("linked_station", linkedStation.asLong());
-        }
-        tag.putInt("state", state.ordinal());
-        tag.putInt("delay_counter", delayCounter);
-        if (currScheduleEntry != null)
-        {
-            tag.put("current_schedule_entry", currScheduleEntry.save(registries));
-        }
-        if (currCartUuid != null)
-        {
-            tag.storeNullable("current_cart", UUIDUtil.CODEC, currCartUuid);
-        }
+        super.saveAdditional(valueOutput);
+        valueOutput.storeNullable("linked_station", FoupCodecs.POS_AS_LONG, linkedStation);
+        valueOutput.putInt("state", state.ordinal());
+        valueOutput.putInt("delay_counter", delayCounter);
+        valueOutput.storeNullable("current_schedule_entry", Schedule.Entry.CODEC, currScheduleEntry);
+        valueOutput.storeNullable("current_cart", UUIDUtil.CODEC, currCartUuid);
     }
 
     public enum State

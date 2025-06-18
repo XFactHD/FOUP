@@ -2,9 +2,8 @@ package io.github.xfacthd.foup.common.data.railnet;
 
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.LongTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
@@ -33,6 +32,7 @@ public final class TrackPath
         return null;
     }
 
+    @Nullable
     public TrackNode remove(RailNetwork network)
     {
         return nodes.remove().getNode(network);
@@ -58,23 +58,17 @@ public final class TrackPath
         return nodes.size();
     }
 
-    public ListTag save()
+    public void save(ValueOutput.TypedOutputList<BlockPos> nodeOutput)
     {
-        ListTag pathNodes = new ListTag();
-        for (PathNode node : nodes)
-        {
-            pathNodes.add(LongTag.valueOf(node.pos.asLong()));
-        }
-        return pathNodes;
+        nodes.forEach(node -> nodeOutput.add(node.pos));
     }
 
-    public static TrackPath load(ListTag tag)
+    public static TrackPath load(ValueInput.TypedInputList<BlockPos> nodeInput)
     {
         Queue<PathNode> nodes = new ArrayDeque<>();
-        for (Tag nodeTag : tag)
+        for (BlockPos nodePos : nodeInput)
         {
-            long pos = ((LongTag) nodeTag).longValue();
-            nodes.offer(new PathNode(BlockPos.of(pos), null));
+            nodes.offer(new PathNode(nodePos, null));
         }
         return new TrackPath(nodes);
     }
@@ -96,6 +90,7 @@ public final class TrackPath
             return new PathNode(node.getPos(), node);
         }
 
+        @Nullable
         private TrackNode getNode(RailNetwork network)
         {
             if (node == null)

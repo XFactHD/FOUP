@@ -8,10 +8,8 @@ import io.github.xfacthd.foup.common.data.component.ItemContents;
 import io.github.xfacthd.foup.common.data.component.LockerContents;
 import io.github.xfacthd.foup.common.menu.FoupStorageLockerMenu;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -19,6 +17,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
@@ -197,27 +197,27 @@ public final class FoupStorageLockerBlockEntity extends BaseBlockEntity implemen
 
     @Override
     @SuppressWarnings("deprecation")
-    public void removeComponentsFromTag(CompoundTag tag)
+    public void removeComponentsFromTag(ValueOutput valueOutput)
     {
-        tag.remove("inventory");
-        tag.remove("reserved_slot");
+        valueOutput.discard("inventory");
+        valueOutput.discard("reserved_slot");
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void loadAdditional(ValueInput valueInput)
     {
-        super.loadAdditional(tag, registries);
-        inventory.deserializeNBT(registries, tag.getCompoundOrEmpty("inventory"));
-        reservedSlot = tag.getIntOr("reserved_slot", -1);
+        super.loadAdditional(valueInput);
+        inventory.deserialize(valueInput.childOrEmpty("inventory"));
+        reservedSlot = valueInput.getIntOr("reserved_slot", -1);
         computeOccupationState();
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(ValueOutput valueOutput)
     {
-        super.saveAdditional(tag, registries);
-        tag.put("inventory", inventory.serializeNBT(registries));
-        tag.putInt("reserved_slot", reservedSlot);
+        super.saveAdditional(valueOutput);
+        inventory.serialize(valueOutput.child("inventory"));
+        valueOutput.putInt("reserved_slot", reservedSlot);
     }
 
     private void computeOccupationState()

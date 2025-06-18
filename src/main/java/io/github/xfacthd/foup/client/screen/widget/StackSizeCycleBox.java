@@ -5,7 +5,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -22,8 +22,8 @@ public final class StackSizeCycleBox extends AbstractWidget
             ResourceLocation.withDefaultNamespace("widget/button_disabled"),
             ResourceLocation.withDefaultNamespace("widget/button_highlighted")
     );
-    private static final int TEXT_COLOR = 14737632;
-    private static final int TEXT_COLOR_UNEDITABLE = 7368816;
+    private static final int TEXT_COLOR = 0xFFE0E0E0;
+    private static final int TEXT_COLOR_UNEDITABLE = 0xFF707070;
     private static final int MIN = 1;
     private static final int MAX = Item.ABSOLUTE_MAX_STACK_SIZE;
     private static final ResourceLocation ICON_SORT_UP = ResourceLocation.withDefaultNamespace("statistics/sort_up");
@@ -45,19 +45,19 @@ public final class StackSizeCycleBox extends AbstractWidget
     protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
     {
         ResourceLocation background = BACKGROUND_SPRITES.get(isActive(), isFocused());
-        graphics.blitSprite(RenderType::guiTextured, background, getX(), getY(), width - 13, height);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, background, getX(), getY(), width - 13, height);
 
         boolean overButtons = isActive() && isHovered && mouseX >= getX() + width - 13;
         boolean hoveredUp = overButtons && mouseY < getY() + height / 2;
         boolean hoveredDown = overButtons && mouseY >= getY() + height / 2;
 
         ResourceLocation buttonUp = BUTTON_SPRITES.get(isActive() && editable && value < MAX, hoveredUp);
-        graphics.blitSprite(RenderType::guiTextured, buttonUp, getX() + width - 13, getY(), 13, height / 2);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, buttonUp, getX() + width - 13, getY(), 13, height / 2);
         ResourceLocation buttonDown = BUTTON_SPRITES.get(isActive() && editable && value > MIN, hoveredDown);
-        graphics.blitSprite(RenderType::guiTextured, buttonDown, getX() + width - 13, getY() + height / 2, 13, height / 2);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, buttonDown, getX() + width - 13, getY() + height / 2, 13, height / 2);
 
-        graphics.blitSprite(RenderType::guiTextured, ICON_SORT_UP, getX() + width - 14, getY() + (height / 4) - 6, 14, 14);
-        graphics.blitSprite(RenderType::guiTextured, ICON_SORT_DOWN, getX() + width - 14, getY() + (height / 2) + (height / 4) - 7, 14, 14);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ICON_SORT_UP, getX() + width - 14, getY() + (height / 4) - 6, 14, 14);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ICON_SORT_DOWN, getX() + width - 14, getY() + (height / 2) + (height / 4) - 7, 14, 14);
 
         if (!empty)
         {

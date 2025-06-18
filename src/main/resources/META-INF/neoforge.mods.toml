@@ -1,5 +1,3 @@
-modLoader="javafml"
-loaderVersion="${loader_version_range}"
 license="LGPL v3"
 issueTrackerURL="https://www.github.com/xfacthd/foup/issues"
 

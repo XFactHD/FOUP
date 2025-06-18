@@ -8,6 +8,7 @@ import io.github.xfacthd.foup.common.data.railnet.RailNetworkSavedData;
 import io.github.xfacthd.foup.common.data.railnet.TrackNode;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import io.github.xfacthd.foup.common.data.railnet.Schedule;
+import io.github.xfacthd.foup.common.util.FoupCodecs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -18,6 +19,8 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.TriState;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -181,9 +184,9 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries)
+    public void onDataPacket(Connection net, ValueInput valueInput)
     {
-        handleUpdateTag(pkt.getTag(), registries);
+        handleUpdateTag(valueInput);
     }
 
     @Override
@@ -196,33 +199,27 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider)
+    public void handleUpdateTag(ValueInput valueInput)
     {
-        name = tag.getStringOr("name", "");
-        linkedType = StationType.byId(tag.getIntOr("linked_type", -1));
+        name = valueInput.getStringOr("name", "");
+        linkedType = StationType.byId(valueInput.getIntOr("linked_type", -1));
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void loadAdditional(ValueInput valueInput)
     {
-        super.loadAdditional(tag, registries);
-        name = tag.getStringOr("name", "");
-        linkedPos = tag.contains("linked_pos") ? BlockPos.of(tag.getLongOr("linked_pos", 0)) : null;
-        linkedType = StationType.byName(tag.getStringOr("linked_type", ""));
+        super.loadAdditional(valueInput);
+        name = valueInput.getStringOr("name", "");
+        linkedPos = valueInput.read("linked_pos", FoupCodecs.POS_AS_LONG).orElse(null);
+        linkedType = StationType.byName(valueInput.getStringOr("linked_type", ""));
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(ValueOutput valueOutput)
     {
-        super.saveAdditional(tag, registries);
-        tag.putString("name", name);
-        if (linkedPos != null)
-        {
-            tag.putLong("linked_pos", linkedPos.asLong());
-        }
-        if (linkedType != null)
-        {
-            tag.putString("linked_type", linkedType.getSerializedName());
-        }
+        super.saveAdditional(valueOutput);
+        valueOutput.putString("name", name);
+        valueOutput.storeNullable("linked_pos", FoupCodecs.POS_AS_LONG, linkedPos);
+        valueOutput.storeNullable("linked_type", StationType.CODEC, linkedType);
     }
 }

@@ -12,7 +12,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -94,24 +94,24 @@ public final class OverheadRailStationScreen extends Screen
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
     {
         renderTransparentBackground(graphics);
-        graphics.blit(RenderType::guiTextured, BACKGROUND, leftPos, topPos, 0, 0, WIDTH, HEIGHT, 256, 256);
-        graphics.drawString(font, title, leftPos + TITLE_X, topPos + TITLE_Y, 0x404040, false);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, 0, 0, WIDTH, HEIGHT, 256, 256);
+        graphics.drawString(font, title, leftPos + TITLE_X, topPos + TITLE_Y, 0xFF404040, false);
 
-        graphics.drawString(font, LABEL_NAME, leftPos + 8, topPos + 24, 0x404040, false);
+        graphics.drawString(font, LABEL_NAME, leftPos + 8, topPos + 24, 0xFF404040, false);
 
-        graphics.drawString(font, LABEL_STATE, leftPos + 8, topPos + 48, 0x404040, false);
+        graphics.drawString(font, LABEL_STATE, leftPos + 8, topPos + 48, 0xFF404040, false);
         Component linkState = switch (station.getLinkedType())
         {
             case LOADER -> VALUE_LINKED_LOADER;
             case STORAGE -> VALUE_LINKED_STORAGE;
             case null, default -> VALUE_UNLINKED;
         };
-        graphics.drawString(font, linkState, leftPos + 45, topPos + 48, 0x404040, false);
+        graphics.drawString(font, linkState, leftPos + 45, topPos + 48, 0xFF404040, false);
 
         if (lastError != null)
         {
-            graphics.drawString(font, LABEL_ERROR, leftPos + 8, topPos + 72, 0x404040, false);
-            graphics.drawString(font, lastError, leftPos + 45, topPos + 72, 0x404040, false);
+            graphics.drawString(font, LABEL_ERROR, leftPos + 8, topPos + 72, 0xFF404040, false);
+            graphics.drawString(font, lastError, leftPos + 45, topPos + 72, 0xFF404040, false);
         }
     }
 

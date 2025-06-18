@@ -129,6 +129,7 @@ public final class TrackNode implements GraphObject<RailNetwork>
         this.blockEntity = null;
     }
 
+    @Nullable
     public AbstractOverheadRailBlockEntity getOwner()
     {
         return blockEntity;

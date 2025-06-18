@@ -75,7 +75,7 @@ public final class RailNetworkDebugPayloads
     {
         if (RECEIVERS.add(player))
         {
-            RailNetworkSavedData.get(player.serverLevel()).forEach((id, network) ->
+            RailNetworkSavedData.get(player.level()).forEach((id, network) ->
                     PacketDistributor.sendToPlayer(player, new ClientboundRailNetworkDebugPayload(id, pack(network)))
             );
             return true;
