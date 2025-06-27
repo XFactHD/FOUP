@@ -55,34 +55,31 @@ public final class OverheadRailInfoRenderer
             type != null && type != StationType.UNKNOWN ? type.getTranslation() : null;
     private static final ObjectList<BlockModelPart> SCRATCH_PART_LIST = new ObjectArrayList<>();
 
-    public static void onRenderLevelStage(RenderLevelStageEvent event)
+    public static void onRenderLevelStage(RenderLevelStageEvent.AfterParticles event)
     {
         Minecraft mc = Minecraft.getInstance();
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES)
-        {
-            if (Objects.requireNonNull(mc.player).isSpectator()) return;
-            if (!(mc.hitResult instanceof BlockHitResult hitResult)) return;
-            if (hitResult.getType() != HitResult.Type.BLOCK) return;
+        if (Objects.requireNonNull(mc.player).isSpectator()) return;
+        if (!(mc.hitResult instanceof BlockHitResult hitResult)) return;
+        if (hitResult.getType() != HitResult.Type.BLOCK) return;
 
-            ItemStack stack = mc.player.getMainHandItem();
-            if (stack.is(FoupContent.ITEM_RAIL_INSPECTOR))
+        ItemStack stack = mc.player.getMainHandItem();
+        if (stack.is(FoupContent.ITEM_RAIL_INSPECTOR))
+        {
+            BlockPos pos = hitResult.getBlockPos();
+            BlockState state = Objects.requireNonNull(mc.level).getBlockState(pos);
+            if (state.getBlock() instanceof AbstractOverheadRailBlock)
             {
-                BlockPos pos = hitResult.getBlockPos();
-                BlockState state = Objects.requireNonNull(mc.level).getBlockState(pos);
-                if (state.getBlock() instanceof AbstractOverheadRailBlock)
-                {
-                    renderRailInfoArround(event.getPoseStack(), event.getCamera(), mc.font, mc.level, pos, state, false);
-                }
+                renderRailInfoArround(event.getPoseStack(), event.getCamera(), mc.font, mc.level, pos, state, false);
             }
-            else if (stack.getItem() instanceof BlockItem item && item.getBlock() instanceof AbstractOverheadRailBlock block)
+        }
+        else if (stack.getItem() instanceof BlockItem item && item.getBlock() instanceof AbstractOverheadRailBlock block)
+        {
+            BlockPlaceContext context = new BlockPlaceContext(mc.player, InteractionHand.MAIN_HAND, stack, hitResult);
+            BlockState state = block.getStateForPlacement(context, true);
+            BlockPos pos = context.getClickedPos();
+            if (canPlaceAt(Objects.requireNonNull(mc.level), pos, state, context, mc.player))
             {
-                BlockPlaceContext context = new BlockPlaceContext(mc.player, InteractionHand.MAIN_HAND, stack, hitResult);
-                BlockState state = block.getStateForPlacement(context, true);
-                BlockPos pos = context.getClickedPos();
-                if (canPlaceAt(Objects.requireNonNull(mc.level), pos, state, context, mc.player))
-                {
-                    renderRailInfoArround(event.getPoseStack(), event.getCamera(), mc.font, mc.level, pos, state, true);
-                }
+                renderRailInfoArround(event.getPoseStack(), event.getCamera(), mc.font, mc.level, pos, state, true);
             }
         }
     }

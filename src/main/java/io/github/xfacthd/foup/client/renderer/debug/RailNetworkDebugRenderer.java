@@ -35,9 +35,9 @@ public final class RailNetworkDebugRenderer
     private static final Function<@Nullable StationType, @Nullable Component> STATION_FORMATTER = stationType ->
             Component.literal(stationType != null ? stationType.name() : "NULL");
 
-    public static void onRenderLevelStage(RenderLevelStageEvent event)
+    public static void onRenderLevelStage(RenderLevelStageEvent.AfterParticles event)
     {
-        if (DEBUG_DATA.isEmpty() || event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
+        if (DEBUG_DATA.isEmpty()) return;
 
         RenderSystem.pushPipelineModifier(PipelineModifiers.NO_DEPTH_TEST);
         MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
