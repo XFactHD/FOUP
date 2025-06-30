@@ -1,6 +1,7 @@
 package io.github.xfacthd.foup.client;
 
 import io.github.xfacthd.foup.Foup;
+import io.github.xfacthd.foup.client.network.ClientNetworkHandler;
 import io.github.xfacthd.foup.client.renderer.PipelineModifiers;
 import io.github.xfacthd.foup.client.renderer.block.FoupStorageInterfaceRenderer;
 import io.github.xfacthd.foup.client.renderer.debug.RailNetworkDebugRenderer;
@@ -38,6 +39,7 @@ public final class FoupClient
         modBus.addListener(ClientUtils::onRegisterRenderPipelines);
         modBus.addListener(ClientUtils::onRegisterRenderBuffers);
         modBus.addListener(PipelineModifiers::onRegisterPipelineModifiers);
+        modBus.addListener(ClientNetworkHandler::onRegisterPayloadHandlers);
 
         NeoForge.EVENT_BUS.addListener(OverheadRailInfoRenderer::onRenderLevelStage);
 

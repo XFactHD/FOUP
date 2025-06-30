@@ -37,7 +37,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -283,13 +283,13 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
 
     private void requestExecute(Button btn)
     {
-        PacketDistributor.sendToServer(new ServerboundExecuteSchedulePayload(cart.getId()));
+        ClientPacketDistributor.sendToServer(new ServerboundExecuteSchedulePayload(cart.getId()));
         buttonExecute.active = false;
     }
 
     private void requestStop(Button btn)
     {
-        PacketDistributor.sendToServer(new ServerboundStopSchedulePayload(cart.getId()));
+        ClientPacketDistributor.sendToServer(new ServerboundStopSchedulePayload(cart.getId()));
         buttonStop.active = false;
     }
 
@@ -298,7 +298,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         Schedule.Entry entry = new Schedule.Entry(Mth.createInsecureUUID(), "", StationType.UNKNOWN, StationAction.LOAD, Optional.empty(), OptionalInt.empty());
         scheduleEntries.add(entry);
         scheduleList.addEntry(new ScheduleList.ScheduleEntry(this, entry, true));
-        PacketDistributor.sendToServer(new ServerboundAddScheduleEntryPayload(cart.getId(), scheduleEntries.size() - 1, entry));
+        ClientPacketDistributor.sendToServer(new ServerboundAddScheduleEntryPayload(cart.getId(), scheduleEntries.size() - 1, entry));
     }
 
     public void updateStaleSchedule(List<Schedule.Entry> scheduleEntries, Schedule.RejectedAction rejectedAction, Map<String, StationType> stations)
@@ -622,7 +622,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
                 list().children().remove(idx);
                 list().children().add(idx + dir, this);
 
-                PacketDistributor.sendToServer(new ServerboundMoveScheduleEntryPayload(owner.cart.getId(), idx, dir > 0, entry.uuid()));
+                ClientPacketDistributor.sendToServer(new ServerboundMoveScheduleEntryPayload(owner.cart.getId(), idx, dir > 0, entry.uuid()));
             }
 
             private void onStationChange(String name)
@@ -686,7 +686,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
                 entry = new Schedule.Entry(entry.uuid(), station, type, buttonAction.getValue(), filter, count);
 
                 int idx = list().children().indexOf(this);
-                PacketDistributor.sendToServer(new ServerboundEditScheduleEntryPayload(owner.cart.getId(), idx, entry));
+                ClientPacketDistributor.sendToServer(new ServerboundEditScheduleEntryPayload(owner.cart.getId(), idx, entry));
             }
 
             private void delete(Button btn)
@@ -694,7 +694,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
                 list().removeEntry(this);
 
                 int idx = list().children().indexOf(this);
-                PacketDistributor.sendToServer(new ServerboundDeleteScheduleEntryPayload(owner.cart.getId(), idx, entry.uuid()));
+                ClientPacketDistributor.sendToServer(new ServerboundDeleteScheduleEntryPayload(owner.cart.getId(), idx, entry.uuid()));
             }
 
             @SuppressWarnings("deprecation")

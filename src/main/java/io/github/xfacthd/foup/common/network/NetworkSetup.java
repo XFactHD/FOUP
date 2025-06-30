@@ -25,28 +25,23 @@ public final class NetworkSetup
         event.registrar(NET_VERSION)
                 .playToClient(
                         ClientboundRailNetworkDebugPayload.TYPE,
-                        ClientboundRailNetworkDebugPayload.STREAM_CODEC,
-                        ClientboundRailNetworkDebugPayload::handle
+                        ClientboundRailNetworkDebugPayload.STREAM_CODEC
                 )
                 .playToClient(
                         ClientboundOpenOverheadRailStationScreenPayload.TYPE,
-                        ClientboundOpenOverheadRailStationScreenPayload.STREAM_CODEC,
-                        ClientboundOpenOverheadRailStationScreenPayload::handle
+                        ClientboundOpenOverheadRailStationScreenPayload.STREAM_CODEC
                 )
                 .playToClient(
                         ClientboundAcknowledgeStationRenamePayload.TYPE,
-                        ClientboundAcknowledgeStationRenamePayload.STREAM_CODEC,
-                        ClientboundAcknowledgeStationRenamePayload::handle
+                        ClientboundAcknowledgeStationRenamePayload.STREAM_CODEC
                 )
                 .playToClient(
                         ClientboundAcknowledgeStationLinkPayload.TYPE,
-                        ClientboundAcknowledgeStationLinkPayload.STREAM_CODEC,
-                        ClientboundAcknowledgeStationLinkPayload::handle
+                        ClientboundAcknowledgeStationLinkPayload.STREAM_CODEC
                 )
                 .playToClient(
                         ClientboundRefreshStaleSchedulePayload.TYPE,
-                        ClientboundRefreshStaleSchedulePayload.STREAM_CODEC,
-                        ClientboundRefreshStaleSchedulePayload::handle
+                        ClientboundRefreshStaleSchedulePayload.STREAM_CODEC
                 )
                 .playToServer(
                         ServerboundToggleLoaderAutoEjectPayload.TYPE,

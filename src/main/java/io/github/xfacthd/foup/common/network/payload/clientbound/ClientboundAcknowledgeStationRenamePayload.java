@@ -1,13 +1,11 @@
 package io.github.xfacthd.foup.common.network.payload.clientbound;
 
-import io.github.xfacthd.foup.client.util.ClientAccess;
 import io.github.xfacthd.foup.common.data.RenameResult;
 import io.github.xfacthd.foup.common.util.Utils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record ClientboundAcknowledgeStationRenamePayload(BlockPos pos, RenameResult result) implements CustomPacketPayload
 {
@@ -19,11 +17,6 @@ public record ClientboundAcknowledgeStationRenamePayload(BlockPos pos, RenameRes
             ClientboundAcknowledgeStationRenamePayload::result,
             ClientboundAcknowledgeStationRenamePayload::new
     );
-
-    public void handle(@SuppressWarnings("unused") IPayloadContext ctx)
-    {
-        ClientAccess.handleStationRenameAck(pos, result);
-    }
 
     @Override
     public Type<ClientboundAcknowledgeStationRenamePayload> type()

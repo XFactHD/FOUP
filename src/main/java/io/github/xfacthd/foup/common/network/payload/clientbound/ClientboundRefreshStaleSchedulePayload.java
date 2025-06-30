@@ -1,6 +1,5 @@
 package io.github.xfacthd.foup.common.network.payload.clientbound;
 
-import io.github.xfacthd.foup.client.util.ClientAccess;
 import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.railnet.Schedule;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
@@ -9,7 +8,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,11 +32,6 @@ public record ClientboundRefreshStaleSchedulePayload(
             ClientboundRefreshStaleSchedulePayload::stations,
             ClientboundRefreshStaleSchedulePayload::new
     );
-
-    public void handle(@SuppressWarnings("unused") IPayloadContext ctx)
-    {
-        ClientAccess.handleRefreshStaleSchedule(cartId, rejectedAction, scheduleEntries, stations);
-    }
 
     @Override
     public Type<ClientboundRefreshStaleSchedulePayload> type()
