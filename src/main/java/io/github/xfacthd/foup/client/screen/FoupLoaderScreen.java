@@ -21,6 +21,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Objects;
 
@@ -49,6 +50,7 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
     public static final Component BUTTON_AUTO_EJECT = Component.translatable("button.foup.foup_loader.auto_eject");
     private static final int INTERACT_DURATION = AbstractCartInteractorBlockEntity.State.INTERACTING.getDuration(StationType.LOADER);
 
+    @UnknownNullability
     private Button autoEjectButton;
 
     public FoupLoaderScreen(FoupLoaderMenu menu, Inventory inventory, Component title)

@@ -39,6 +39,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -99,9 +100,13 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     private final OverheadCartEntity cart;
     private final List<Schedule.Entry> scheduleEntries;
     private final Map<String, StationType> stations;
+    @UnknownNullability
     private Button buttonAddStation;
+    @UnknownNullability
     private Button buttonExecute;
+    @UnknownNullability
     private Button buttonStop;
+    @UnknownNullability
     private ScheduleList scheduleList;
     private boolean cartIdle;
     private boolean canEdit;
@@ -148,7 +153,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
 
         ScheduleList oldList = scheduleList;
         int listHeight = imageHeight - LIST_Y - INVENTORY_Y_OFF - PADDING;
-        scheduleList = addRenderableWidget(new ScheduleList(minecraft, leftPos + EDGE_PADDING_X, topPos + LIST_Y, listHeight, scheduleList));
+        scheduleList = addRenderableWidget(new ScheduleList(Objects.requireNonNull(minecraft), leftPos + EDGE_PADDING_X, topPos + LIST_Y, listHeight, scheduleList));
         if (oldList == null)
         {
             rebuiltScheduleList();

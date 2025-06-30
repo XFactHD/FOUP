@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.TriState;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Objects;
 
@@ -48,8 +49,11 @@ public final class OverheadRailStationScreen extends Screen
     private final OverheadRailStationBlockEntity station;
     private int leftPos;
     private int topPos;
+    @UnknownNullability
     private EditBox nameEditBox;
+    @UnknownNullability
     private Button setNameButton;
+    @UnknownNullability
     private Button linkButton;
     private String lastName;
     private boolean renameInProgress = false;
@@ -139,7 +143,7 @@ public final class OverheadRailStationScreen extends Screen
     @Override
     public void tick()
     {
-        if (station.isRemoved() || !station.isUsableByPlayer(Objects.requireNonNull(minecraft).player))
+        if (station.isRemoved() || !station.isUsableByPlayer(Objects.requireNonNull(Objects.requireNonNull(minecraft).player)))
         {
             onClose();
             return;
