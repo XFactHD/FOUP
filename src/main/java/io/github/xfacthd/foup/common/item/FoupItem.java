@@ -45,6 +45,13 @@ public final class FoupItem extends Item
     }
 
     @Override
+    public boolean canFitInsideContainerItems(ItemStack stack)
+    {
+        return stack.getOrDefault(FoupContent.DC_TYPE_ITEM_CONTENTS, ItemContents.EMPTY).stack().isEmpty();
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
     public boolean canFitInsideContainerItems()
     {
         return false;

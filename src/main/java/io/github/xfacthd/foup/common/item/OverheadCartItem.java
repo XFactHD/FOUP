@@ -51,6 +51,13 @@ public final class OverheadCartItem extends Item
     }
 
     @Override
+    public boolean canFitInsideContainerItems(ItemStack stack)
+    {
+        return !stack.getOrDefault(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.EMPTY).stack().isEmpty();
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
     public boolean canFitInsideContainerItems()
     {
         return false;
