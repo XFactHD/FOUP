@@ -4,6 +4,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -35,16 +36,16 @@ public final class FilterSlot extends AbstractWidget
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick)
     {
-        if (active && isMouseOver(mouseX, mouseY))
+        if (active && isMouseOver(event.x(), event.y()))
         {
             ItemStack carried = owner.getMenu().getCarried();
-            if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT && carried.isEmpty())
+            if (event.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT && carried.isEmpty())
             {
                 filter = ItemStack.EMPTY;
             }
-            else if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && !carried.isEmpty() && preFilter.test(carried))
+            else if (event.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT && !carried.isEmpty() && preFilter.test(carried))
             {
                 filter = carried.copy();
             }

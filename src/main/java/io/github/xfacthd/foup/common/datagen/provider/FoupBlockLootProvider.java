@@ -10,6 +10,7 @@ import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
 import java.util.List;
@@ -38,7 +39,7 @@ public final class FoupBlockLootProvider extends BlockLootSubProvider
 
     private void dropSelfWithComponents(Block block, List<DataComponentType<?>> components)
     {
-        CopyComponentsFunction.Builder function = CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY);
+        CopyComponentsFunction.Builder function = CopyComponentsFunction.copyComponentsFromBlockEntity(LootContextParams.BLOCK_ENTITY);
         components.forEach(function::include);
         add(block, LootTable.lootTable().withPool(applyExplosionCondition(block, LootPool.lootPool()
                 .setRolls(ConstantValue.exactly(1.0F))

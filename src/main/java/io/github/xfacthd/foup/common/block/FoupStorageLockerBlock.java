@@ -3,6 +3,7 @@ package io.github.xfacthd.foup.common.block;
 import io.github.xfacthd.foup.common.blockentity.FoupStorageLockerBlockEntity;
 import io.github.xfacthd.foup.common.data.PropertyHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -88,7 +89,7 @@ public final class FoupStorageLockerBlock extends Block implements EntityBlock
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos)
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction face)
     {
         if (level.getBlockEntity(pos) instanceof FoupStorageLockerBlockEntity be)
         {

@@ -1,7 +1,6 @@
 package io.github.xfacthd.foup.client.renderer.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import io.github.xfacthd.foup.client.renderer.entity.OverheadCartRenderer;
 import io.github.xfacthd.foup.common.FoupContent;
@@ -10,11 +9,14 @@ import io.github.xfacthd.foup.common.blockentity.FoupStorageInterfaceBlockEntity
 import io.github.xfacthd.foup.common.data.StationAction;
 import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.component.ItemContents;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -27,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public final class FoupStorageInterfaceRenderer extends ExtractingBlockEntityRenderer<FoupStorageInterfaceBlockEntity, FoupStorageInterfaceRenderState>
+public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<FoupStorageInterfaceBlockEntity, FoupStorageInterfaceRenderState>
 {
     private static final ResourceLocation DOOR_TEXTURE = ResourceLocation.withDefaultNamespace("block/vault_top");
     private static final float MIN_XZ = 3F/16F;
@@ -51,21 +53,18 @@ public final class FoupStorageInterfaceRenderer extends ExtractingBlockEntityRen
 
     public FoupStorageInterfaceRenderer(BlockEntityRendererProvider.Context ctx)
     {
-        this.itemModelResolver = ctx.getItemModelResolver();
+        this.itemModelResolver = ctx.itemModelResolver();
     }
 
     @Override
-    public void render(FoupStorageInterfaceRenderState renderState, PoseStack poseStack, MultiBufferSource bufferSource, int light, int overlay, Vec3 camera)
+    public void submit(FoupStorageInterfaceRenderState renderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera)
     {
         if (sprite == null) return;
 
         long start = renderState.actionStart;
-        float time = computeTime(renderState.gameTime, start, renderState.partialTick);
+        float time = renderState.actionTime;
         if (time < DOOR_END_OPEN || time > DOOR_START_CLOSE)
         {
-            VertexConsumer buffer = bufferSource.getBuffer(Sheets.solidBlockSheet());
-            PoseStack.Pose pose = poseStack.last();
-
             float factor = time > DOOR_START_CLOSE ? (TOTAL_TIME - time) : time;
             factor /= DOOR_TIME;
             float off = (.5F - MIN_XZ) * factor;
@@ -75,33 +74,37 @@ public final class FoupStorageInterfaceRenderer extends ExtractingBlockEntityRen
             float maxU = sprite.getU(MAX_XZ - off);
             float minV = sprite.getV(MIN_XZ);
             float maxV = sprite.getV(MAX_XZ);
+            int light = renderState.lightCoords;
 
-            float cenMin = .5F - off;
-            buffer.addVertex(pose, MIN_XZ, MAX_Y, MIN_XZ).setColor(-1).setUv(minU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            buffer.addVertex(pose, MIN_XZ, MAX_Y, MAX_XZ).setColor(-1).setUv(minU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            buffer.addVertex(pose, cenMin, MAX_Y, MAX_XZ).setColor(-1).setUv(cenU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            buffer.addVertex(pose, cenMin, MAX_Y, MIN_XZ).setColor(-1).setUv(cenU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-
-            float cenMax = .5F + off;
-            buffer.addVertex(pose, cenMax, MAX_Y, MIN_XZ).setColor(-1).setUv(cenU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            buffer.addVertex(pose, cenMax, MAX_Y, MAX_XZ).setColor(-1).setUv(cenU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            buffer.addVertex(pose, MAX_XZ, MAX_Y, MAX_XZ).setColor(-1).setUv(maxU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            buffer.addVertex(pose, MAX_XZ, MAX_Y, MIN_XZ).setColor(-1).setUv(maxU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-
-            if (time > 0F)
+            submitNodeCollector.submitCustomGeometry(poseStack, Sheets.solidBlockSheet(), (pose, buffer) ->
             {
-                float cenMinU = sprite.getU(6F/16F);
-                buffer.addVertex(pose, cenMin, MAX_Y, MIN_XZ).setColor(-1).setUv(   cenU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 1, 0, 0);
-                buffer.addVertex(pose, cenMin, MAX_Y, MAX_XZ).setColor(-1).setUv(   cenU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 1, 0, 0);
-                buffer.addVertex(pose, cenMin,    0F, MAX_XZ).setColor(-1).setUv(cenMinU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 1, 0, 0);
-                buffer.addVertex(pose, cenMin,    0F, MIN_XZ).setColor(-1).setUv(cenMinU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 1, 0, 0);
+                float cenMin = .5F - off;
+                buffer.addVertex(pose, MIN_XZ, MAX_Y, MIN_XZ).setColor(-1).setUv(minU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
+                buffer.addVertex(pose, MIN_XZ, MAX_Y, MAX_XZ).setColor(-1).setUv(minU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
+                buffer.addVertex(pose, cenMin, MAX_Y, MAX_XZ).setColor(-1).setUv(cenU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
+                buffer.addVertex(pose, cenMin, MAX_Y, MIN_XZ).setColor(-1).setUv(cenU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
 
-                float cenMaxU = sprite.getU(10F/16F);
-                buffer.addVertex(pose, cenMax,    0F, MIN_XZ).setColor(-1).setUv(cenMaxU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, -1, 0, 0);
-                buffer.addVertex(pose, cenMax,    0F, MAX_XZ).setColor(-1).setUv(cenMaxU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, -1, 0, 0);
-                buffer.addVertex(pose, cenMax, MAX_Y, MAX_XZ).setColor(-1).setUv(   cenU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, -1, 0, 0);
-                buffer.addVertex(pose, cenMax, MAX_Y, MIN_XZ).setColor(-1).setUv(   cenU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, -1, 0, 0);
-            }
+                float cenMax = .5F + off;
+                buffer.addVertex(pose, cenMax, MAX_Y, MIN_XZ).setColor(-1).setUv(cenU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
+                buffer.addVertex(pose, cenMax, MAX_Y, MAX_XZ).setColor(-1).setUv(cenU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
+                buffer.addVertex(pose, MAX_XZ, MAX_Y, MAX_XZ).setColor(-1).setUv(maxU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
+                buffer.addVertex(pose, MAX_XZ, MAX_Y, MIN_XZ).setColor(-1).setUv(maxU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
+
+                if (time > 0F)
+                {
+                    float cenMinU = sprite.getU(6F/16F);
+                    buffer.addVertex(pose, cenMin, MAX_Y, MIN_XZ).setColor(-1).setUv(   cenU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 1, 0, 0);
+                    buffer.addVertex(pose, cenMin, MAX_Y, MAX_XZ).setColor(-1).setUv(   cenU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 1, 0, 0);
+                    buffer.addVertex(pose, cenMin,    0F, MAX_XZ).setColor(-1).setUv(cenMinU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 1, 0, 0);
+                    buffer.addVertex(pose, cenMin,    0F, MIN_XZ).setColor(-1).setUv(cenMinU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 1, 0, 0);
+
+                    float cenMaxU = sprite.getU(10F/16F);
+                    buffer.addVertex(pose, cenMax,    0F, MIN_XZ).setColor(-1).setUv(cenMaxU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, -1, 0, 0);
+                    buffer.addVertex(pose, cenMax,    0F, MAX_XZ).setColor(-1).setUv(cenMaxU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, -1, 0, 0);
+                    buffer.addVertex(pose, cenMax, MAX_Y, MAX_XZ).setColor(-1).setUv(   cenU, maxV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, -1, 0, 0);
+                    buffer.addVertex(pose, cenMax, MAX_Y, MIN_XZ).setColor(-1).setUv(   cenU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, -1, 0, 0);
+                }
+            });
         }
 
         float factor = 0F;
@@ -121,7 +124,7 @@ public final class FoupStorageInterfaceRenderer extends ExtractingBlockEntityRen
 
             poseStack.pushPose();
             poseStack.scale(1.995F, 1.995F, 1.995F);
-            renderState.inflightFoup.render(poseStack, bufferSource, light, overlay);
+            renderState.inflightFoup.submit(poseStack, submitNodeCollector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
             poseStack.popPose();
 
             ItemStackRenderState foupContent = renderState.inflightFoupContent;
@@ -130,7 +133,7 @@ public final class FoupStorageInterfaceRenderer extends ExtractingBlockEntityRen
                 poseStack.pushPose();
                 poseStack.mulPose(Axis.YP.rotationDegrees(180F - renderState.cartRotation));
 
-                OverheadCartRenderer.renderFoupContents(foupContent, renderState.inflightFoupContentSize, poseStack, bufferSource, 0, -1, 0, light, false);
+                OverheadCartRenderer.renderFoupContents(foupContent, renderState.inflightFoupContentSize, poseStack, submitNodeCollector, 0, -1, 0, renderState.lightCoords, false);
 
                 poseStack.popPose();
             }
@@ -146,12 +149,18 @@ public final class FoupStorageInterfaceRenderer extends ExtractingBlockEntityRen
     }
 
     @Override
-    public void extractRenderState(FoupStorageInterfaceBlockEntity be, FoupStorageInterfaceRenderState renderState, float partialTick)
+    public void extractRenderState(
+            FoupStorageInterfaceBlockEntity be,
+            FoupStorageInterfaceRenderState renderState,
+            float partialTick,
+            Vec3 cameraPos,
+            @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay
+    )
     {
-        super.extractRenderState(be, renderState, partialTick);
+        BlockEntityRenderer.super.extractRenderState(be, renderState, partialTick, cameraPos, crumblingOverlay);
 
-        renderState.gameTime = Objects.requireNonNull(be.getLevel()).getGameTime();
         renderState.actionStart = be.getActionStart();
+        renderState.actionTime = computeTime(Objects.requireNonNull(be.getLevel()).getGameTime(), renderState.actionStart, partialTick);
         renderState.activeAction = be.getActiveAction();
         renderState.cartRotation = be.getCartRotation();
 

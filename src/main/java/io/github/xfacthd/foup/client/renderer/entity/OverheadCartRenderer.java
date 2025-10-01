@@ -1,16 +1,16 @@
 package io.github.xfacthd.foup.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import io.github.xfacthd.foup.common.entity.OverheadCartState;
 import io.github.xfacthd.foup.common.util.Utils;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -47,38 +47,35 @@ public final class OverheadCartRenderer extends EntityRenderer<OverheadCartEntit
     }
 
     @Override
-    public void render(OverheadCartRenderState renderState, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight)
+    public void submit(OverheadCartRenderState renderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera)
     {
-        model.setupAnim(renderState);
-
         poseStack.pushPose();
         poseStack.mulPose(Axis.YP.rotationDegrees(180F - renderState.yRot));
         poseStack.translate(0, 1.5F, 0);
         poseStack.scale(-1.0F, -1.0F, 1.0F);
-        VertexConsumer buffer = bufferSource.getBuffer(model.renderType(TEXTURE));
-        model.renderToBuffer(poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY);
+        submitNodeCollector.submitModel(model, renderState, poseStack, model.renderType(TEXTURE), renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0, null);
 
         ItemStackRenderState foupContent = renderState.foupContent;
         if (!foupContent.isEmpty())
         {
-            renderFoupContents(foupContent, renderState.foupContentSize, poseStack, bufferSource, packedLight);
+            renderFoupContents(foupContent, renderState.foupContentSize, poseStack, submitNodeCollector, renderState.lightCoords);
         }
 
         poseStack.popPose();
 
-        super.render(renderState, poseStack, bufferSource, packedLight);
+        super.submit(renderState, poseStack, submitNodeCollector, camera);
     }
 
-    private void renderFoupContents(ItemStackRenderState renderState, int stackSize, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight)
+    private void renderFoupContents(ItemStackRenderState renderState, int stackSize, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight)
     {
-        renderFoupContents(renderState, stackSize, poseStack, bufferSource, model.foup.x, model.foup.y + model.hoistWire.yScale, model.foup.z, packedLight, true);
+        renderFoupContents(renderState, stackSize, poseStack, submitNodeCollector, model.foup.x, model.foup.y + model.hoistWire.yScale, model.foup.z, packedLight, true);
     }
 
     public static void renderFoupContents(
             ItemStackRenderState renderState,
             int stackSize,
             PoseStack poseStack,
-            MultiBufferSource bufferSource,
+            SubmitNodeCollector submitNodeCollector,
             float x,
             float y,
             float z,
@@ -117,7 +114,7 @@ public final class OverheadCartRenderer extends EntityRenderer<OverheadCartEntit
         {
             poseStack.pushPose();
             transformer.transform(poseStack, i, passes);
-            renderState.render(poseStack, bufferSource, packedLight, OverlayTexture.NO_OVERLAY);
+            renderState.submit(poseStack, submitNodeCollector, packedLight, OverlayTexture.NO_OVERLAY, 0);
             poseStack.popPose();
         }
 

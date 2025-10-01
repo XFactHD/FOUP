@@ -28,7 +28,7 @@ public final class Foup
 
         NeoForge.EVENT_BUS.addListener(FoupCommands::registerCommands);
 
-        if ((!FMLEnvironment.production || RailNetworkDebugPayloads.ENABLE_IN_PROD))
+        if ((!FMLEnvironment.isProduction() || RailNetworkDebugPayloads.ENABLE_IN_PROD))
         {
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugPayloads::onServerTickEnd);
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugPayloads::onPlayerDisconnect);

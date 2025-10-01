@@ -12,6 +12,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -120,24 +122,24 @@ public final class OverheadRailStationScreen extends Screen
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick)
     {
-        if (nameEditBox.isFocused() && !nameEditBox.isMouseOver(mouseX, mouseY))
+        if (nameEditBox.isFocused() && !nameEditBox.isMouseOver(event.x(), event.y()))
         {
             setFocused(null);
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    public boolean keyPressed(KeyEvent event)
     {
-        if (!nameEditBox.isFocused() && Objects.requireNonNull(minecraft).options.keyInventory.matches(keyCode, scanCode))
+        if (!nameEditBox.isFocused() && Objects.requireNonNull(minecraft).options.keyInventory.matches(event))
         {
             onClose();
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override

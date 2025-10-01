@@ -13,16 +13,17 @@ import io.github.xfacthd.foup.common.blockentity.OverheadRailStationBlockEntity;
 import io.github.xfacthd.foup.common.data.StationType;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -38,7 +39,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.neoforged.neoforge.client.NeoForgeRenderTypes;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -94,7 +94,7 @@ public final class OverheadRailInfoRenderer
     }
 
     private static void renderRailInfoArround(
-            PoseStack poseStack, Camera camera, Font font, ClientLevel level, BlockPos pos, @Nullable BlockState state, boolean renderGhost
+            PoseStack poseStack, CameraRenderState camera, Font font, ClientLevel level, BlockPos pos, @Nullable BlockState state, boolean renderGhost
     )
     {
         RenderSystem.pushPipelineModifier(PipelineModifiers.NO_DEPTH_TEST);
@@ -106,11 +106,12 @@ public final class OverheadRailInfoRenderer
         {
             if (renderGhost)
             {
-                Vec3 offset = Vec3.atLowerCornerOf(pos).subtract(camera.getPosition());
+                Vec3 offset = Vec3.atLowerCornerOf(pos).subtract(camera.pos);
                 poseStack.pushPose();
                 poseStack.translate(offset.x, offset.y, offset.z);
 
-                RenderType bufferType = NeoForgeRenderTypes.TRANSLUCENT_ON_PARTICLES_TARGET.get();
+                // FIXME: rewrite to not use render types at all
+                RenderType bufferType = Sheets.translucentItemSheet();//NeoForgeRenderTypes.TRANSLUCENT_ON_PARTICLES_TARGET.get();
                 VertexConsumer builder = new GhostVertexConsumer(buffers.getBuffer(bufferType), GHOST_OPACITY);
 
                 SCRATCH_PART_LIST.clear();
@@ -140,7 +141,8 @@ public final class OverheadRailInfoRenderer
         buffers.endBatch(ClientUtils.INFO_QUADS);
         if (renderGhost && state != null)
         {
-            buffers.endBatch(NeoForgeRenderTypes.TRANSLUCENT_ON_PARTICLES_TARGET.get());
+            //buffers.endBatch(NeoForgeRenderTypes.TRANSLUCENT_ON_PARTICLES_TARGET.get());
+            buffers.endBatch(Sheets.translucentItemSheet());
         }
 
         RenderSystem.popPipelineModifier();
@@ -148,7 +150,7 @@ public final class OverheadRailInfoRenderer
 
     private static void renderRailInfo(
             PoseStack poseStack,
-            Camera camera,
+            CameraRenderState camera,
             MultiBufferSource.BufferSource buffers,
             VertexConsumer builder,
             Font font,
@@ -160,7 +162,7 @@ public final class OverheadRailInfoRenderer
     {
         poseStack.pushPose();
 
-        Vec3 offset = Vec3.atCenterOf(pos).add(0, .25, 0).subtract(camera.getPosition());
+        Vec3 offset = Vec3.atCenterOf(pos).add(0, .25, 0).subtract(camera.pos);
         poseStack.translate(offset.x, offset.y, offset.z);
 
         for (Direction dir : HORIZONTAL_DIRECTIONS)
@@ -209,7 +211,7 @@ public final class OverheadRailInfoRenderer
 
     public static void renderStationInfo(
             PoseStack poseStack,
-            Camera camera,
+            CameraRenderState camera,
             MultiBufferSource.BufferSource buffers,
             Font font,
             String name,
@@ -220,7 +222,7 @@ public final class OverheadRailInfoRenderer
         poseStack.pushPose();
 
         poseStack.translate(0, .5, 0);
-        poseStack.mulPose(camera.rotation());
+        poseStack.mulPose(camera.orientation);
         poseStack.mulPose(Axis.YP.rotationDegrees(180));
         poseStack.mulPose(Axis.ZN.rotationDegrees(180));
         poseStack.scale(1F/40F, 1F/40F, 1);

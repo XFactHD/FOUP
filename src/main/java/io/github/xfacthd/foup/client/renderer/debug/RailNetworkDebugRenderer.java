@@ -12,11 +12,11 @@ import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugData;
 import io.github.xfacthd.foup.common.util.Utils;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -50,7 +50,7 @@ public final class RailNetworkDebugRenderer
         RenderSystem.popPipelineModifier();
     }
 
-    private static void renderNetwork(long netId, RailNetworkDebugData entry, MultiBufferSource.BufferSource buffer, PoseStack poseStack, Camera camera, Font font)
+    private static void renderNetwork(long netId, RailNetworkDebugData entry, MultiBufferSource.BufferSource buffer, PoseStack poseStack, CameraRenderState camera, Font font)
     {
         VertexConsumer builder = buffer.getBuffer(ClientUtils.INFO_QUADS);
         boolean showNetId = Objects.requireNonNull(Minecraft.getInstance().player).isShiftKeyDown();
@@ -58,7 +58,7 @@ public final class RailNetworkDebugRenderer
         {
             poseStack.pushPose();
 
-            Vec3 offset = Vec3.atCenterOf(node.pos()).add(0, .25, 0).subtract(camera.getPosition());
+            Vec3 offset = Vec3.atCenterOf(node.pos()).add(0, .25, 0).subtract(camera.pos);
             poseStack.translate(offset.x, offset.y, offset.z);
 
             Matrix4f pose = poseStack.last().pose();
@@ -93,12 +93,12 @@ public final class RailNetworkDebugRenderer
         }
     }
 
-    private static void renderNetworkId(MultiBufferSource.BufferSource buffer, PoseStack poseStack, Camera camera, Font font, long netId)
+    private static void renderNetworkId(MultiBufferSource.BufferSource buffer, PoseStack poseStack, CameraRenderState camera, Font font, long netId)
     {
         poseStack.pushPose();
 
         poseStack.translate(0, 0, 0);
-        poseStack.mulPose(camera.rotation());
+        poseStack.mulPose(camera.orientation);
         poseStack.mulPose(Axis.YP.rotationDegrees(180));
         poseStack.mulPose(Axis.ZN.rotationDegrees(180));
         poseStack.scale(1F/40F, 1F/40F, 1);

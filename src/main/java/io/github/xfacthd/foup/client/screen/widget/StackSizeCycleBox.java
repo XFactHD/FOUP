@@ -5,6 +5,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -69,10 +72,10 @@ public final class StackSizeCycleBox extends AbstractWidget
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick)
     {
-        boolean overButtons = active && editable && isHovered && mouseX >= getX() + width - 13;
-        if (overButtons && value < MAX && mouseY < getY() + height / 2F)
+        boolean overButtons = active && editable && isHovered && event.x() >= getX() + width - 13;
+        if (overButtons && value < MAX && event.y() < getY() + height / 2F)
         {
             if (empty)
             {
@@ -83,19 +86,19 @@ public final class StackSizeCycleBox extends AbstractWidget
                 value++;
             }
         }
-        else if (overButtons && value > MIN && mouseY >= getY() + height / 2F)
+        else if (overButtons && value > MIN && event.y() >= getY() + height / 2F)
         {
             value--;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean charTyped(char codePoint, int modifiers)
+    public boolean charTyped(CharacterEvent event)
     {
-        if (isActive() && editable && isFocused() && Character.isDigit(codePoint))
+        if (isActive() && editable && isFocused() && Character.isDigit(event.codepoint()))
         {
-            int digit = Character.digit(codePoint, 10);
+            int digit = Character.digit(event.codepoint(), 10);
             if (empty)
             {
                 if (digit >= MIN)
@@ -114,15 +117,15 @@ public final class StackSizeCycleBox extends AbstractWidget
             }
             return true;
         }
-        return super.charTyped(codePoint, modifiers);
+        return super.charTyped(event);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    public boolean keyPressed(KeyEvent event)
     {
         if (isActive() && editable && isFocused())
         {
-            if (keyCode == GLFW.GLFW_KEY_BACKSPACE)
+            if (event.key() == GLFW.GLFW_KEY_BACKSPACE)
             {
                 if (!empty)
                 {
@@ -137,7 +140,7 @@ public final class StackSizeCycleBox extends AbstractWidget
                 }
                 return true;
             }
-            else if (keyCode == GLFW.GLFW_KEY_DELETE)
+            else if (event.key() == GLFW.GLFW_KEY_DELETE)
             {
                 if (!empty)
                 {
@@ -160,7 +163,7 @@ public final class StackSizeCycleBox extends AbstractWidget
                 return true;
             }
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override

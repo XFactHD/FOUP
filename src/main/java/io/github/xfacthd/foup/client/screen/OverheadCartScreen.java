@@ -29,6 +29,9 @@ import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -206,17 +209,17 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick)
     {
-        if (getFocused() != null && !getFocused().isMouseOver(mouseX, mouseY))
+        if (getFocused() != null && !getFocused().isMouseOver(event.x(), event.y()))
         {
             setFocused(null);
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    public boolean keyPressed(KeyEvent event)
     {
         boolean anyFocused = false;
         for (ScheduleList.ScheduleEntry child : scheduleList.children())
@@ -227,11 +230,11 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
                 break;
             }
         }
-        if ((getFocused() instanceof EditBox || anyFocused) && Objects.requireNonNull(minecraft).options.keyInventory.matches(keyCode, scanCode))
+        if ((getFocused() instanceof EditBox || anyFocused) && Objects.requireNonNull(minecraft).options.keyInventory.matches(event))
         {
             return false;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override
@@ -258,13 +261,13 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     }
 
     @Override // For some reason AbstractContainerScreen doesn't forward dragging to widgets
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY)
     {
-        if (getFocused() == scheduleList && isDragging() && button == GLFW.GLFW_MOUSE_BUTTON_LEFT && scheduleList.isMouseOver(mouseX, mouseY))
+        if (getFocused() == scheduleList && isDragging() && event.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT && scheduleList.isMouseOver(event.x(), event.y()))
         {
-            return scheduleList.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+            return scheduleList.mouseDragged(event, dragX, dragY);
         }
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override
@@ -318,7 +321,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
 
     private void rebuiltScheduleList()
     {
-        scheduleList.children().clear();
+        scheduleList.clearEntries();
         for (Schedule.Entry entry : scheduleEntries)
         {
             scheduleList.addEntry(new ScheduleList.ScheduleEntry(this, entry, false));
@@ -367,9 +370,9 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         }
 
         @Override
-        protected boolean removeEntry(ScheduleEntry entry)
+        protected void removeEntry(ScheduleEntry entry)
         {
-            return super.removeEntry(entry);
+            super.removeEntry(entry);
         }
 
         @Override
@@ -391,9 +394,9 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         }
 
         @Override
-        protected boolean isValidClickButton(int button)
+        protected boolean isValidClickButton(MouseButtonInfo button)
         {
-            return button == GLFW.GLFW_MOUSE_BUTTON_LEFT || button == GLFW.GLFW_MOUSE_BUTTON_RIGHT;
+            return button.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT || button.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT;
         }
 
         private static final class ScheduleEntry extends Entry<ScheduleEntry>
@@ -421,7 +424,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
             private static final int COUNT_LABEL_Y_OFF = 14;
             private static final int ERROR_SIZE = 10;
             private static final int ERROR_X = EDGE_PADDING + (MOVE_BTN_WIDTH / 2) - (ERROR_SIZE / 2);
-            private static final int ERROR_Y = 17;
+            private static final int ERROR_Y = 19;
 
             private final OverheadCartScreen owner;
             private final Button buttonUp;
@@ -489,24 +492,27 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
             }
 
             @Override
-            public void renderBack(GuiGraphics graphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTick)
+            public void renderContent(GuiGraphics graphics, int mouseX, int mouseY, boolean hovering, float partialTick)
             {
                 validity = getValidity();
-                graphics.renderOutline(left - 1, top - 1, width + 2, height + 2, validity == EntryValidity.VALID ? 0xFF444444 : 0xFFAA0000);
-            }
 
-            @Override
-            public void render(GuiGraphics graphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTick)
-            {
+                // Can't use GuiGraphics#submitOutline() as it renders too late
+                renderOutline(graphics, validity == EntryValidity.VALID ? 0xFF444444 : 0xFFAA0000);
+
                 for (AbstractWidget child : children)
                 {
                     child.active = true;
                 }
 
-                buttonUp.active = index != 0;
+                int left = getX();
+                int top = getY();
+                int width = getWidth();
+                int height = getHeight();
+
+                buttonUp.active = this != list().children().getFirst();
                 buttonUp.setPosition(left + MOVE_BTN_X, top + EDGE_PADDING);
 
-                buttonDown.active = index != list().children().size() - 1;
+                buttonDown.active = this != list().children().getLast();
                 buttonDown.setPosition(left + MOVE_BTN_X, top + height - EDGE_PADDING - MOVE_BTN_HEIGHT);
 
                 boxStation.active = mutable;
@@ -566,6 +572,19 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
                         graphics.setTooltipForNextFrame(validity.description, mouseX, mouseY);
                     }
                 }
+            }
+
+            private void renderOutline(GuiGraphics graphics, int color)
+            {
+                // Can't use GuiGraphics#submitOutline() as it renders too late
+                int x = getX();
+                int y = getY();
+                int width = getWidth();
+                int height = getHeight();
+                graphics.fill(x,             y,              x + width, y + 1,          color);
+                graphics.fill(x,             y + height - 1, x + width, y + height,     color);
+                graphics.fill(x,             y + 1,          x + 1,     y + height - 1, color);
+                graphics.fill(x + width - 1, y + 1,          x + width, y + height - 1, color);
             }
 
             @Override

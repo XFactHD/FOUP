@@ -43,7 +43,7 @@ public final class FoupClient
 
         NeoForge.EVENT_BUS.addListener(OverheadRailInfoRenderer::onRenderLevelStage);
 
-        if ((!FMLEnvironment.production || RailNetworkDebugPayloads.ENABLE_IN_PROD))
+        if ((!FMLEnvironment.isProduction() || RailNetworkDebugPayloads.ENABLE_IN_PROD))
         {
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onRenderLevelStage);
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onPlayerDisconnect);
