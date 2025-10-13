@@ -10,7 +10,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 
 import java.util.function.IntSupplier;
 import java.util.function.Predicate;
@@ -28,7 +29,7 @@ public final class FoupStorageLockerMenu extends AbstractContainerMenu
         this(containerId, inventory, new ClientItemHandler(LOCKER_SLOTS), p -> true, () -> -1);
     }
 
-    public FoupStorageLockerMenu(int containerId, Inventory inventory, ItemStackHandler beInv, Predicate<Player> stillValid, IntSupplier lockedSlotSupplier)
+    public FoupStorageLockerMenu(int containerId, Inventory inventory, ItemStacksResourceHandler beInv, Predicate<Player> stillValid, IntSupplier lockedSlotSupplier)
     {
         super(FoupContent.MENU_TYPE_FOUP_STORAGE_LOCKER.value(), containerId);
         this.lockedSlot = addDataSlot(DataSlot.standalone());
@@ -90,7 +91,7 @@ public final class FoupStorageLockerMenu extends AbstractContainerMenu
         return stillValid.test(player);
     }
 
-    private static final class ClientItemHandler extends ItemStackHandler
+    private static final class ClientItemHandler extends ItemStacksResourceHandler
     {
         public ClientItemHandler(int slots)
         {
@@ -98,9 +99,9 @@ public final class FoupStorageLockerMenu extends AbstractContainerMenu
         }
 
         @Override
-        public boolean isItemValid(int slot, ItemStack stack)
+        public boolean isValid(int slot, ItemResource resource)
         {
-            return FoupStorageLockerBlockEntity.canPlaceInStorage(stack);
+            return FoupStorageLockerBlockEntity.canPlaceInStorage(resource);
         }
     }
 }

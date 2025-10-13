@@ -10,7 +10,7 @@ public final class CapabilitySetup
 {
     public static void onRegisterCapabilities(RegisterCapabilitiesEvent event)
     {
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, FoupContent.BE_TYPE_FOUP_LOADER.value(), (be, side) ->
+        event.registerBlockEntity(Capabilities.Item.BLOCK, FoupContent.BE_TYPE_FOUP_LOADER.value(), (be, side) ->
         {
             if (side == Direction.DOWN)
             {
@@ -22,7 +22,7 @@ public final class CapabilitySetup
             }
             return null;
         });
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, FoupContent.BE_TYPE_FOUP_STORAGE_LOCKER.value(), (be, side) ->
+        event.registerBlockEntity(Capabilities.Item.BLOCK, FoupContent.BE_TYPE_FOUP_STORAGE_LOCKER.value(), (be, side) ->
         {
             if (side != null && side != Direction.UP && side.getAxis() != be.getBlockState().getValue(PropertyHolder.FACING_HOR).getAxis())
             {

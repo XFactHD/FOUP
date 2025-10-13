@@ -8,7 +8,9 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,22 +47,23 @@ public final class LockerContents
         return hashCode;
     }
 
-    public void applyTo(ItemStackHandler inventory)
+    public void applyTo(ItemStacksResourceHandler inventory)
     {
         for (int i = 0; i < FoupStorageLockerBlockEntity.SLOT_COUNT; i++)
         {
-            inventory.setStackInSlot(i, items.get(i).copy());
+            ItemStack stack = items.get(i);
+            inventory.set(i, ItemResource.of(stack), stack.getCount());
         }
     }
 
-    public static LockerContents of(ItemStackHandler inventory)
+    public static LockerContents of(ResourceHandler<ItemResource> inventory)
     {
-        Preconditions.checkArgument(inventory.getSlots() == FoupStorageLockerBlockEntity.SLOT_COUNT);
+        Preconditions.checkArgument(inventory.size() == FoupStorageLockerBlockEntity.SLOT_COUNT);
 
         List<ItemStack> stacks = new ArrayList<>(FoupStorageLockerBlockEntity.SLOT_COUNT);
         for (int i = 0; i < FoupStorageLockerBlockEntity.SLOT_COUNT; i++)
         {
-            stacks.add(inventory.getStackInSlot(i).copy());
+            stacks.add(inventory.getResource(i).toStack(inventory.getAmountAsInt(i)));
         }
         return new LockerContents(stacks);
     }

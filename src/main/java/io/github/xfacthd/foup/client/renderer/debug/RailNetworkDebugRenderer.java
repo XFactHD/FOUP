@@ -20,12 +20,16 @@ import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -34,27 +38,46 @@ public final class RailNetworkDebugRenderer
     private static final Long2ObjectMap<RailNetworkDebugData> DEBUG_DATA = new Long2ObjectOpenHashMap<>();
     private static final Function<@Nullable StationType, @Nullable Component> STATION_FORMATTER = stationType ->
             Component.literal(stationType != null ? stationType.name() : "NULL");
+    private static final ContextKey<List<RailNetworkDebugRenderState>> DATA_KEY = new ContextKey<>(Utils.rl("rail_net_debug_renderer"));
 
-    public static void onRenderLevelStage(RenderLevelStageEvent.AfterParticles event)
+    public static void onExtractRenderState(ExtractLevelRenderStateEvent event)
     {
         if (DEBUG_DATA.isEmpty()) return;
 
-        RenderSystem.pushPipelineModifier(PipelineModifiers.NO_DEPTH_TEST);
-        MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
-        Font font = Minecraft.getInstance().font;
+        List<RailNetworkDebugRenderState> renderStates = new ArrayList<>();
+        boolean showNetId = Objects.requireNonNull(Minecraft.getInstance().player).isShiftKeyDown();
         for (Long2ObjectMap.Entry<RailNetworkDebugData> entry : DEBUG_DATA.long2ObjectEntrySet())
         {
-            renderNetwork(entry.getLongKey(), entry.getValue(), buffer, event.getPoseStack(), event.getCamera(), font);
+            renderStates.add(new RailNetworkDebugRenderState(entry.getLongKey(), entry.getValue(), showNetId));
+        }
+        if (!renderStates.isEmpty())
+        {
+            event.getRenderState().setRenderData(DATA_KEY, renderStates);
+        }
+    }
+
+    public static void onRenderLevelStage(RenderLevelStageEvent.AfterParticles event)
+    {
+        List<RailNetworkDebugRenderState> renderStates = event.getLevelRenderState().getRenderData(DATA_KEY);
+        if (renderStates == null) return;
+
+        RenderSystem.pushPipelineModifier(PipelineModifiers.NO_DEPTH_TEST);
+        MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+        CameraRenderState camera = event.getLevelRenderState().cameraRenderState;
+        Font font = Minecraft.getInstance().font;
+        for (RailNetworkDebugRenderState renderState : renderStates)
+        {
+            renderNetwork(renderState, buffer, event.getPoseStack(), camera, font);
         }
         buffer.endBatch(ClientUtils.INFO_QUADS);
+        buffer.endLastBatch();
         RenderSystem.popPipelineModifier();
     }
 
-    private static void renderNetwork(long netId, RailNetworkDebugData entry, MultiBufferSource.BufferSource buffer, PoseStack poseStack, CameraRenderState camera, Font font)
+    private static void renderNetwork(RailNetworkDebugRenderState renderState, MultiBufferSource.BufferSource buffer, PoseStack poseStack, CameraRenderState camera, Font font)
     {
         VertexConsumer builder = buffer.getBuffer(ClientUtils.INFO_QUADS);
-        boolean showNetId = Objects.requireNonNull(Minecraft.getInstance().player).isShiftKeyDown();
-        for (RailNetworkDebugData.Node node : entry.nodes())
+        for (RailNetworkDebugData.Node node : renderState.data.nodes())
         {
             poseStack.pushPose();
 
@@ -68,9 +91,9 @@ public final class RailNetworkDebugRenderer
             builder.addVertex(pose,  .15F, 0,  .15F).setColor(color);
             builder.addVertex(pose,  .15F, 0, -.15F).setColor(color);
 
-            if (showNetId)
+            if (renderState.showNetId)
             {
-                renderNetworkId(buffer, poseStack, camera, font, netId);
+                renderNetworkId(buffer, poseStack, camera, font, renderState.netId);
             }
 
             for (BlockPos neighbour : node.neighbours())
@@ -126,6 +149,8 @@ public final class RailNetworkDebugRenderer
     {
         DEBUG_DATA.clear();
     }
+
+    private record RailNetworkDebugRenderState(long netId, RailNetworkDebugData data, boolean showNetId) { }
 
     private RailNetworkDebugRenderer() { }
 }

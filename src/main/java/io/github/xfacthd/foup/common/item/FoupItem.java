@@ -67,7 +67,7 @@ public final class FoupItem extends Item
 
     public static boolean canPlaceInFoup(ItemStack stack)
     {
-        return stack.getItem().canFitInsideContainerItems();
+        return stack.getItem().canFitInsideContainerItems(stack);
     }
 
     public static DataResult<ItemStack> validateCanPlaceInFoup(ItemStack stack)

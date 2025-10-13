@@ -41,10 +41,12 @@ public final class FoupClient
         modBus.addListener(PipelineModifiers::onRegisterPipelineModifiers);
         modBus.addListener(ClientNetworkHandler::onRegisterPayloadHandlers);
 
+        NeoForge.EVENT_BUS.addListener(OverheadRailInfoRenderer::onExtractRenderState);
         NeoForge.EVENT_BUS.addListener(OverheadRailInfoRenderer::onRenderLevelStage);
 
         if ((!FMLEnvironment.isProduction() || RailNetworkDebugPayloads.ENABLE_IN_PROD))
         {
+            NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onExtractRenderState);
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onRenderLevelStage);
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onPlayerDisconnect);
         }

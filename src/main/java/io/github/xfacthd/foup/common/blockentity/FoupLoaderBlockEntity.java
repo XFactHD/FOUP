@@ -3,7 +3,7 @@ package io.github.xfacthd.foup.common.blockentity;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.StationAction;
 import io.github.xfacthd.foup.common.data.StationType;
-import io.github.xfacthd.foup.common.data.capability.itemhandler.ExternalItemHandler;
+import io.github.xfacthd.foup.common.data.capability.itemhandler.ExternalItemResourceHandler;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import io.github.xfacthd.foup.common.data.railnet.Schedule;
 import io.github.xfacthd.foup.common.item.FoupItem;
@@ -23,9 +23,10 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -39,28 +40,28 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     private static final int PUSH_INTERNAL = 5;
     private static final int PUSH_COUNT = 8;
 
-    private final ItemStackHandler inventory = new ItemStackHandler(2)
+    private final ItemStacksResourceHandler inventory = new ItemStacksResourceHandler(2)
     {
         @Override
-        public boolean isItemValid(int slot, ItemStack stack)
+        public boolean isValid(int slot, ItemResource resource)
         {
-            return FoupItem.canPlaceInFoup(stack);
+            return FoupItem.canPlaceInFoup(resource.toStack());
         }
 
         @Override
-        protected void onContentsChanged(int slot)
+        protected void onContentsChanged(int slot, ItemStack prevStack)
         {
             FoupLoaderBlockEntity.this.setChangedWithoutSignalUpdate();
         }
     };
-    private final ExternalItemHandler inputItemHandler = new ExternalItemHandler(
+    private final ExternalItemResourceHandler inputItemHandler = new ExternalItemResourceHandler(
             inventory, slot -> slot == SLOT_INPUT && (getActiveAction() != StationAction.LOAD || isBlocked()), slot -> false
     );
-    private final ExternalItemHandler outputItemHandler = new ExternalItemHandler(
+    private final ExternalItemResourceHandler outputItemHandler = new ExternalItemResourceHandler(
             inventory, slot -> false, slot -> slot == SLOT_OUTPUT
     );
     @Nullable
-    private BlockCapabilityCache<IItemHandler, Direction> outputTargetCache = null;
+    private BlockCapabilityCache<ResourceHandler<ItemResource>, Direction> outputTargetCache = null;
     private boolean autoEject = true;
 
     public FoupLoaderBlockEntity(BlockPos pos, BlockState state)
@@ -81,8 +82,8 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
         {
             case LOAD ->
             {
-                ItemStack stack = inventory.getStackInSlot(SLOT_INPUT);
-                if (stack.isEmpty())
+                ItemResource resource = inventory.getResource(SLOT_INPUT);
+                if (resource.isEmpty())
                 {
                     yield StartCheck.WAIT;
                 }
@@ -96,24 +97,24 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
                     {
                         yield StartCheck.SKIP;
                     }
-                    if (!ItemStack.isSameItemSameComponents(stack, foup))
+                    if (!resource.equals(ItemResource.of(foup)))
                     {
                         yield StartCheck.RETRY;
                     }
                 }
                 if (scheduleEntry.count().isPresent())
                 {
-                    int count = Math.min(scheduleEntry.count().getAsInt(), Utils.getMaxStackSize(stack));
+                    int count = Math.min(scheduleEntry.count().getAsInt(), Utils.getMaxStackSize(resource));
                     if (foup.getCount() >= count)
                     {
                         yield StartCheck.SKIP;
                     }
-                    if (stack.getCount() < count)
+                    if (inventory.getAmountAsInt(SLOT_INPUT) < count)
                     {
                         yield StartCheck.WAIT;
                     }
                 }
-                if (!scheduleEntry.matchesFilter(stack))
+                if (!scheduleEntry.matchesFilter(resource.toStack()))
                 {
                     yield StartCheck.RETRY;
                 }
@@ -125,15 +126,15 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
                 {
                     yield StartCheck.SKIP;
                 }
-                ItemStack stack = inventory.getStackInSlot(SLOT_OUTPUT);
-                if (!stack.isEmpty())
+                ItemResource resource = inventory.getResource(SLOT_OUTPUT);
+                if (!resource.isEmpty())
                 {
-                    if (!ItemStack.isSameItemSameComponents(foup, stack))
+                    if (!resource.equals(ItemResource.of(foup)))
                     {
                         yield StartCheck.WAIT;
                     }
                     int count = Math.min(scheduleEntry.getCount(), foup.getCount());
-                    if (stack.getMaxStackSize() - stack.getCount() < count)
+                    if (resource.getMaxStackSize() - inventory.getAmountAsInt(SLOT_OUTPUT) < count)
                     {
                         yield StartCheck.WAIT;
                     }
@@ -154,19 +155,28 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
             case LOAD ->
             {
                 ItemStack foup = Objects.requireNonNull(cart.getFoupContent());
-                ItemStack stack = inventory.getStackInSlot(SLOT_INPUT);
+                int invCount = inventory.getAmountAsInt(SLOT_INPUT);
 
-                int count = Math.min(Math.min(stack.getCount(), Utils.getMaxStackSize(foup) - foup.getCount()), scheduleEntry.getCount());
-                cart.setFoupContent(stack.copyWithCount(count + foup.getCount()));
-                inventory.extractItem(SLOT_INPUT, count, false);
+                int count = Math.min(Math.min(invCount, Utils.getMaxStackSize(foup) - foup.getCount()), scheduleEntry.getCount());
+                try (Transaction tx = Transaction.openRoot())
+                {
+                    ItemResource resource = inventory.getResource(SLOT_INPUT);
+                    cart.setFoupContent(resource.toStack(count + foup.getCount()));
+                    inventory.extract(SLOT_INPUT, resource, count, tx);
+                    tx.commit();
+                }
             }
             case UNLOAD ->
             {
                 ItemStack foup = Objects.requireNonNull(cart.getFoupContent());
-                ItemStack stack = inventory.getStackInSlot(SLOT_OUTPUT);
+                ItemResource resource = inventory.getResource(SLOT_OUTPUT);
 
-                int count = Math.min(Math.min(foup.getCount(), Utils.getMaxStackSize(stack)), scheduleEntry.getCount());
-                inventory.insertItem(SLOT_OUTPUT, foup.copyWithCount(count), false);
+                int count = Math.min(Math.min(foup.getCount(), Utils.getMaxStackSize(resource)), scheduleEntry.getCount());
+                try (Transaction tx = Transaction.openRoot())
+                {
+                    inventory.insert(SLOT_OUTPUT, ItemResource.of(foup), count, tx);
+                    tx.commit();
+                }
                 cart.setFoupContent(count == foup.getCount() ? ItemStack.EMPTY : foup.copyWithCount(foup.getCount() - count));
             }
         }
@@ -177,31 +187,35 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     {
         if (!autoEject || level().getGameTime() % PUSH_INTERNAL != 0) return;
 
-        ItemStack stack = inventory.getStackInSlot(SLOT_OUTPUT);
-        if (stack.isEmpty()) return;
+        ItemResource resource = inventory.getResource(SLOT_OUTPUT);
+        if (resource.isEmpty()) return;
 
-        IItemHandler itemHandler = Objects.requireNonNull(outputTargetCache).getCapability();
+        ResourceHandler<ItemResource> itemHandler = Objects.requireNonNull(outputTargetCache).getCapability();
         if (itemHandler == null) return;
 
-        ItemStack toInsert = stack.getCount() <= PUSH_COUNT ? stack : stack.copyWithCount(PUSH_COUNT);
-        ItemStack remainder = ItemHandlerHelper.insertItem(itemHandler, toInsert, false);
-        if (remainder.getCount() < toInsert.getCount())
+        try (Transaction tx = Transaction.openRoot())
         {
-            inventory.extractItem(SLOT_OUTPUT, toInsert.getCount() - remainder.getCount(), false);
+            int count = Math.min(inventory.getAmountAsInt(SLOT_OUTPUT), PUSH_COUNT);
+            int inserted = itemHandler.insert(resource, count, tx);
+            if (inserted > 0)
+            {
+                inventory.extract(SLOT_OUTPUT, resource, inserted, tx);
+                tx.commit();
+            }
         }
     }
 
-    public ItemStackHandler getInventory()
+    public ItemStacksResourceHandler getInventory()
     {
         return inventory;
     }
 
-    public IItemHandler getExternalInputItemHandler()
+    public ResourceHandler<ItemResource> getExternalInputItemHandler()
     {
         return inputItemHandler;
     }
 
-    public ExternalItemHandler getExternalOutputItemHandler()
+    public ExternalItemResourceHandler getExternalOutputItemHandler()
     {
         return outputItemHandler;
     }
@@ -222,13 +236,13 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
     @Override
     public void dropContents(Consumer<ItemStack> dropper)
     {
-        for (int i = 0; i < inventory.getSlots(); i++)
+        for (int i = 0; i < inventory.size(); i++)
         {
-            ItemStack stack = inventory.getStackInSlot(i);
-            if (!stack.isEmpty())
+            ItemResource resource = inventory.getResource(i);
+            if (!resource.isEmpty())
             {
-                dropper.accept(stack);
-                inventory.setStackInSlot(i, ItemStack.EMPTY);
+                dropper.accept(resource.toStack(inventory.getAmountAsInt(i)));
+                inventory.set(i, ItemResource.EMPTY, 0);
             }
         }
     }
@@ -239,7 +253,7 @@ public final class FoupLoaderBlockEntity extends AbstractCartInteractorBlockEnti
         super.onLoad();
         if (level instanceof ServerLevel serverLevel)
         {
-            outputTargetCache = BlockCapabilityCache.create(Capabilities.ItemHandler.BLOCK, serverLevel, worldPosition.below(), Direction.UP, () -> !isRemoved(), () -> {});
+            outputTargetCache = BlockCapabilityCache.create(Capabilities.Item.BLOCK, serverLevel, worldPosition.below(), Direction.UP, () -> !isRemoved(), () -> {});
         }
     }
 

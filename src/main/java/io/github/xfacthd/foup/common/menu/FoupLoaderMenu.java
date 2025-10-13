@@ -11,9 +11,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -63,7 +63,7 @@ public final class FoupLoaderMenu extends AbstractCartInteractorMenu
         this(containerId, inventory, new ClientItemHandler(LOADER_SLOTS), p -> true, DUMMY);
     }
 
-    public FoupLoaderMenu(int containerId, Inventory inventory, ItemStackHandler beInv, Predicate<Player> stillValid, LoaderStateProvider stateProvider)
+    public FoupLoaderMenu(int containerId, Inventory inventory, ItemStacksResourceHandler beInv, Predicate<Player> stillValid, LoaderStateProvider stateProvider)
     {
         super(FoupContent.MENU_TYPE_FOUP_LOADER.value(), containerId, stillValid, stateProvider);
         this.stateProvider = stateProvider;
@@ -136,11 +136,11 @@ public final class FoupLoaderMenu extends AbstractCartInteractorMenu
         void setAutoEject(boolean autoExtract);
     }
 
-    private static final class OutputSlot extends SlotItemHandler
+    private static final class OutputSlot extends ResourceHandlerSlot
     {
-        public OutputSlot(IItemHandler itemHandler, int index, int xPosition, int yPosition)
+        public OutputSlot(ItemStacksResourceHandler itemHandler, int index, int xPosition, int yPosition)
         {
-            super(itemHandler, index, xPosition, yPosition);
+            super(itemHandler, itemHandler::set, index, xPosition, yPosition);
         }
 
         @Override
@@ -150,7 +150,7 @@ public final class FoupLoaderMenu extends AbstractCartInteractorMenu
         }
     }
 
-    private static final class ClientItemHandler extends ItemStackHandler
+    private static final class ClientItemHandler extends ItemStacksResourceHandler
     {
         public ClientItemHandler(int slots)
         {
@@ -158,9 +158,9 @@ public final class FoupLoaderMenu extends AbstractCartInteractorMenu
         }
 
         @Override
-        public boolean isItemValid(int slot, ItemStack stack)
+        public boolean isValid(int slot, ItemResource resource)
         {
-            return FoupItem.canPlaceInFoup(stack);
+            return FoupItem.canPlaceInFoup(resource.toStack());
         }
     }
 }

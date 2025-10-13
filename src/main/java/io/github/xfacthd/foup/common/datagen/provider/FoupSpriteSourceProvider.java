@@ -4,6 +4,7 @@ import io.github.xfacthd.foup.Foup;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.client.renderer.texture.atlas.sources.SingleFile;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.client.data.SpriteSourceProvider;
 
@@ -20,6 +21,6 @@ public final class FoupSpriteSourceProvider extends SpriteSourceProvider
     @Override
     protected void gather()
     {
-        atlas(BLOCKS_ATLAS).addSource(new SingleFile(Utils.rl("entity/overhead_cart"), Optional.empty()));
+        atlas(AtlasIds.BLOCKS).addSource(new SingleFile(Utils.rl("entity/overhead_cart"), Optional.empty()));
     }
 }

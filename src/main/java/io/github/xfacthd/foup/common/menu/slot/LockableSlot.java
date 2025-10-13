@@ -2,18 +2,20 @@ package io.github.xfacthd.foup.common.menu.slot;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 import java.util.function.IntPredicate;
 
-public final class LockableSlot extends SlotItemHandler
+public final class LockableSlot extends ResourceHandlerSlot
 {
+    private final int index;
     private final IntPredicate isLocked;
 
-    public LockableSlot(IItemHandler itemHandler, int index, int xPosition, int yPosition, IntPredicate isLocked)
+    public LockableSlot(ItemStacksResourceHandler itemHandler, int index, int xPosition, int yPosition, IntPredicate isLocked)
     {
-        super(itemHandler, index, xPosition, yPosition);
+        super(itemHandler, itemHandler::set, index, xPosition, yPosition);
+        this.index = index;
         this.isLocked = isLocked;
     }
 

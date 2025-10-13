@@ -15,6 +15,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -107,6 +108,11 @@ public final class Utils
     public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> payloadType(String name)
     {
         return new CustomPacketPayload.Type<>(Utils.rl(name));
+    }
+
+    public static int getMaxStackSize(ItemResource resource)
+    {
+        return resource.isEmpty() ? Item.ABSOLUTE_MAX_STACK_SIZE : resource.getMaxStackSize();
     }
 
     public static int getMaxStackSize(ItemStack stack)

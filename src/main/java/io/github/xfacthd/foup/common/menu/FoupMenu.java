@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.StackCopySlot;
+import net.neoforged.neoforge.world.inventory.StackCopySlot;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
