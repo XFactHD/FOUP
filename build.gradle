@@ -28,9 +28,6 @@ neoForge {
             client()
             systemProperty 'neoforge.enabledGameTestNamespaces', 'foup'
             systemProperty 'terminal.ansi', 'true'
-
-            // TODO: this should be moved to a NeoForge patch or MDG
-            programArgument '--offlineDeveloperMode'
         }
 
         server {
