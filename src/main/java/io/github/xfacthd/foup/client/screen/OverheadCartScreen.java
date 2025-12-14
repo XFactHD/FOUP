@@ -1,5 +1,6 @@
 package io.github.xfacthd.foup.client.screen;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.github.xfacthd.foup.client.screen.widget.FilterSlot;
 import io.github.xfacthd.foup.client.screen.widget.IndicatorButton;
 import io.github.xfacthd.foup.client.screen.widget.StackSizeCycleBox;
@@ -34,16 +35,15 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.Locale;
@@ -55,8 +55,8 @@ import java.util.OptionalInt;
 // TODO: add description tooltips for filter and count
 public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCartMenu>
 {
-    private static final ResourceLocation BACKGROUND = Utils.rl("background");
-    private static final ResourceLocation INVENTORY = ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
+    private static final Identifier BACKGROUND = Utils.rl("background");
+    private static final Identifier INVENTORY = Identifier.withDefaultNamespace("textures/gui/container/generic_54.png");
     private static final int WIDTH = 300;
     private static final int MIN_HEIGHT = 240;
     private static final int MAX_HEIGHT = 440;
@@ -263,7 +263,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     @Override // For some reason AbstractContainerScreen doesn't forward dragging to widgets
     public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY)
     {
-        if (getFocused() == scheduleList && isDragging() && event.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT && scheduleList.isMouseOver(event.x(), event.y()))
+        if (getFocused() == scheduleList && isDragging() && event.button() == InputConstants.MOUSE_BUTTON_LEFT && scheduleList.isMouseOver(event.x(), event.y()))
         {
             return scheduleList.mouseDragged(event, dragX, dragY);
         }
@@ -396,17 +396,17 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         @Override
         protected boolean isValidClickButton(MouseButtonInfo button)
         {
-            return button.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT || button.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT;
+            return button.button() == InputConstants.MOUSE_BUTTON_LEFT || button.button() == InputConstants.MOUSE_BUTTON_RIGHT;
         }
 
         private static final class ScheduleEntry extends Entry<ScheduleEntry>
         {
-            private static final ResourceLocation ICON_UP = ResourceLocation.withDefaultNamespace("statistics/sort_up");
-            private static final ResourceLocation ICON_DOWN = ResourceLocation.withDefaultNamespace("statistics/sort_down");
-            private static final ResourceLocation ICON_EDIT = Utils.rl("edit");
-            private static final ResourceLocation ICON_SAVE = Utils.rl("save");
-            private static final ResourceLocation ICON_DELETE = Utils.rl("delete");
-            private static final ResourceLocation ICON_ERROR = ResourceLocation.withDefaultNamespace("icon/unseen_notification");
+            private static final Identifier ICON_UP = Identifier.withDefaultNamespace("statistics/sort_up");
+            private static final Identifier ICON_DOWN = Identifier.withDefaultNamespace("statistics/sort_down");
+            private static final Identifier ICON_EDIT = Utils.rl("edit");
+            private static final Identifier ICON_SAVE = Utils.rl("save");
+            private static final Identifier ICON_DELETE = Utils.rl("delete");
+            private static final Identifier ICON_ERROR = Identifier.withDefaultNamespace("icon/unseen_notification");
             private static final int SPRITE_SIZE = 18;
             private static final int ELEM_HEIGHT = 18;
             private static final int MOVE_BTN_WIDTH = 18;
@@ -465,9 +465,8 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
                 this.boxStation = new EditBox(owner.font, LEFT_ELEM_WIDTH, ELEM_HEIGHT, SELECT_STATION); // TODO: replace with combo box or provide auto-complete suggestions
                 this.boxStation.setValue(entry.station());
                 this.boxStation.setResponder(this::onStationChange);
-                this.buttonAction = CycleButton.builder(StationAction::getTranslation)
+                this.buttonAction = CycleButton.builder(StationAction::getTranslation, entry.action())
                         .withValues(StationAction.values())
-                        .withInitialValue(entry.action())
                         .create(0, 0, LEFT_ELEM_WIDTH, ELEM_HEIGHT, BUTTON_ACTION, this::onActionChange);
                 this.checkFilter = new IndicatorButton(0, 0, CHECKBOX_SIZE, CHECKBOX_SIZE, CHECK_FILTER, () -> useFilter, this::onCheckFilterToggle);
                 this.filterSlot = new FilterSlot(owner, 0, 0, SLOT_FILTER, FoupItem::canPlaceInFoup);

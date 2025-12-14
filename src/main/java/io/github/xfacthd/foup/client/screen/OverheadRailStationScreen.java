@@ -17,10 +17,10 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.TriState;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Objects;
@@ -28,7 +28,7 @@ import java.util.Objects;
 public final class OverheadRailStationScreen extends Screen
 {
     public static final Component SCREEN_TITLE = Component.translatable("screen.foup.rail_station");
-    private static final ResourceLocation BACKGROUND = Utils.rl("textures/gui/overhead_rail_station.png");
+    private static final Identifier BACKGROUND = Utils.rl("textures/gui/overhead_rail_station.png");
     private static final int WIDTH = 186;
     private static final int HEIGHT = 90;
     private static final int TITLE_X = 8;

@@ -15,22 +15,22 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Objects;
 
 public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMenu>
 {
-    private static final ResourceLocation BACKGROUND = Utils.rl("textures/gui/foup_loader.png");
-    private static final ResourceLocation LOCK_ICON = ResourceLocation.withDefaultNamespace("container/cartography_table/locked");
-    private static final ResourceLocation PROGRESS_ICON = ResourceLocation.withDefaultNamespace("container/furnace/burn_progress");
-    private static final ResourceLocation CROSS_ICON = ResourceLocation.withDefaultNamespace("container/beacon/cancel");
+    private static final Identifier BACKGROUND = Utils.rl("textures/gui/foup_loader.png");
+    private static final Identifier LOCK_ICON = Identifier.withDefaultNamespace("container/cartography_table/locked");
+    private static final Identifier PROGRESS_ICON = Identifier.withDefaultNamespace("container/furnace/burn_progress");
+    private static final Identifier CROSS_ICON = Identifier.withDefaultNamespace("container/beacon/cancel");
     private static final int WIDTH = 176;
     private static final int HEIGHT = 174;
     private static final int SLOT_SIZE_INNER = 16;

@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
@@ -20,7 +20,7 @@ import org.joml.Quaternionf;
 
 public final class OverheadCartRenderer extends EntityRenderer<OverheadCartEntity, OverheadCartRenderState>
 {
-    private static final ResourceLocation TEXTURE = Utils.rl("textures/entity/overhead_cart.png");
+    private static final Identifier TEXTURE = Utils.rl("textures/entity/overhead_cart.png");
     private static final float Y_OFFSET_FLAT = 9F/16F;
     private static final float Y_OFFSET_3D = 12.5F/16F;
     private static final Quaternionf FLAT_PRE_ROTATION = Axis.XN.rotationDegrees(90F);

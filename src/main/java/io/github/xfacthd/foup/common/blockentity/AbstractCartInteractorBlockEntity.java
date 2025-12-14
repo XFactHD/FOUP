@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -32,8 +32,7 @@ public abstract sealed class AbstractCartInteractorBlockEntity extends BaseBlock
     // TODO: consider displaying state on the block itself
     private State state = State.IDLE;
     private int delayCounter = 0;
-    @Nullable
-    private Schedule.Entry currScheduleEntry = null;
+    private Schedule.@Nullable Entry currScheduleEntry = null;
     @Nullable
     protected StationAction currAction = null;
     @Nullable

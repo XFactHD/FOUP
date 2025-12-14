@@ -5,7 +5,7 @@ import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayDeque;
 import java.util.Collection;

@@ -36,7 +36,7 @@ public final class FoupCommands
     private static ArgumentBuilder<CommandSourceStack, ?> registerDebugRailNetworkCommand()
     {
         return Commands.literal("debug_rail_net")
-                .requires(cs -> cs.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .executes(ctx ->
                 {
                     if (RailNetworkDebugPayloads.addReceiver(ctx.getSource().getPlayerOrException()))
@@ -52,7 +52,7 @@ public final class FoupCommands
     {
         return Commands.literal("networks")
                 .then(Commands.literal("list")
-                        .requires(cs -> cs.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .executes(ctx ->
                         {
                             MutableComponent networks = Component.literal("List of FOUP rail networks:");
@@ -64,7 +64,7 @@ public final class FoupCommands
                         })
                 )
                 .then(Commands.literal("remove")
-                        .requires(cs -> cs.hasPermission(Commands.LEVEL_ADMINS))
+                        .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
                         .then(Commands.argument("network_id", LongArgumentType.longArg())
                                 .executes(ctx ->
                                 {
@@ -84,7 +84,7 @@ public final class FoupCommands
     private static ArgumentBuilder<CommandSourceStack, ?> registerFixStuckCartsCommand()
     {
         return Commands.literal("fix_stuck_carts")
-                .requires(cs -> cs.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.argument("network_id", LongArgumentType.longArg())
                         .executes(ctx ->
                         {

@@ -11,7 +11,7 @@ import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;

@@ -14,7 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,7 +27,7 @@ public final class RailNetworkSavedData extends SavedData
     private static final String NAME = "foup_rail_networks";
     private static final SavedDataType<RailNetworkSavedData> TYPE = new SavedDataType<>(
             NAME,
-            ctx -> new RailNetworkSavedData(ctx.levelOrThrow()),
+            RailNetworkSavedData::new,
             ctx -> PackedData.CODEC.xmap(data -> unpack(data, ctx), RailNetworkSavedData::pack)
     );
 
@@ -35,9 +35,9 @@ public final class RailNetworkSavedData extends SavedData
     private final Long2ObjectMap<Graph<RailNetwork>> networks;
     private long idCounter = 0;
 
-    private RailNetworkSavedData(ServerLevel level)
+    private RailNetworkSavedData(@Nullable ServerLevel level)
     {
-        this.level = level;
+        this.level = Objects.requireNonNull(level);
         this.networks = new Long2ObjectOpenHashMap<>();
     }
 
@@ -174,9 +174,10 @@ public final class RailNetworkSavedData extends SavedData
         return new PackedData(netList, idCounter);
     }
 
-    private static RailNetworkSavedData unpack(PackedData data, Context ctx)
+    private static RailNetworkSavedData unpack(PackedData data, @Nullable ServerLevel level)
     {
-        ServerLevel Level = ctx.levelOrThrow();
+        Objects.requireNonNull(level);
+
         Long2ObjectMap<Graph<RailNetwork>> networks = new Long2ObjectOpenHashMap<>(data.networks.size());
         for (PackedNetwork net : data.networks)
         {
@@ -188,14 +189,14 @@ public final class RailNetworkSavedData extends SavedData
             TrackNode.inhibitDataAccess = true;
 
             // Ensure that a graph exists even if no neighbors exist
-            connectTracks(Level, net.nodes.getFirst().node, null);
+            connectTracks(level, net.nodes.getFirst().node, null);
 
             for (PackedNode nodeData : net.nodes)
             {
                 TrackNode node = nodeData.node;
                 for (int neighbour : nodeData.neighbors)
                 {
-                    connectTracks(Level, node, net.nodes.get(neighbour).node);
+                    connectTracks(level, node, net.nodes.get(neighbour).node);
                 }
             }
 
@@ -206,7 +207,7 @@ public final class RailNetworkSavedData extends SavedData
             graph.getContextData().setId(net.id);
             networks.put(net.id, graph);
         }
-        return new RailNetworkSavedData(Level, data.idCounter, networks);
+        return new RailNetworkSavedData(level, data.idCounter, networks);
     }
 
     private record PackedData(List<PackedNetwork> networks, long idCounter)

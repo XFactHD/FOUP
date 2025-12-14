@@ -4,7 +4,8 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 
@@ -17,9 +18,9 @@ public final class ClientUtils
             .build();
     public static final RenderType INFO_QUADS = RenderType.create(
             "foup_info_quads",
-            RenderType.TRANSIENT_BUFFER_SIZE,
-            INFO_QUADS_PIPELINE,
-            RenderType.CompositeState.builder().createCompositeState(false)
+            RenderSetup.builder(INFO_QUADS_PIPELINE)
+                    .bufferSize(RenderType.TRANSIENT_BUFFER_SIZE)
+                    .createRenderSetup()
     );
 
     public static void onRegisterRenderPipelines(RegisterRenderPipelinesEvent event)

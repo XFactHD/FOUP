@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
@@ -32,9 +32,9 @@ public final class Utils
                     Long2ObjectOpenHashMap::new
             ));
 
-    public static ResourceLocation rl(String path)
+    public static Identifier rl(String path)
     {
-        return ResourceLocation.fromNamespaceAndPath(Foup.MOD_ID, path);
+        return Identifier.fromNamespaceAndPath(Foup.MOD_ID, path);
     }
 
     public static Vec3 fraction(Vec3 vec)

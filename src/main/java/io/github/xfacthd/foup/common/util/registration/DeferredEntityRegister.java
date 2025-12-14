@@ -3,7 +3,7 @@ package io.github.xfacthd.foup.common.util.registration;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -22,7 +22,7 @@ public final class DeferredEntityRegister extends DeferredRegister<EntityType<?>
     @Override
     @SuppressWarnings("unchecked")
     protected <I extends EntityType<?>> DeferredHolder<EntityType<?>, I> createHolder(
-            ResourceKey<? extends Registry<EntityType<?>>> registryKey, ResourceLocation key
+            ResourceKey<? extends Registry<EntityType<?>>> registryKey, Identifier key
     )
     {
         return (DeferredHolder<EntityType<?>, I>) DeferredEntity.createBlockEntity(ResourceKey.create(registryKey, key));
@@ -32,7 +32,7 @@ public final class DeferredEntityRegister extends DeferredRegister<EntityType<?>
             String name, EntityType.EntityFactory<T> factory, MobCategory category, UnaryOperator<EntityType.Builder<T>> builder
     )
     {
-        ResourceKey<EntityType<?>> dfuKey = ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(getNamespace(), name));
+        ResourceKey<EntityType<?>> dfuKey = ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(getNamespace(), name));
         //noinspection ConstantConditions
         return (DeferredEntity<T>) register(name, () -> builder.apply(EntityType.Builder.of(factory, category)).build(dfuKey));
     }

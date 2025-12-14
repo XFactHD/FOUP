@@ -1,18 +1,19 @@
-package io.github.xfacthd.foup.common.compat.emi;
+// FIXME: RL->ID
+/*package io.github.xfacthd.foup.common.compat.emi;
 
 import dev.emi.emi.api.recipe.EmiPatternCraftingRecipe;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.SlotWidget;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.component.HeldFoup;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
 public final class AddFoupToCartEmiRecipe extends EmiPatternCraftingRecipe
 {
-    public AddFoupToCartEmiRecipe(ResourceLocation id)
+    public AddFoupToCartEmiRecipe(Identifier id)
     {
         super(List.of(EmiStack.of(FoupContent.ITEM_CART), EmiStack.of(FoupContent.ITEM_FOUP)), createOutput(), id, true);
     }
@@ -46,3 +47,4 @@ public final class AddFoupToCartEmiRecipe extends EmiPatternCraftingRecipe
         return EmiStack.of(stack);
     }
 }
+*/

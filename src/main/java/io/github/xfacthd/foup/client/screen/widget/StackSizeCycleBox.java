@@ -10,27 +10,27 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import org.lwjgl.glfw.GLFW;
 
 public final class StackSizeCycleBox extends AbstractWidget
 {
     private static final WidgetSprites BACKGROUND_SPRITES = new WidgetSprites(
-            ResourceLocation.withDefaultNamespace("widget/text_field"),
-            ResourceLocation.withDefaultNamespace("widget/text_field_highlighted")
+            Identifier.withDefaultNamespace("widget/text_field"),
+            Identifier.withDefaultNamespace("widget/text_field_highlighted")
     );
     private static final WidgetSprites BUTTON_SPRITES = new WidgetSprites(
-            ResourceLocation.withDefaultNamespace("widget/button"),
-            ResourceLocation.withDefaultNamespace("widget/button_disabled"),
-            ResourceLocation.withDefaultNamespace("widget/button_highlighted")
+            Identifier.withDefaultNamespace("widget/button"),
+            Identifier.withDefaultNamespace("widget/button_disabled"),
+            Identifier.withDefaultNamespace("widget/button_highlighted")
     );
     private static final int TEXT_COLOR = 0xFFE0E0E0;
     private static final int TEXT_COLOR_UNEDITABLE = 0xFF707070;
     private static final int MIN = 1;
     private static final int MAX = Item.ABSOLUTE_MAX_STACK_SIZE;
-    private static final ResourceLocation ICON_SORT_UP = ResourceLocation.withDefaultNamespace("statistics/sort_up");
-    private static final ResourceLocation ICON_SORT_DOWN = ResourceLocation.withDefaultNamespace("statistics/sort_down");
+    private static final Identifier ICON_SORT_UP = Identifier.withDefaultNamespace("statistics/sort_up");
+    private static final Identifier ICON_SORT_DOWN = Identifier.withDefaultNamespace("statistics/sort_down");
 
     private final Font font;
     private int value;
@@ -47,16 +47,16 @@ public final class StackSizeCycleBox extends AbstractWidget
     @Override
     protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
     {
-        ResourceLocation background = BACKGROUND_SPRITES.get(isActive(), isFocused());
+        Identifier background = BACKGROUND_SPRITES.get(isActive(), isFocused());
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, background, getX(), getY(), width - 13, height);
 
         boolean overButtons = isActive() && isHovered && mouseX >= getX() + width - 13;
         boolean hoveredUp = overButtons && mouseY < getY() + height / 2;
         boolean hoveredDown = overButtons && mouseY >= getY() + height / 2;
 
-        ResourceLocation buttonUp = BUTTON_SPRITES.get(isActive() && editable && value < MAX, hoveredUp);
+        Identifier buttonUp = BUTTON_SPRITES.get(isActive() && editable && value < MAX, hoveredUp);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, buttonUp, getX() + width - 13, getY(), 13, height / 2);
-        ResourceLocation buttonDown = BUTTON_SPRITES.get(isActive() && editable && value > MIN, hoveredDown);
+        Identifier buttonDown = BUTTON_SPRITES.get(isActive() && editable && value > MIN, hoveredDown);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, buttonDown, getX() + width - 13, getY() + height / 2, 13, height / 2);
 
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ICON_SORT_UP, getX() + width - 14, getY() + (height / 4) - 6, 14, 14);

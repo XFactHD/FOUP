@@ -22,11 +22,11 @@ import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.client.renderer.block.model.VariantMutator;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.neoforged.neoforge.client.model.generators.loaders.CompositeModelBuilder;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class FoupModelProvider extends ModelProvider
 {
@@ -38,15 +38,15 @@ public final class FoupModelProvider extends ModelProvider
     @Override
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels)
     {
-        ResourceLocation straightModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL.value());
+        Identifier straightModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL.value());
         blockModels.blockStateOutput.accept(
                 MultiVariantGenerator.dispatch(FoupContent.BLOCK_RAIL.value(), BlockModelGenerators.plainVariant(straightModel))
                         .with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING)
         );
         itemModels.itemModelOutput.accept(FoupContent.BLOCK_RAIL.value().asItem(), ItemModelUtils.plainModel(straightModel));
 
-        ResourceLocation curveModelRight = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_CURVE.value(), "_right");
-        ResourceLocation curveModelLeft = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_CURVE.value(), "_left");
+        Identifier curveModelRight = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_CURVE.value(), "_right");
+        Identifier curveModelLeft = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_CURVE.value(), "_left");
         blockModels.blockStateOutput.accept(
                 MultiVariantGenerator.dispatch(FoupContent.BLOCK_RAIL_CURVE.value())
                         .with(
@@ -58,10 +58,10 @@ public final class FoupModelProvider extends ModelProvider
         );
         itemModels.itemModelOutput.accept(FoupContent.BLOCK_RAIL_CURVE.value().asItem(), ItemModelUtils.plainModel(curveModelRight));
 
-        ResourceLocation switchRightInModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_SWITCH.value(), "_right_in");
-        ResourceLocation switchRightOutModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_SWITCH.value(), "_right_out");
-        ResourceLocation switchLeftInModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_SWITCH.value(), "_left_in");
-        ResourceLocation switchLeftOutModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_SWITCH.value(), "_left_out");
+        Identifier switchRightInModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_SWITCH.value(), "_right_in");
+        Identifier switchRightOutModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_SWITCH.value(), "_right_out");
+        Identifier switchLeftInModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_SWITCH.value(), "_left_in");
+        Identifier switchLeftOutModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_SWITCH.value(), "_left_out");
         blockModels.blockStateOutput.accept(
                 MultiVariantGenerator.dispatch(FoupContent.BLOCK_RAIL_SWITCH.value())
                         .with(
@@ -81,7 +81,7 @@ public final class FoupModelProvider extends ModelProvider
                 .requiredTextureSlot(texIndicator)
                 .renderType("minecraft:cutout")
                 .build();
-        ResourceLocation stationModelLinked = ExtendedModelTemplateBuilder.builder()
+        Identifier stationModelLinked = ExtendedModelTemplateBuilder.builder()
                 .parent(mcLocation("block/block"))
                 .renderType("minecraft:cutout")
                 .requiredTextureSlot(TextureSlot.PARTICLE)
@@ -99,7 +99,7 @@ public final class FoupModelProvider extends ModelProvider
                         TextureMapping.particle(mcLocation("block/iron_block")),
                         blockModels.modelOutput
                 );
-        ResourceLocation stationModelUnlinked = ExtendedModelTemplateBuilder.builder()
+        Identifier stationModelUnlinked = ExtendedModelTemplateBuilder.builder()
                 .parent(mcLocation("block/block"))
                 .renderType("minecraft:cutout")
                 .requiredTextureSlot(TextureSlot.PARTICLE)
@@ -130,26 +130,26 @@ public final class FoupModelProvider extends ModelProvider
 
         ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_STATION.value(), "_unlinked");
 
-        ResourceLocation loaderModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_LOADER.value());
+        Identifier loaderModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_LOADER.value());
         blockModels.blockStateOutput.accept(
                 MultiVariantGenerator.dispatch(FoupContent.BLOCK_FOUP_LOADER.value(), BlockModelGenerators.plainVariant(loaderModel))
                         .with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING_ALT)
         );
         itemModels.itemModelOutput.accept(FoupContent.BLOCK_FOUP_LOADER.value().asItem(), ItemModelUtils.plainModel(loaderModel));
 
-        ResourceLocation interfaceModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_INTERFACE.value());
+        Identifier interfaceModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_INTERFACE.value());
         blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(
                 FoupContent.BLOCK_FOUP_STORAGE_INTERFACE.value(),
                 BlockModelGenerators.plainVariant(interfaceModel)
         ));
-        ResourceLocation interfaceItemModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_INTERFACE.value().asItem());
+        Identifier interfaceItemModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_INTERFACE.value().asItem());
         itemModels.itemModelOutput.accept(FoupContent.BLOCK_FOUP_STORAGE_INTERFACE.value().asItem(), ItemModelUtils.plainModel(interfaceItemModel));
 
         registerStorageLocker(blockModels);
-        ResourceLocation lockerItemModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value().asItem());
+        Identifier lockerItemModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value().asItem());
         itemModels.itemModelOutput.accept(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value().asItem(), ItemModelUtils.plainModel(lockerItemModel));
 
-        ResourceLocation foupItemModel = ModelLocationUtils.getModelLocation(FoupContent.ITEM_FOUP.asItem());
+        Identifier foupItemModel = ModelLocationUtils.getModelLocation(FoupContent.ITEM_FOUP.asItem());
         itemModels.itemModelOutput.accept(FoupContent.ITEM_FOUP.asItem(), ItemModelUtils.plainModel(foupItemModel));
 
         itemModels.itemModelOutput.accept(
@@ -166,15 +166,15 @@ public final class FoupModelProvider extends ModelProvider
 
     private static void registerStorageLocker(BlockModelGenerators blockModels)
     {
-        ResourceLocation caseModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_case");
-        ResourceLocation botLeftEmptyModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_bottom_left_empty");
-        ResourceLocation botRightEmptyModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_bottom_right_empty");
-        ResourceLocation topLeftEmptyModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_top_left_empty");
-        ResourceLocation topRightEmptyModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_top_right_empty");
-        ResourceLocation botLeftFullModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_bottom_left_full");
-        ResourceLocation botRightFullModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_bottom_right_full");
-        ResourceLocation topLeftFullModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_top_left_full");
-        ResourceLocation topRightFullModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_top_right_full");
+        Identifier caseModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_case");
+        Identifier botLeftEmptyModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_bottom_left_empty");
+        Identifier botRightEmptyModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_bottom_right_empty");
+        Identifier topLeftEmptyModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_top_left_empty");
+        Identifier topRightEmptyModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_top_right_empty");
+        Identifier botLeftFullModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_bottom_left_full");
+        Identifier botRightFullModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_bottom_right_full");
+        Identifier topLeftFullModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_top_left_full");
+        Identifier topRightFullModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_top_right_full");
 
         MultiPartGenerator generator = MultiPartGenerator.multiPart(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value());
         addLockerPart(generator, caseModel, null, false, false);
@@ -197,7 +197,7 @@ public final class FoupModelProvider extends ModelProvider
         blockModels.blockStateOutput.accept(generator);
     }
 
-    private static void addLockerPart(MultiPartGenerator generator, ResourceLocation model, @Nullable BooleanProperty prop, boolean value, boolean mirror)
+    private static void addLockerPart(MultiPartGenerator generator, Identifier model, @Nullable BooleanProperty prop, boolean value, boolean mirror)
     {
         for (Direction dir : PropertyHolder.FACING_HOR.getPossibleValues())
         {

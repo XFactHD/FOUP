@@ -1,7 +1,7 @@
 package io.github.xfacthd.foup.common.util;
 
-import net.minecraft.Util;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Util;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;

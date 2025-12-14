@@ -20,18 +20,18 @@ import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
 public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<FoupStorageInterfaceBlockEntity, FoupStorageInterfaceRenderState>
 {
-    private static final ResourceLocation DOOR_TEXTURE = ResourceLocation.withDefaultNamespace("block/vault_top");
+    private static final Identifier DOOR_TEXTURE = Identifier.withDefaultNamespace("block/vault_top");
     private static final float MIN_XZ = 3F/16F;
     private static final float MAX_XZ = 13F/16F;
     private static final float MAX_Y = 1.95F/16F;
@@ -154,7 +154,7 @@ public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<F
             FoupStorageInterfaceRenderState renderState,
             float partialTick,
             Vec3 cameraPos,
-            @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay
+            ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
     )
     {
         BlockEntityRenderer.super.extractRenderState(be, renderState, partialTick, cameraPos, crumblingOverlay);

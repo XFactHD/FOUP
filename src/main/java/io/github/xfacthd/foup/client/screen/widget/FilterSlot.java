@@ -7,7 +7,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 
@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 
 public final class FilterSlot extends AbstractWidget
 {
-    private static final ResourceLocation BACKGROUND = ResourceLocation.withDefaultNamespace("container/slot");
+    private static final Identifier BACKGROUND = Identifier.withDefaultNamespace("container/slot");
 
     private final AbstractContainerScreen<?> owner;
     private final Predicate<ItemStack> preFilter;

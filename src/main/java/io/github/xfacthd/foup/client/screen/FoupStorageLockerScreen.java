@@ -7,16 +7,16 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class FoupStorageLockerScreen extends AbstractContainerScreen<FoupStorageLockerMenu>
 {
-    private static final ResourceLocation BACKGROUND = Utils.rl("textures/gui/foup_storage_locker.png");
-    private static final ResourceLocation LOCK_ICON = ResourceLocation.withDefaultNamespace("container/cartography_table/locked");
+    private static final Identifier BACKGROUND = Utils.rl("textures/gui/foup_storage_locker.png");
+    private static final Identifier LOCK_ICON = Identifier.withDefaultNamespace("container/cartography_table/locked");
     private static final int WIDTH = 176;
     private static final int HEIGHT = 174;
     private static final int SLOT_SIZE_INNER = 16;
