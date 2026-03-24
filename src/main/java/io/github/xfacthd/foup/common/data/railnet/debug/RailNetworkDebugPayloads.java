@@ -7,7 +7,8 @@ import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.railnet.RailNetwork;
 import io.github.xfacthd.foup.common.data.railnet.RailNetworkSavedData;
 import io.github.xfacthd.foup.common.data.railnet.TrackNode;
-import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRailNetworkDebugPayload;
+import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRailNetworkDebugClearPayload;
+import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRailNetworkDebugDataPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -50,7 +51,7 @@ public final class RailNetworkDebugPayloads
         RailNetworkSavedData savedData = RailNetworkSavedData.get(level);
         Graph<RailNetwork> network = savedData.getNetwork(id);
         Optional<RailNetworkDebugData> debugData = network != null ? pack(network) : Optional.empty();
-        ClientboundRailNetworkDebugPayload payload = new ClientboundRailNetworkDebugPayload(id, debugData);
+        ClientboundRailNetworkDebugDataPayload payload = new ClientboundRailNetworkDebugDataPayload(id, debugData);
         RECEIVERS.forEach(player -> PacketDistributor.sendToPlayer(player, payload));
     }
 
@@ -77,8 +78,18 @@ public final class RailNetworkDebugPayloads
         if (RECEIVERS.add(player))
         {
             RailNetworkSavedData.get(player.level()).forEach((id, network) ->
-                    PacketDistributor.sendToPlayer(player, new ClientboundRailNetworkDebugPayload(id, pack(network)))
+                    PacketDistributor.sendToPlayer(player, new ClientboundRailNetworkDebugDataPayload(id, pack(network)))
             );
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean removeReceiver(ServerPlayer player)
+    {
+        if (RECEIVERS.remove(player))
+        {
+            PacketDistributor.sendToPlayer(player, ClientboundRailNetworkDebugClearPayload.INSTANCE);
             return true;
         }
         return false;

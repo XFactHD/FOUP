@@ -4,11 +4,9 @@ import com.mojang.serialization.MapCodec;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.component.HeldFoup;
 import io.github.xfacthd.foup.common.data.component.ItemContents;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -20,11 +18,6 @@ public final class AddFoupToCartRecipe extends CustomRecipe
     public static final MapCodec<AddFoupToCartRecipe> CODEC = MapCodec.unit(AddFoupToCartRecipe::new);
     public static final StreamCodec<RegistryFriendlyByteBuf, AddFoupToCartRecipe> STREAM_CODEC = NeoForgeStreamCodecs.uncheckedUnit(new AddFoupToCartRecipe());
     private static final int SIZE = 2;
-
-    public AddFoupToCartRecipe()
-    {
-        super(CraftingBookCategory.MISC);
-    }
 
     @Override
     public boolean matches(CraftingInput input, Level level)
@@ -52,7 +45,7 @@ public final class AddFoupToCartRecipe extends CustomRecipe
     }
 
     @Override
-    public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries)
+    public ItemStack assemble(CraftingInput input)
     {
         if (input.ingredientCount() != SIZE) return ItemStack.EMPTY;
 

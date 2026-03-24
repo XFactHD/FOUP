@@ -7,7 +7,8 @@ import io.github.xfacthd.foup.common.blockentity.OverheadRailStationBlockEntity;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundAcknowledgeStationLinkPayload;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundAcknowledgeStationRenamePayload;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundOpenOverheadRailStationScreenPayload;
-import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRailNetworkDebugPayload;
+import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRailNetworkDebugClearPayload;
+import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRailNetworkDebugDataPayload;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRefreshStaleSchedulePayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -18,16 +19,22 @@ public final class ClientNetworkHandler
 {
     public static void onRegisterPayloadHandlers(RegisterClientPayloadHandlersEvent event)
     {
-        event.register(ClientboundRailNetworkDebugPayload.TYPE, ClientNetworkHandler::handleRailNetDebug);
+        event.register(ClientboundRailNetworkDebugDataPayload.TYPE, ClientNetworkHandler::handleRailNetDebugData);
+        event.register(ClientboundRailNetworkDebugClearPayload.TYPE, ClientNetworkHandler::handleRailNetDebugClear);
         event.register(ClientboundOpenOverheadRailStationScreenPayload.TYPE, ClientNetworkHandler::handleOpenOverheadRailStationScreen);
         event.register(ClientboundAcknowledgeStationRenamePayload.TYPE, ClientNetworkHandler::handleStationRenameAck);
         event.register(ClientboundAcknowledgeStationLinkPayload.TYPE, ClientNetworkHandler::handleStationLinkAck);
         event.register(ClientboundRefreshStaleSchedulePayload.TYPE, ClientNetworkHandler::handleRefreshStaleSchedule);
     }
 
-    private static void handleRailNetDebug(ClientboundRailNetworkDebugPayload payload, IPayloadContext ctx)
+    private static void handleRailNetDebugData(ClientboundRailNetworkDebugDataPayload payload, IPayloadContext ctx)
     {
         RailNetworkDebugRenderer.handleData(payload.networkId(), payload.data().orElse(null));
+    }
+
+    private static void handleRailNetDebugClear(ClientboundRailNetworkDebugClearPayload payload, IPayloadContext ctx)
+    {
+        RailNetworkDebugRenderer.clearData();
     }
 
     private static void handleOpenOverheadRailStationScreen(ClientboundOpenOverheadRailStationScreenPayload payload, IPayloadContext ctx)

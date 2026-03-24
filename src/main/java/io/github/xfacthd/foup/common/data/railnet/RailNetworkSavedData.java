@@ -6,11 +6,13 @@ import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
 import io.github.xfacthd.foup.common.data.RenameResult;
 import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
+import io.github.xfacthd.foup.common.util.Utils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
@@ -24,44 +26,43 @@ import java.util.function.BiConsumer;
 
 public final class RailNetworkSavedData extends SavedData
 {
-    private static final String NAME = "foup_rail_networks";
-    private static final SavedDataType<RailNetworkSavedData> TYPE = new SavedDataType<>(
-            NAME,
-            RailNetworkSavedData::new,
-            ctx -> PackedData.CODEC.xmap(data -> unpack(data, ctx), RailNetworkSavedData::pack)
-    );
+    private static final Identifier NAME = Utils.rl("rail_networks");
+    private static final Codec<RailNetworkSavedData> CODEC = PackedData.CODEC.xmap(RailNetworkSavedData::new, RailNetworkSavedData::pack);
+    private static final SavedDataType<RailNetworkSavedData> TYPE = new SavedDataType<>(NAME, RailNetworkSavedData::new, CODEC);
 
-    private final ServerLevel level;
     private final Long2ObjectMap<Graph<RailNetwork>> networks;
     private long idCounter = 0;
+    @Nullable
+    private PackedData packedData;
 
-    private RailNetworkSavedData(@Nullable ServerLevel level)
+    private RailNetworkSavedData()
     {
-        this.level = Objects.requireNonNull(level);
         this.networks = new Long2ObjectOpenHashMap<>();
     }
 
-    private RailNetworkSavedData(ServerLevel level, long idCounter, Long2ObjectMap<Graph<RailNetwork>> networks)
+    private RailNetworkSavedData(PackedData packedData)
     {
-        this.level = level;
-        this.idCounter = idCounter;
-        this.networks = networks;
+        this.networks = new Long2ObjectOpenHashMap<>(packedData.networks.size());
+        this.idCounter = packedData.idCounter;
+        this.packedData = packedData;
     }
 
     public static RailNetworkSavedData get(ServerLevel level)
     {
-        return level.getDataStorage().computeIfAbsent(TYPE);
+        RailNetworkSavedData netData = level.getDataStorage().computeIfAbsent(TYPE);
+        netData.initIfNeeded(level);
+        return netData;
     }
 
     public static void connectTracks(ServerLevel level, TrackNode node, @Nullable TrackNode neighbour)
     {
         if (neighbour != null)
         {
-            Graph.connect(node, neighbour, g -> new RailNetwork(level));
+            Graph.connect(node, neighbour, _ -> new RailNetwork(level));
         }
         else
         {
-            Graph.integrate(node, List.of(), g -> new RailNetwork(level));
+            Graph.integrate(node, List.of(), _ -> new RailNetwork(level));
         }
     }
 
@@ -84,7 +85,7 @@ public final class RailNetworkSavedData extends SavedData
         return result;
     }
 
-    void tryAddNetwork(Graph<RailNetwork> graph)
+    void tryAddNetwork(ServerLevel level, Graph<RailNetwork> graph)
     {
         if (!networks.containsValue(graph))
         {
@@ -97,7 +98,7 @@ public final class RailNetworkSavedData extends SavedData
         setDirty();
     }
 
-    void tryRemoveNetwork(Graph<RailNetwork> graph, TrackNode node)
+    void tryRemoveNetwork(ServerLevel level, Graph<RailNetwork> graph, TrackNode node)
     {
         Collection<GraphObject<RailNetwork>> objects = graph.getObjects();
         // The graph clears the node's ref to the graph before removing the node from the graph
@@ -112,11 +113,13 @@ public final class RailNetworkSavedData extends SavedData
     }
 
     @Nullable
+    @SuppressWarnings("DataFlowIssue")
     public Graph<RailNetwork> getNetwork(long network)
     {
         return networks.get(network);
     }
 
+    @SuppressWarnings("ConstantValue")
     public boolean removeNetwork(long network)
     {
         boolean removed = networks.remove(network) != null;
@@ -148,6 +151,11 @@ public final class RailNetworkSavedData extends SavedData
 
     private PackedData pack()
     {
+        if (packedData != null)
+        {
+            return packedData;
+        }
+
         List<PackedNetwork> netList = new ArrayList<>();
         for (Long2ObjectMap.Entry<Graph<RailNetwork>> entry : networks.long2ObjectEntrySet())
         {
@@ -174,12 +182,11 @@ public final class RailNetworkSavedData extends SavedData
         return new PackedData(netList, idCounter);
     }
 
-    private static RailNetworkSavedData unpack(PackedData data, @Nullable ServerLevel level)
+    private void initIfNeeded(ServerLevel level)
     {
-        Objects.requireNonNull(level);
+        if (packedData == null) return;
 
-        Long2ObjectMap<Graph<RailNetwork>> networks = new Long2ObjectOpenHashMap<>(data.networks.size());
-        for (PackedNetwork net : data.networks)
+        for (PackedNetwork net : packedData.networks)
         {
             if (net.nodes.isEmpty())
             {
@@ -207,7 +214,7 @@ public final class RailNetworkSavedData extends SavedData
             graph.getContextData().setId(net.id);
             networks.put(net.id, graph);
         }
-        return new RailNetworkSavedData(level, data.idCounter, networks);
+        packedData = null;
     }
 
     private record PackedData(List<PackedNetwork> networks, long idCounter)

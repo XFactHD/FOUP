@@ -19,7 +19,8 @@ import net.minecraft.client.data.models.model.ModelTemplate;
 import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
-import net.minecraft.client.renderer.block.model.VariantMutator;
+import net.minecraft.client.renderer.block.dispatch.VariantMutator;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
@@ -79,42 +80,39 @@ public final class FoupModelProvider extends ModelProvider
         ModelTemplate stationTemplate = ExtendedModelTemplateBuilder.builder()
                 .parent(ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_STATION.value()))
                 .requiredTextureSlot(texIndicator)
-                .renderType("minecraft:cutout")
                 .build();
         Identifier stationModelLinked = ExtendedModelTemplateBuilder.builder()
                 .parent(mcLocation("block/block"))
-                .renderType("minecraft:cutout")
                 .requiredTextureSlot(TextureSlot.PARTICLE)
                 .customLoader(CompositeModelBuilder::new, builder -> builder
                         .child("rail", straightModel)
                         .inlineChild(
                                 "shell",
                                 stationTemplate,
-                                TextureMapping.singleSlot(texIndicator, modLocation("block/station_indicator_linked"))
+                                TextureMapping.singleSlot(texIndicator, modMaterial("block/station_indicator_linked"))
                         )
                 )
                 .build()
                 .create(
                         ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_STATION.value(), "_linked"),
-                        TextureMapping.particle(mcLocation("block/iron_block")),
+                        TextureMapping.particle(mcMaterial("block/iron_block")),
                         blockModels.modelOutput
                 );
         Identifier stationModelUnlinked = ExtendedModelTemplateBuilder.builder()
                 .parent(mcLocation("block/block"))
-                .renderType("minecraft:cutout")
                 .requiredTextureSlot(TextureSlot.PARTICLE)
                 .customLoader(CompositeModelBuilder::new, builder -> builder
                         .child("rail", straightModel)
                         .inlineChild(
                                 "shell",
                                 stationTemplate,
-                                TextureMapping.singleSlot(texIndicator, modLocation("block/station_indicator_unlinked"))
+                                TextureMapping.singleSlot(texIndicator, modMaterial("block/station_indicator_unlinked"))
                         )
                 )
                 .build()
                 .create(
                         ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL_STATION.value(), "_unlinked"),
-                        TextureMapping.particle(mcLocation("block/iron_block")),
+                        TextureMapping.particle(mcMaterial("block/iron_block")),
                         blockModels.modelOutput
                 );
         blockModels.blockStateOutput.accept(
@@ -219,5 +217,15 @@ public final class FoupModelProvider extends ModelProvider
                     .with(VariantMutator.Y_ROT.withValue(quadrant));
             generator.with(condition, variant);
         }
+    }
+
+    private Material mcMaterial(String id)
+    {
+        return new Material(mcLocation(id));
+    }
+
+    private Material modMaterial(String id)
+    {
+        return new Material(modLocation(id));
     }
 }

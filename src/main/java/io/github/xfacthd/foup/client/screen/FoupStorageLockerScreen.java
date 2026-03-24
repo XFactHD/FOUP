@@ -3,7 +3,7 @@ package io.github.xfacthd.foup.client.screen;
 import io.github.xfacthd.foup.common.menu.FoupStorageLockerMenu;
 import io.github.xfacthd.foup.common.menu.slot.LockableSlot;
 import io.github.xfacthd.foup.common.util.Utils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -23,27 +23,18 @@ public final class FoupStorageLockerScreen extends AbstractContainerScreen<FoupS
 
     public FoupStorageLockerScreen(FoupStorageLockerMenu menu, Inventory inventory, Component title)
     {
-        super(menu, inventory, title);
-        this.imageWidth = WIDTH;
-        this.imageHeight = HEIGHT;
-        this.inventoryLabelY += 9;
+        super(menu, inventory, title, WIDTH, HEIGHT);
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        renderTooltip(guiGraphics, mouseX, mouseY);
-    }
-
-    @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY)
-    {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, 0, 0, WIDTH, HEIGHT, 256, 256);
     }
 
     @Override
-    protected void renderSlotContents(GuiGraphics graphics, ItemStack stack, Slot slot, @Nullable String countString)
+    protected void renderSlotContents(GuiGraphicsExtractor graphics, ItemStack stack, Slot slot, @Nullable String countString)
     {
         super.renderSlotContents(graphics, stack, slot, countString);
         if (slot instanceof LockableSlot lockableSlot && lockableSlot.isLocked())

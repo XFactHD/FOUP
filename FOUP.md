@@ -1,0 +1,62 @@
+Content:
+- FOUP (Front Opening Unified Pod) item
+- Overhead Hoist Cart item/entity
+- Overhead Hoist Rail item/block
+- Overhead Hoist Rail Curve item/block
+- Overhead Hoist Rail Station item/block
+- Overhead Hoist Rail Switch item/block
+- FOUP Loader item/block
+- FOUP Storage item/block
+
+Details:
+- [x] Rail hangs between 0.5 and 1.0 of the block space with a gap for the cart's suspension in the bottom and open on the top
+- [x] Cart reaches through rail and hangs on top with wheels between 0.75 and 1.0 of the rail's block space
+- [x] Rails are one-way
+- [x] FOUP loaders interact with the cart entity directly and can load/unload into/out of it (single operation for entire stack that takes a certain time)
+- [x] ~~Loaders can be configured as loaders or unloaders~~ Loaders are bidirectional and the action is determined by the cart's schedule
+- [x] Loaders block the cart while the FOUP is being loaded or unloaded
+- [x] Loaders are sided and only accept items on their back face and only output items on their bottom face
+- [x] Loaders automatically push items out but don't pull items in
+- [x] Loaders have a single buffer slot per direction
+- [x] Stations must be linked to a loader or a storage
+- [x] Loaders and storages may be at least 2 blocks (1 block of space) and at most 6 blocks below the station (5 blocks of space)
+- [ ] Path between station and loader must be clear of blocks
+- [x] Stations have names
+- [x] Rail networks are represented by a GraphLib directed graph
+- [ ] ~~Carts are registered to the network on placement and removed from the network on removal~~
+- [ ] ~~Carts can traverse unloaded chunks~~
+- [ ] ~~Carts cannot reach stations in unloaded chunks~~
+- [x] Storages are at least two blocks high (top is insertion/extraction, below are storage)
+- [x] Storages can hold 8 FOUPs as items
+- [x] Storages are sided and show four FOUP slots on the front and four slots on the back
+- [ ] ~~Unreachable stations or stations which cannot service the cart (loader with empty buffer, unloader with non-empty buffer, full storages intended to receive a FOUP, empty storages intended to have a FOUP taken) will cause the cart to circle around the network until serviceable to avoid blocking other carts~~
+- [x] Carts have schedules with a list of station names and the task (load, unload, take empty from storage, take full from storage, place empty in storage, place full in storage)
+- [ ] Breaking a station's linked target will invalidate associated schedules on the network's carts
+- [ ] Renaming a station invalidates associated schedules on the network's carts
+- [x] FOUPs can be inserted into or removed from the system via storages
+- [x] FOUPs can be inserted into the system by combining a cart and a FOUP in a crafting grid
+- [x] FOUP items retain their contents in a data component and show them in the tooltip
+- [x] Right-clicking a FOUP in the air opens a UI to interact with its contents (may be changed to act similarly to the Bundle in the future)
+- [x] Capture graphs in `GraphObject#setGraph()`
+- [x] Attach additional data object to graph storing network ID (long from a global persisted counter), `Long2ObjectMap` for a pos-node mapping (used by BEs to find their nodes on load), a map of station names to nodes and, if necessary, a list of carts on the network
+- [x] Remove node-related data from old graph in `GraphObject#setGraph()` if present and add it to the new graph
+- [x] Node holds block position, type, availability and occupation state
+- [x] Path between scheduled stations is computed with Dijkstra
+- [x] Rail nodes have a pathing cost of 1, stations have a cost of 5 due to blocking potential
+- [ ] ~~Loaders and storages must be perpendicular to rails~~
+- [x] Get or create and connect track nodes in `BlockEntity#onLoad()` (allows gracefully reconstructing network in case of data loss)
+- [x] Connect only if the neighbor already has a node (if it doesn't, it will get one later and do the connection)
+- [x] Keep previous and current node in cart behavior (next node can be "peeked" every time)
+- [x] Use all three nodes to anticipate curves
+- [x] Special-case pathing to target in the immediately following block
+- [x] Resolved paths are registered to the network for invalidation if the network changes
+- [ ] Check for at least preceding rail being present when placing a cart
+- [ ] Check for neither preceding nor following rail being blocked by another cart when placing one
+- [ ] Immediately mark preceding rail as occupied on placement
+- [x] Holding a rail inspector item and pointing at a rail segment will display rail directions of the targeted and all 8 surrounding rails
+- [x] Holding any rail item will display a ghost of the rail segment and the rail directions of the ghost rail and all 8 surrounding rails (different arrow color for ghost and neighbors)
+- [ ] Infrastructure for additional cart types (dispenser cart, Wheatly cart, etc.)
+
+Sources:
+- https://en.wikipedia.org/wiki/FOUP
+- https://github.com/gigaherz/GraphLib

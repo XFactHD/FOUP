@@ -1,6 +1,6 @@
 package io.github.xfacthd.foup.client.screen.widget;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -29,10 +29,10 @@ public final class FilterSlot extends AbstractWidget
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, getX(), getY(), width, height);
-        graphics.renderFakeItem(filter, getX() + 1, getY() + 1);
+        graphics.fakeItem(filter, getX() + 1, getY() + 1);
     }
 
     @Override

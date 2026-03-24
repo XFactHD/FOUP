@@ -13,30 +13,27 @@ import io.github.xfacthd.foup.common.block.AbstractOverheadRailBlock;
 import io.github.xfacthd.foup.common.blockentity.OverheadRailStationBlockEntity;
 import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.util.Utils;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockQuadOutput;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.RandomSource;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -55,12 +52,10 @@ import java.util.function.Function;
 
 public final class OverheadRailInfoRenderer
 {
-    private static final RandomSource RANDOM = RandomSource.create();
     private static final Direction[] HORIZONTAL_DIRECTIONS = Direction.Plane.HORIZONTAL.stream().toArray(Direction[]::new);
     private static final int GHOST_OPACITY = 170;
     private static final Function<@Nullable StationType, @Nullable Component> STATION_FORMATTER = type ->
             type != null && type != StationType.UNKNOWN ? type.getTranslation() : null;
-    private static final ObjectList<BlockModelPart> SCRATCH_PART_LIST = new ObjectArrayList<>();
     private static final ContextKey<RailInfoRenderState> DATA_KEY = new ContextKey<>(Utils.rl("rail_info_renderer"));
 
     public static void onExtractRenderState(ExtractLevelRenderStateEvent event)
@@ -114,8 +109,7 @@ public final class OverheadRailInfoRenderer
         {
             if (renderGhost)
             {
-                BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
-                BlockStateModel model = blockRenderer.getBlockModel(state);
+                BlockStateModel model = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(state);
                 ghost = new GhostBlockRenderState(state, pos, model);
             }
             nodes.add(extractRailInfo(level, pos, state, !renderGhost));
@@ -145,18 +139,19 @@ public final class OverheadRailInfoRenderer
         return new RailNodeInfoRenderState(state, pos.immutable(), stationData);
     }
 
-    public static void onRenderLevelStage(RenderLevelStageEvent.AfterParticles event)
+    public static void onRenderLevelStage(RenderLevelStageEvent.AfterTranslucentParticles event)
     {
         RailInfoRenderState renderState = event.getLevelRenderState().getRenderData(DATA_KEY);
         if (renderState == null) return;
 
+        Minecraft minecraft = Minecraft.getInstance();
         PoseStack poseStack = event.getPoseStack();
         CameraRenderState camera = event.getLevelRenderState().cameraRenderState;
-        Font font = Minecraft.getInstance().font;
+        Font font = minecraft.font;
 
         RenderSystem.pushPipelineModifier(PipelineModifiers.NO_DEPTH_TEST);
 
-        MultiBufferSource.BufferSource buffers = Minecraft.getInstance().renderBuffers().bufferSource();
+        MultiBufferSource.BufferSource buffers = minecraft.renderBuffers().bufferSource();
 
         VertexConsumer quadBuilder = buffers.getBuffer(ClientUtils.INFO_QUADS);
         GhostBlockRenderState ghost = renderState.ghost;
@@ -166,17 +161,17 @@ public final class OverheadRailInfoRenderer
             poseStack.pushPose();
             poseStack.translate(offset.x, offset.y, offset.z);
 
+            boolean ambientOcclusion = minecraft.options.ambientOcclusion().get();
+            ModelBlockRenderer blockRenderer = new ModelBlockRenderer(ambientOcclusion, false, minecraft.getBlockColors());
             // FIXME: rewrite to not use render types at all
             RenderType bufferType = Sheets.translucentItemSheet();//NeoForgeRenderTypes.TRANSLUCENT_ON_PARTICLES_TARGET.get();
             VertexConsumer builder = new GhostVertexConsumer(buffers.getBuffer(bufferType), GHOST_OPACITY);
+            BlockQuadOutput output = (_, _, _, quad, instance) ->
+                    builder.putBakedQuad(poseStack.last(), quad, instance);
 
-            ClientLevel realLevel = Objects.requireNonNull(Minecraft.getInstance().level);
+            ClientLevel realLevel = Objects.requireNonNull(minecraft.level);
             BlockAndTintGetter level = new SingleBlockFakeLevel(realLevel, ghost.pos, ghost.state);
-            ghost.model.collectParts(level, ghost.pos, ghost.state, RANDOM, SCRATCH_PART_LIST);
-            Minecraft.getInstance()
-                    .getBlockRenderer()
-                    .renderBatched(ghost.state, ghost.pos, level, poseStack, $ -> builder, false, SCRATCH_PART_LIST);
-            SCRATCH_PART_LIST.clear();
+            blockRenderer.tesselateBlock(output, 0, 0, 0, level, ghost.pos, ghost.state, ghost.model, 0);
 
             poseStack.popPose();
         }
@@ -278,10 +273,10 @@ public final class OverheadRailInfoRenderer
         Component typeName = formatter.apply(type);
 
         Matrix4f pose = poseStack.last().pose();
-        font.drawInBatch(name, -(font.width(name) / 2F), -9, 0xFFBB00FF, false, pose, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        font.drawInBatch(name, -(font.width(name) / 2F), -9, 0xFFBB00FF, false, pose, buffers, Font.DisplayMode.NORMAL, 0, LightCoordsUtil.FULL_BRIGHT);
         if (typeName != null)
         {
-            font.drawInBatch(typeName, -(font.width(typeName) / 2F), 1, 0xFFBB00FF, false, pose, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+            font.drawInBatch(typeName, -(font.width(typeName) / 2F), 1, 0xFFBB00FF, false, pose, buffers, Font.DisplayMode.NORMAL, 0, LightCoordsUtil.FULL_BRIGHT);
         }
 
         poseStack.popPose();

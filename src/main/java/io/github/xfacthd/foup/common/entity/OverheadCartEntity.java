@@ -184,7 +184,7 @@ public final class OverheadCartEntity extends Entity
     }
 
     @Override
-    public InteractionResult interact(Player player, InteractionHand hand)
+    public InteractionResult interact(Player player, InteractionHand hand, Vec3 location)
     {
         if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty())
         {

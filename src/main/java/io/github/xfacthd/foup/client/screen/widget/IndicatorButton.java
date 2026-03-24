@@ -2,7 +2,7 @@ package io.github.xfacthd.foup.client.screen.widget;
 
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.client.gui.ActiveTextCollector;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -25,9 +25,9 @@ public final class IndicatorButton extends Button.Plain
     }
 
     @Override
-    public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
-        super.renderContents(graphics, mouseX, mouseY, partialTick);
+        super.extractContents(graphics, mouseX, mouseY, partialTick);
         int x = getX() + width - INDICATOR_SIZE - Math.min(3, (width - INDICATOR_SIZE) / 2);
         int y = getY() + (height - INDICATOR_SIZE) / 2;
         boolean checked = checkedSupplier.getAsBoolean();
@@ -36,7 +36,7 @@ public final class IndicatorButton extends Button.Plain
     }
 
     @Override
-    protected void renderDefaultLabel(ActiveTextCollector textCollector)
+    protected void extractDefaultLabel(ActiveTextCollector textCollector)
     {
         int minX = getX() + 3;
         int maxX = getX() + getWidth() - INDICATOR_SIZE - 6;

@@ -20,7 +20,7 @@ import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundMove
 import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundStopSchedulePayload;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -37,6 +37,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
@@ -99,6 +100,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     public static final Component BUTTON_DELETE = Component.translatable("button.foup.overhead_cart.schedule.delete");
     public static final Component LABEL_FILTER = Component.translatable("label.foup.overhead_cart.schedule.filter");
     public static final Component LABEL_COUNT = Component.translatable("label.foup.overhead_cart.schedule.count");
+    private static final RandomSource RANDOM = RandomSource.createThreadLocalInstance();
 
     private final OverheadCartEntity cart;
     private final List<Schedule.Entry> scheduleEntries;
@@ -116,14 +118,12 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
 
     public OverheadCartScreen(OverheadCartMenu menu, Inventory inventory, Component title)
     {
-        super(menu, inventory, title);
+        super(menu, inventory, title, WIDTH, MIN_HEIGHT);
         this.cart = menu.getCart();
         this.scheduleEntries = menu.getInitialScheduleEntries();
         this.stations = menu.getInitialStations();
         this.cartIdle = cart.getState() == OverheadCartState.IDLE;
         this.canEdit = Objects.requireNonNull(Minecraft.getInstance().player).mayBuild();
-        this.imageHeight = MIN_HEIGHT;
-        this.imageWidth = WIDTH;
     }
 
     @Override
@@ -170,42 +170,37 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    public void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
     {
-        super.render(graphics, mouseX, mouseY, partialTick);
-        renderTooltip(graphics, mouseX, mouseY);
+        graphics.text(font, title, titleLabelX, titleLabelY, 0xFF404040, false);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY)
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
-        graphics.drawString(font, title, titleLabelX, titleLabelY, 0xFF404040, false);
-    }
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
 
-    @Override
-    public void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY)
-    {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, WIDTH, imageHeight);
         graphics.blit(RenderPipelines.GUI_TEXTURED, INVENTORY, leftPos + INVENTORY_X, topPos + imageHeight - INVENTORY_Y_OFF, INVENTORY_U, INVENTORY_V, INVENTORY_WIDTH, INVENTORY_HEIGHT, 256, 256);
-        graphics.drawString(font, title, leftPos + EDGE_PADDING_X, topPos + EDGE_PADDING_Y, 0xFF404040, false);
+        graphics.text(font, title, leftPos + EDGE_PADDING_X, topPos + EDGE_PADDING_Y, 0xFF404040, false);
 
         OverheadCartIssue issue = cart.getIssue();
         boolean hasIssue = issue != null;
 
-        graphics.drawString(font, LABEL_STATE, leftPos + EDGE_PADDING_X, topPos + STATE_Y, 0xFF404040, false);
+        graphics.text(font, LABEL_STATE, leftPos + EDGE_PADDING_X, topPos + STATE_Y, 0xFF404040, false);
         if (hasIssue)
         {
-            graphics.drawString(font, LABEL_ISSUE, leftPos + EDGE_PADDING_X, topPos + ISSUE_Y, 0xFF404040, false);
+            graphics.text(font, LABEL_ISSUE, leftPos + EDGE_PADDING_X, topPos + ISSUE_Y, 0xFF404040, false);
         }
 
         int offset = Math.max(font.width(LABEL_STATE), hasIssue ? font.width(LABEL_ISSUE) : 0) + 4;
-        graphics.drawString(font, cart.getState().getTranslation(), leftPos + EDGE_PADDING_X + offset, topPos + STATE_Y, 0xFF404040, false);
+        graphics.text(font, cart.getState().getTranslation(), leftPos + EDGE_PADDING_X + offset, topPos + STATE_Y, 0xFF404040, false);
         if (hasIssue)
         {
-            graphics.drawString(font, formatIssue(issue), leftPos + EDGE_PADDING_X + offset, topPos + ISSUE_Y, 0xFF404040, false);
+            graphics.text(font, formatIssue(issue), leftPos + EDGE_PADDING_X + offset, topPos + ISSUE_Y, 0xFF404040, false);
         }
 
-        graphics.drawString(font, LABEL_SCHEDULE, leftPos + EDGE_PADDING_X, topPos + SCHEDULE_Y, 0xFF404040, false);
+        graphics.text(font, LABEL_SCHEDULE, leftPos + EDGE_PADDING_X, topPos + SCHEDULE_Y, 0xFF404040, false);
     }
 
     @Override
@@ -303,7 +298,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
 
     private void addStation(Button btn)
     {
-        Schedule.Entry entry = new Schedule.Entry(Mth.createInsecureUUID(), "", StationType.UNKNOWN, StationAction.LOAD, Optional.empty(), OptionalInt.empty());
+        Schedule.Entry entry = new Schedule.Entry(Mth.createInsecureUUID(RANDOM), "", StationType.UNKNOWN, StationAction.LOAD, Optional.empty(), OptionalInt.empty());
         scheduleEntries.add(entry);
         scheduleList.addEntry(new ScheduleList.ScheduleEntry(this, entry, true));
         ClientPacketDistributor.sendToServer(new ServerboundAddScheduleEntryPayload(cart.getId(), scheduleEntries.size() - 1, entry));
@@ -491,11 +486,11 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
             }
 
             @Override
-            public void renderContent(GuiGraphics graphics, int mouseX, int mouseY, boolean hovering, float partialTick)
+            public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick)
             {
                 validity = getValidity();
 
-                // Can't use GuiGraphics#submitOutline() as it renders too late
+                // Can't use GuiGraphicsExtractor#submitOutline() as it renders too late
                 renderOutline(graphics, validity == EntryValidity.VALID ? 0xFF444444 : 0xFFAA0000);
 
                 for (AbstractWidget child : children)
@@ -549,11 +544,11 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
 
                 if (filterSlot.visible)
                 {
-                    graphics.drawString(owner.font, LABEL_FILTER, left + FILTER_LABEL_X, top + FILTER_LABEL_Y, 0xFFFFFFFF);
+                    graphics.text(owner.font, LABEL_FILTER, left + FILTER_LABEL_X, top + FILTER_LABEL_Y, 0xFFFFFFFF);
                 }
                 if (boxCount.visible)
                 {
-                    graphics.drawString(owner.font, LABEL_COUNT, left + FILTER_LABEL_X, top + height - COUNT_LABEL_Y_OFF, 0xFFFFFFFF);
+                    graphics.text(owner.font, LABEL_COUNT, left + FILTER_LABEL_X, top + height - COUNT_LABEL_Y_OFF, 0xFFFFFFFF);
                 }
                 for (AbstractWidget child : children)
                 {
@@ -561,7 +556,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
                     {
                         child.active = false;
                     }
-                    child.render(graphics, mouseX, mouseY, partialTick);
+                    child.extractRenderState(graphics, mouseX, mouseY, partialTick);
                 }
                 if (validity != EntryValidity.VALID)
                 {
@@ -573,9 +568,9 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
                 }
             }
 
-            private void renderOutline(GuiGraphics graphics, int color)
+            private void renderOutline(GuiGraphicsExtractor graphics, int color)
             {
-                // Can't use GuiGraphics#submitOutline() as it renders too late
+                // Can't use GuiGraphicsExtractor#submitOutline() as it renders too late
                 int x = getX();
                 int y = getY();
                 int width = getWidth();

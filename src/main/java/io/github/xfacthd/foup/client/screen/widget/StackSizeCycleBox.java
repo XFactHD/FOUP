@@ -1,7 +1,7 @@
 package io.github.xfacthd.foup.client.screen.widget;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -45,7 +45,7 @@ public final class StackSizeCycleBox extends AbstractWidget
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
         Identifier background = BACKGROUND_SPRITES.get(isActive(), isFocused());
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, background, getX(), getY(), width - 13, height);
@@ -67,7 +67,7 @@ public final class StackSizeCycleBox extends AbstractWidget
             String text = Integer.toString(getValue());
             int x = getX() + width - 13 - 4 - font.width(text);
             int color = editable ? TEXT_COLOR : TEXT_COLOR_UNEDITABLE;
-            graphics.drawString(font, text, x, getY() + (height - 8) / 2, color, true);
+            graphics.text(font, text, x, getY() + (height - 8) / 2, color, true);
         }
     }
 

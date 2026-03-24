@@ -1,7 +1,6 @@
 package io.github.xfacthd.foup.client.util;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.DepthTestFunction;
 import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
@@ -9,11 +8,13 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 
+import java.util.Optional;
+
 public final class ClientUtils
 {
     private static final RenderPipeline INFO_QUADS_PIPELINE = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
             .withLocation(Utils.rl("info_quads"))
-            .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+            .withDepthStencilState(Optional.empty())
             .withCull(false)
             .build();
     public static final RenderType INFO_QUADS = RenderType.create(

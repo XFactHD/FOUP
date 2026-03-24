@@ -37,15 +37,28 @@ public final class FoupCommands
     {
         return Commands.literal("debug_rail_net")
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
-                .executes(ctx ->
-                {
-                    if (RailNetworkDebugPayloads.addReceiver(ctx.getSource().getPlayerOrException()))
-                    {
-                        return Command.SINGLE_SUCCESS;
-                    }
-                    ctx.getSource().sendFailure(Component.literal("Player is already registered"));
-                    return 0;
-                });
+                .then(Commands.literal("register")
+                        .executes(ctx ->
+                        {
+                            if (RailNetworkDebugPayloads.addReceiver(ctx.getSource().getPlayerOrException()))
+                            {
+                                return Command.SINGLE_SUCCESS;
+                            }
+                            ctx.getSource().sendFailure(Component.literal("Player is already registered"));
+                            return 0;
+                        })
+                )
+                .then(Commands.literal("unregister")
+                        .executes(ctx ->
+                        {
+                            if (RailNetworkDebugPayloads.removeReceiver(ctx.getSource().getPlayerOrException()))
+                            {
+                                return Command.SINGLE_SUCCESS;
+                            }
+                            ctx.getSource().sendFailure(Component.literal("Player is not registered"));
+                            return 0;
+                        })
+                );
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> registerNetworkInfoCommand()
@@ -102,7 +115,7 @@ public final class FoupCommands
                             for (TrackNode node : network.getContextData().getStationNodes())
                             {
                                 BlockPos pos = node.getPos();
-                                if (!level.shouldTickBlocksAt(ChunkPos.asLong(pos))) continue;
+                                if (!level.shouldTickBlocksAt(ChunkPos.pack(pos))) continue;
                                 if (!(node.getOwner() instanceof OverheadRailStationBlockEntity station)) continue;
 
                                 AbstractCartInteractorBlockEntity interactor = station.getLinkedBlock();

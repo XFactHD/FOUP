@@ -14,12 +14,12 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
@@ -56,7 +56,7 @@ public final class RailNetworkDebugRenderer
         }
     }
 
-    public static void onRenderLevelStage(RenderLevelStageEvent.AfterParticles event)
+    public static void onRenderLevelStage(RenderLevelStageEvent.AfterTranslucentParticles event)
     {
         List<RailNetworkDebugRenderState> renderStates = event.getLevelRenderState().getRenderData(DATA_KEY);
         if (renderStates == null) return;
@@ -128,7 +128,7 @@ public final class RailNetworkDebugRenderer
 
         String name = Long.toString(netId);
         Matrix4f pose = poseStack.last().pose();
-        font.drawInBatch(name, -(font.width(name) / 2F), -9, 0xFFFFFFFF, false, pose, buffer, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        font.drawInBatch(name, -(font.width(name) / 2F), -9, 0xFFFFFFFF, false, pose, buffer, Font.DisplayMode.NORMAL, 0, LightCoordsUtil.FULL_BRIGHT);
 
         poseStack.popPose();
     }
@@ -143,6 +143,11 @@ public final class RailNetworkDebugRenderer
         {
             DEBUG_DATA.remove(networkId);
         }
+    }
+
+    public static void clearData()
+    {
+        DEBUG_DATA.clear();
     }
 
     public static void onPlayerDisconnect(@SuppressWarnings("unused") ClientPlayerNetworkEvent.LoggingOut event)

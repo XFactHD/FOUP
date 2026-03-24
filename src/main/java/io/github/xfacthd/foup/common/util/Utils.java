@@ -16,6 +16,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -24,11 +25,11 @@ import java.util.stream.Collectors;
 
 public final class Utils
 {
-    private static final Long2ObjectMap<Direction> DIRECTION_BY_NORMAL = Arrays.stream(Direction.values())
+    private static final Long2ObjectMap<@Nullable Direction> DIRECTION_BY_NORMAL = Arrays.stream(Direction.values())
             .collect(Collectors.toMap(
                     side -> new BlockPos(side.getUnitVec3i()).asLong(),
                     Function.identity(),
-                    (sideA, sideB) -> { throw new IllegalArgumentException("Duplicate keys"); },
+                    (_, _) -> { throw new IllegalArgumentException("Duplicate keys"); },
                     Long2ObjectOpenHashMap::new
             ));
 
@@ -77,11 +78,13 @@ public final class Utils
         return dir.getAxis() == Direction.Axis.Z;
     }
 
+    @Nullable
     public static Direction getDirByNormal(int x, int y, int z)
     {
         return DIRECTION_BY_NORMAL.get(BlockPos.asLong(x, y, z));
     }
 
+    @Nullable
     public static Direction getDirByNormal(BlockPos from, BlockPos to)
     {
         int nx = to.getX() - from.getX();

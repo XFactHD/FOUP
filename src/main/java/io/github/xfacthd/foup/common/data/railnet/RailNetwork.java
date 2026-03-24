@@ -85,6 +85,7 @@ public final class RailNetwork implements Mergeable<RailNetwork>
     }
 
     @Nullable
+    @SuppressWarnings("DataFlowIssue")
     public TrackNode getNode(long pos)
     {
         return nodes.get(pos);
@@ -144,6 +145,7 @@ public final class RailNetwork implements Mergeable<RailNetwork>
         activePaths.remove(path);
     }
 
+    // TODO: separate into path invalidation and schedule invalidation (latter mainly for station name and link changes)
     void invalidatePaths()
     {
         if (!activePaths.isEmpty())

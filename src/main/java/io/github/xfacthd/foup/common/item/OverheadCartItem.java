@@ -65,8 +65,8 @@ public final class OverheadCartItem extends Item
 
     @Override
     @SuppressWarnings("deprecation")
-    public void appendHoverText(ItemStack stack, TooltipContext ctx, TooltipDisplay display, Consumer<Component> lines, TooltipFlag flag)
+    public void appendHoverText(ItemStack stack, TooltipContext ctx, TooltipDisplay display, Consumer<Component> appender, TooltipFlag flag)
     {
-        stack.addToTooltip(FoupContent.DC_TYPE_HELD_FOUP, ctx, lines, flag);
+        stack.addToTooltip(FoupContent.DC_TYPE_HELD_FOUP, ctx, display, appender, flag);
     }
 }

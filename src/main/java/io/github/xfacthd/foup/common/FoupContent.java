@@ -27,7 +27,6 @@ import io.github.xfacthd.foup.common.menu.FoupMenu;
 import io.github.xfacthd.foup.common.menu.FoupStorageLockerMenu;
 import io.github.xfacthd.foup.common.menu.OverheadCartMenu;
 import io.github.xfacthd.foup.common.recipe.AddFoupToCartRecipe;
-import io.github.xfacthd.foup.common.util.SimpleRecipeSerializer;
 import io.github.xfacthd.foup.common.util.registration.DeferredBlockEntity;
 import io.github.xfacthd.foup.common.util.registration.DeferredBlockEntityRegister;
 import io.github.xfacthd.foup.common.util.registration.DeferredDataComponentType;
@@ -140,7 +139,7 @@ public final class FoupContent
                 stack.set(DC_TYPE_HELD_FOUP, HeldFoup.of(ItemStack.EMPTY));
                 return stack;
             })
-            .displayItems((params, output) -> ITEMS.getEntries()
+            .displayItems((_, output) -> ITEMS.getEntries()
                     .stream()
                     .map(Holder::value)
                     .mapMulti((Item item, Consumer<ItemStack> consumer) ->
@@ -175,7 +174,7 @@ public final class FoupContent
 
     // region Recipe Serializers
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<AddFoupToCartRecipe>> RECIPE_SERIALIZER_ADD_FOUP_TO_CART = RECIPE_SERIALIZERS.register(
-            "add_foup_to_cart", () -> new SimpleRecipeSerializer<>(AddFoupToCartRecipe.CODEC, AddFoupToCartRecipe.STREAM_CODEC)
+            "add_foup_to_cart", () -> new RecipeSerializer<>(AddFoupToCartRecipe.CODEC, AddFoupToCartRecipe.STREAM_CODEC)
     );
     // endregion
 
@@ -188,7 +187,7 @@ public final class FoupContent
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Function<BlockBehaviour.Properties, T> factory)
     {
-        DeferredBlock<T> block = BLOCKS.registerBlock(name, factory, BlockBehaviour.Properties.of());
+        DeferredBlock<T> block = BLOCKS.registerBlock(name, factory);
         ITEMS.registerSimpleBlockItem(block);
         return block;
     }

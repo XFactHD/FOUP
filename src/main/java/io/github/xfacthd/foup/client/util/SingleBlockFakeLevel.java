@@ -1,10 +1,9 @@
 package io.github.xfacthd.foup.client.util;
 
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.ColorResolver;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -15,18 +14,12 @@ import net.minecraft.world.level.material.Fluids;
 import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("ConstantConditions")
-public record SingleBlockFakeLevel(Level realLevel, BlockPos pos, BlockState state) implements BlockAndTintGetter
+public record SingleBlockFakeLevel(BlockAndTintGetter realLevel, BlockPos pos, BlockState state) implements BlockAndTintGetter
 {
     @Override
-    public float getShade(Direction side, boolean shade)
+    public CardinalLighting cardinalLighting()
     {
-        return realLevel.getShade(side, shade);
-    }
-
-    @Override
-    public float getShade(float normalX, float normalY, float normalZ, boolean shade)
-    {
-        return realLevel.getShade(normalX, normalY, normalZ, shade);
+        return realLevel.cardinalLighting();
     }
 
     @Override

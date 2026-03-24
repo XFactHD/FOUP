@@ -9,14 +9,14 @@ import io.github.xfacthd.foup.common.blockentity.FoupStorageInterfaceBlockEntity
 import io.github.xfacthd.foup.common.data.StationAction;
 import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.component.ItemContents;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -76,7 +76,8 @@ public final class FoupStorageInterfaceRenderer implements BlockEntityRenderer<F
             float maxV = sprite.getV(MAX_XZ);
             int light = renderState.lightCoords;
 
-            submitNodeCollector.submitCustomGeometry(poseStack, Sheets.solidBlockSheet(), (pose, buffer) ->
+            // TODO: replace render type with NeoForgeRenderTypes.SOLID_BLOCK_SHEET
+            submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.entitySolid(TextureAtlas.LOCATION_BLOCKS), (pose, buffer) ->
             {
                 float cenMin = .5F - off;
                 buffer.addVertex(pose, MIN_XZ, MAX_Y, MIN_XZ).setColor(-1).setUv(minU, minV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);

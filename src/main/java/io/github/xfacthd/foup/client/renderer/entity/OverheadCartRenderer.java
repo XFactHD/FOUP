@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -24,7 +24,7 @@ public final class OverheadCartRenderer extends EntityRenderer<OverheadCartEntit
     private static final float Y_OFFSET_FLAT = 9F/16F;
     private static final float Y_OFFSET_3D = 12.5F/16F;
     private static final Quaternionf FLAT_PRE_ROTATION = Axis.XN.rotationDegrees(90F);
-    private static final ItemTransformer TRANSFORMER_FLAT = (poseStack, pass, passCount) ->
+    private static final ItemTransformer TRANSFORMER_FLAT = (poseStack, pass, _) ->
     {
         poseStack.translate(0, 0, (1F/16F) * pass);
         poseStack.mulPose(Axis.ZP.rotationDegrees(10 * pass * ((pass & 1) * 2 - 1)));

@@ -3,7 +3,8 @@ package io.github.xfacthd.foup.common.network;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundAcknowledgeStationLinkPayload;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundAcknowledgeStationRenamePayload;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundOpenOverheadRailStationScreenPayload;
-import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRailNetworkDebugPayload;
+import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRailNetworkDebugClearPayload;
+import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRailNetworkDebugDataPayload;
 import io.github.xfacthd.foup.common.network.payload.clientbound.ClientboundRefreshStaleSchedulePayload;
 import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundAddScheduleEntryPayload;
 import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundDeleteScheduleEntryPayload;
@@ -24,8 +25,12 @@ public final class NetworkSetup
     {
         event.registrar(NET_VERSION)
                 .playToClient(
-                        ClientboundRailNetworkDebugPayload.TYPE,
-                        ClientboundRailNetworkDebugPayload.STREAM_CODEC
+                        ClientboundRailNetworkDebugDataPayload.TYPE,
+                        ClientboundRailNetworkDebugDataPayload.STREAM_CODEC
+                )
+                .playToClient(
+                        ClientboundRailNetworkDebugClearPayload.TYPE,
+                        ClientboundRailNetworkDebugClearPayload.STREAM_CODEC
                 )
                 .playToClient(
                         ClientboundOpenOverheadRailStationScreenPayload.TYPE,

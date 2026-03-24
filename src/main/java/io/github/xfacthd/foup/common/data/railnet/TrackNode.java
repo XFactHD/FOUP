@@ -172,7 +172,7 @@ public final class TrackNode implements GraphObject<RailNetwork>
             if (!inhibitDataAccess)
             {
                 ServerLevel level = this.graph.getContextData().getLevel();
-                RailNetworkSavedData.get(level).tryRemoveNetwork(this.graph, this);
+                RailNetworkSavedData.get(level).tryRemoveNetwork(level, this.graph, this);
             }
         }
         this.graph = graph;
@@ -182,7 +182,7 @@ public final class TrackNode implements GraphObject<RailNetwork>
             if (!inhibitDataAccess)
             {
                 ServerLevel level = this.graph.getContextData().getLevel();
-                RailNetworkSavedData.get(level).tryAddNetwork(this.graph);
+                RailNetworkSavedData.get(level).tryAddNetwork(level, this.graph);
             }
         }
     }

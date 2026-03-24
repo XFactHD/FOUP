@@ -59,10 +59,10 @@ public final class FoupItem extends Item
 
     @Override
     @SuppressWarnings("deprecation")
-    public void appendHoverText(ItemStack stack, TooltipContext ctx, TooltipDisplay display, Consumer<Component> lines, TooltipFlag flag)
+    public void appendHoverText(ItemStack stack, TooltipContext ctx, TooltipDisplay display, Consumer<Component> appender, TooltipFlag flag)
     {
-        lines.accept(Component.translatable("item.foup.foup.desc").withStyle(ChatFormatting.GRAY));
-        stack.addToTooltip(FoupContent.DC_TYPE_ITEM_CONTENTS, ctx, lines, flag);
+        appender.accept(Component.translatable("item.foup.foup.desc").withStyle(ChatFormatting.GRAY));
+        stack.addToTooltip(FoupContent.DC_TYPE_ITEM_CONTENTS, ctx, display, appender, flag);
     }
 
     public static boolean canPlaceInFoup(ItemStack stack)
