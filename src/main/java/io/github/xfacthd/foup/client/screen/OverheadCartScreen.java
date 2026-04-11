@@ -637,8 +637,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
 
             private void move(int idx, int dir)
             {
-                list().children().remove(idx);
-                list().children().add(idx + dir, this);
+                list().swap(idx, idx + dir);
 
                 ClientPacketDistributor.sendToServer(new ServerboundMoveScheduleEntryPayload(owner.cart.getId(), idx, dir > 0, entry.uuid()));
             }
