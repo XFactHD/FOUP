@@ -20,6 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -230,8 +231,8 @@ final class OverheadCartBehaviour
 
     private boolean move(TrackPath path, @Nullable TrackNode prevNode, TrackNode currNode, @Nullable TrackNode nextNode)
     {
-        Direction dirOne = prevNode != null ? Utils.getDirByNormal(prevNode.getPos(), currNode.getPos()) : Utils.getDirByViewVec(cart);
-        Direction dirTwo = nextNode != null ? Utils.getDirByNormal(currNode.getPos(), nextNode.getPos()) : dirOne;
+        Direction dirOne = prevNode != null ? getNodeConnectionDirection(prevNode, currNode) : Utils.getDirByViewVec(cart);
+        Direction dirTwo = nextNode != null ? getNodeConnectionDirection(currNode, nextNode) : dirOne;
         TrackShape shape = TrackShape.byDirPair(dirOne, dirTwo);
         Vec3 pos = cart.getPosition(1F);
         Vec3 newPos;
@@ -318,6 +319,20 @@ final class OverheadCartBehaviour
             path.remove(currNode.getNetwork());
         }
         return false;
+    }
+
+    private static Direction getNodeConnectionDirection(TrackNode srcNode, TrackNode destNode)
+    {
+        Direction dir = Utils.getDirByNormal(srcNode.getPos(), destNode.getPos());
+        if (dir == null)
+        {
+            throw new IllegalStateException(String.format(
+                    Locale.ROOT,
+                    "Track nodes %s and %s are not adjacent",
+                    srcNode, destNode
+            ));
+        }
+        return dir;
     }
 
     @Nullable
