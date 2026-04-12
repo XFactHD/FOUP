@@ -1,5 +1,6 @@
 package io.github.xfacthd.foup.common.entity;
 
+import com.mojang.logging.LogUtils;
 import dev.gigaherz.graph3.Graph;
 import io.github.xfacthd.foup.common.blockentity.AbstractOverheadRailBlockEntity;
 import io.github.xfacthd.foup.common.data.TrackShape;
@@ -17,12 +18,15 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.util.Objects;
 import java.util.Optional;
 
 final class OverheadCartBehaviour
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     // The minimum offset needed to compute the rail's BlockPos from the entity's position
     private static final double ENTITY_TO_RAIL_POS_OFFSET = .6;
     // The amount of ticks it takes the hoist to travel up/down one block
@@ -113,8 +117,9 @@ final class OverheadCartBehaviour
                 {
                     done = move(path, prevNode, currNode, path.peek(currNode.getNetwork()));
                 }
-                catch (Throwable ignored)
+                catch (Throwable error)
                 {
+                    LOGGER.error("OverheadCartBehaviour encountered an error while moving", error);
                     done = true;
                     errored = true;
                 }
