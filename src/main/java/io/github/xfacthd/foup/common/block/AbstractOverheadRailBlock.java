@@ -1,6 +1,5 @@
 package io.github.xfacthd.foup.common.block;
 
-import io.github.xfacthd.foup.common.blockentity.AbstractOverheadRailBlockEntity;
 import io.github.xfacthd.foup.common.data.RailType;
 import io.github.xfacthd.foup.common.entity.OverheadCartEntity;
 import net.minecraft.core.BlockPos;
@@ -55,11 +54,6 @@ public abstract class AbstractOverheadRailBlock extends Block implements EntityB
         for (OverheadCartEntity entity : level.getEntitiesOfClass(OverheadCartEntity.class, area))
         {
             entity.killAndDrop(level, null);
-        }
-
-        if (level.getBlockEntity(pos) instanceof AbstractOverheadRailBlockEntity be)
-        {
-            be.destroyNode();
         }
     }
 

@@ -43,12 +43,6 @@ public abstract class AbstractOverheadRailBlockEntity extends BaseBlockEntity
         return -1;
     }
 
-    public final void destroyNode()
-    {
-        Graph<RailNetwork> graph = Objects.requireNonNull(trackNode, "Track node missing").getGraph();
-        Objects.requireNonNull(graph, "Graph missing").remove(trackNode);
-    }
-
     @Nullable
     public TrackNode getTrackNode()
     {
@@ -65,6 +59,13 @@ public abstract class AbstractOverheadRailBlockEntity extends BaseBlockEntity
         {
             Objects.requireNonNull(trackNode, "Track node missing").detach();
         }
+    }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state)
+    {
+        Graph<RailNetwork> graph = Objects.requireNonNull(trackNode, "Track node missing").getGraph();
+        Objects.requireNonNull(graph, "Graph missing").remove(trackNode);
     }
 
     protected void postProcessNewNode(TrackNode node) { }
