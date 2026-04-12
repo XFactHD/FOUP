@@ -42,6 +42,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 import org.jspecify.annotations.Nullable;
 import org.joml.Matrix4f;
 
@@ -231,22 +233,28 @@ public final class OverheadRailInfoRenderer
 
     public static void renderArrow(PoseStack poseStack, VertexConsumer builder, Direction dir, float start, boolean arrow)
     {
+        Quaternionf yRot = Axis.YN.rotationDegrees(dir.toYRot());
+        renderArrow(poseStack, builder, yRot, start, arrow, 0xFF0000FF);
+    }
+
+    public static void renderArrow(PoseStack poseStack, VertexConsumer builder, Quaternionfc yRot, float start, boolean arrow, int color)
+    {
         poseStack.pushPose();
-        poseStack.mulPose(Axis.YN.rotationDegrees(dir.toYRot()));
+        poseStack.mulPose(yRot);
 
         Matrix4f pose = poseStack.last().pose();
         float end = arrow ? .4F : .5F;
-        builder.addVertex(pose, -.05F, 0, start).setColor(0xFF0000FF);
-        builder.addVertex(pose, -.05F, 0,   end).setColor(0xFF0000FF);
-        builder.addVertex(pose,  .05F, 0,   end).setColor(0xFF0000FF);
-        builder.addVertex(pose,  .05F, 0, start).setColor(0xFF0000FF);
+        builder.addVertex(pose, -.05F, 0, start).setColor(color);
+        builder.addVertex(pose, -.05F, 0,   end).setColor(color);
+        builder.addVertex(pose,  .05F, 0,   end).setColor(color);
+        builder.addVertex(pose,  .05F, 0, start).setColor(color);
 
         if (arrow)
         {
-            builder.addVertex(pose, -.15F, 0, .35F).setColor(0xFF0000FF);
-            builder.addVertex(pose,    0F, 0,  .5F).setColor(0xFF0000FF);
-            builder.addVertex(pose,    0F, 0,  .5F).setColor(0xFF0000FF);
-            builder.addVertex(pose,  .15F, 0, .35F).setColor(0xFF0000FF);
+            builder.addVertex(pose, -.15F, 0, .35F).setColor(color);
+            builder.addVertex(pose,    0F, 0,  .5F).setColor(color);
+            builder.addVertex(pose,    0F, 0,  .5F).setColor(color);
+            builder.addVertex(pose,  .15F, 0, .35F).setColor(color);
         }
 
         poseStack.popPose();

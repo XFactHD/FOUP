@@ -25,6 +25,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import org.joml.Quaternionfc;
 import org.jspecify.annotations.Nullable;
 import org.joml.Matrix4f;
 
@@ -102,6 +103,13 @@ public final class RailNetworkDebugRenderer
                 if (dir != null)
                 {
                     OverheadRailInfoRenderer.renderArrow(poseStack, builder, dir, .15F, true);
+                }
+                else
+                {
+                    Vec3 diff = Vec3.atCenterOf(neighbour).subtract(Vec3.atCenterOf(node.pos())).normalize();
+                    double angle = Math.atan2(diff.z, diff.x) - Math.toRadians(90F);
+                    Quaternionfc yRot = Axis.YN.rotation((float) angle);
+                    OverheadRailInfoRenderer.renderArrow(poseStack, builder, yRot, 0F, true, 0xFFFF0000);
                 }
             }
 
