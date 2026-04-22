@@ -107,7 +107,7 @@ public final class FoupMenu extends AbstractContainerMenu
 
         public ServerSlot(int x, int y, ItemStack foup)
         {
-            super(x, y);
+            super(0, x, y);
             this.foup = foup;
         }
 
