@@ -18,8 +18,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public record HeldFoup(boolean hasFoup, ItemStack stack) implements TooltipProvider
-{
+public record HeldFoup(boolean hasFoup, ItemStack stack) implements TooltipProvider {
     public static final Codec<HeldFoup> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             Codec.BOOL.fieldOf("has_foup").forGetter(HeldFoup::hasFoup),
             ItemStack.OPTIONAL_CODEC.fieldOf("stack").validate(FoupItem::validateCanPlaceInFoup).forGetter(HeldFoup::stack)
@@ -33,34 +32,29 @@ public record HeldFoup(boolean hasFoup, ItemStack stack) implements TooltipProvi
     );
     public static final HeldFoup EMPTY = new HeldFoup(false, ItemStack.EMPTY);
 
-    public static HeldFoup of(@Nullable ItemStack stack)
-    {
+    public static HeldFoup of(@Nullable ItemStack stack) {
         return new HeldFoup(stack != null, Objects.requireNonNullElse(stack, ItemStack.EMPTY));
     }
 
-    public void applyToCart(OverheadCartEntity cart)
-    {
+    public void applyToCart(OverheadCartEntity cart) {
         cart.setFoupContent(hasFoup ? stack.copy() : null);
     }
 
     @Override
-    public void addToTooltip(Item.TooltipContext ctx, Consumer<Component> tooltipAdder, TooltipFlag flag, DataComponentGetter componentGetter)
-    {
-        if (!hasFoup) return;
-
-        if (!stack.isEmpty())
-        {
-            tooltipAdder.accept(Component.translatable("desc.foup.component.held_foup.contents", stack.getCount(), stack.getHoverName()));
+    public void addToTooltip(Item.TooltipContext ctx, Consumer<Component> tooltipAdder, TooltipFlag flag, DataComponentGetter componentGetter) {
+        if (!hasFoup) {
+            return;
         }
-        else
-        {
+
+        if (!stack.isEmpty()) {
+            tooltipAdder.accept(Component.translatable("desc.foup.component.held_foup.contents", stack.getCount(), stack.getHoverName()));
+        } else {
             tooltipAdder.accept(Component.translatable("desc.foup.component.held_foup.contents.empty"));
         }
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         return obj instanceof HeldFoup(boolean otherHasFoup, ItemStack otherStack) &&
                 otherHasFoup == hasFoup &&
                 ItemStack.isSameItemSameComponents(stack, otherStack) &&
@@ -68,8 +62,7 @@ public record HeldFoup(boolean hasFoup, ItemStack stack) implements TooltipProvi
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Boolean.hashCode(hasFoup) * 31 + ItemStack.hashItemAndComponents(stack) * 31 + stack.getCount();
     }
 }

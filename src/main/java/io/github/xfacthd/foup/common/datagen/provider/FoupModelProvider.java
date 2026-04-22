@@ -29,16 +29,13 @@ import net.neoforged.neoforge.client.model.generators.loaders.CompositeModelBuil
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
 import org.jspecify.annotations.Nullable;
 
-public final class FoupModelProvider extends ModelProvider
-{
-    public FoupModelProvider(PackOutput output)
-    {
+public final class FoupModelProvider extends ModelProvider {
+    public FoupModelProvider(PackOutput output) {
         super(output, Foup.MOD_ID);
     }
 
     @Override
-    protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels)
-    {
+    protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
         Identifier straightModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_RAIL.value());
         blockModels.blockStateOutput.accept(
                 MultiVariantGenerator.dispatch(FoupContent.BLOCK_RAIL.value(), BlockModelGenerators.plainVariant(straightModel))
@@ -162,8 +159,7 @@ public final class FoupModelProvider extends ModelProvider
         itemModels.generateFlatItem(FoupContent.ITEM_RAIL_INSPECTOR.value(), ModelTemplates.FLAT_HANDHELD_ITEM);
     }
 
-    private static void registerStorageLocker(BlockModelGenerators blockModels)
-    {
+    private static void registerStorageLocker(BlockModelGenerators blockModels) {
         Identifier caseModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_case");
         Identifier botLeftEmptyModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_bottom_left_empty");
         Identifier botRightEmptyModel = ModelLocationUtils.getModelLocation(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value(), "_bottom_right_empty");
@@ -195,18 +191,14 @@ public final class FoupModelProvider extends ModelProvider
         blockModels.blockStateOutput.accept(generator);
     }
 
-    private static void addLockerPart(MultiPartGenerator generator, Identifier model, @Nullable BooleanProperty prop, boolean value, boolean mirror)
-    {
-        for (Direction dir : PropertyHolder.FACING_HOR.getPossibleValues())
-        {
+    private static void addLockerPart(MultiPartGenerator generator, Identifier model, @Nullable BooleanProperty prop, boolean value, boolean mirror) {
+        for (Direction dir : PropertyHolder.FACING_HOR.getPossibleValues()) {
             ConditionBuilder condition = new ConditionBuilder()
                     .term(PropertyHolder.FACING_HOR, dir);
-            if (prop != null)
-            {
+            if (prop != null) {
                 condition.term(prop, value);
             }
-            Quadrant quadrant = switch (dir)
-            {
+            Quadrant quadrant = switch (dir) {
                 case NORTH -> mirror ? Quadrant.R0 : Quadrant.R180;
                 case EAST -> mirror ? Quadrant.R90 : Quadrant.R270;
                 case SOUTH -> mirror ? Quadrant.R180 : Quadrant.R0;
@@ -219,13 +211,11 @@ public final class FoupModelProvider extends ModelProvider
         }
     }
 
-    private Material mcMaterial(String id)
-    {
+    private Material mcMaterial(String id) {
         return new Material(mcLocation(id));
     }
 
-    private Material modMaterial(String id)
-    {
+    private Material modMaterial(String id) {
         return new Material(modLocation(id));
     }
 }

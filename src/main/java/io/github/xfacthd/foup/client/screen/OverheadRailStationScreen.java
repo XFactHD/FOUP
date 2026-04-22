@@ -25,8 +25,7 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Objects;
 
-public final class OverheadRailStationScreen extends Screen
-{
+public final class OverheadRailStationScreen extends Screen {
     public static final Component SCREEN_TITLE = Component.translatable("screen.foup.rail_station");
     private static final Identifier BACKGROUND = Utils.rl("textures/gui/overhead_rail_station.png");
     private static final int WIDTH = 186;
@@ -64,8 +63,7 @@ public final class OverheadRailStationScreen extends Screen
     private Component lastError = null;
     private long lastErrorStart = 0;
 
-    public OverheadRailStationScreen(BlockPos blockPos, OverheadRailStationBlockEntity station)
-    {
+    public OverheadRailStationScreen(BlockPos blockPos, OverheadRailStationBlockEntity station) {
         super(SCREEN_TITLE);
         this.blockPos = blockPos;
         this.station = station;
@@ -73,8 +71,7 @@ public final class OverheadRailStationScreen extends Screen
     }
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         leftPos = (width - WIDTH) / 2;
         topPos = (height - HEIGHT) / 2;
 
@@ -97,8 +94,7 @@ public final class OverheadRailStationScreen extends Screen
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         extractTransparentBackground(graphics);
 
         graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, 0, 0, WIDTH, HEIGHT, 256, 256);
@@ -107,36 +103,30 @@ public final class OverheadRailStationScreen extends Screen
         graphics.text(font, LABEL_NAME, leftPos + 8, topPos + 24, 0xFF404040, false);
 
         graphics.text(font, LABEL_STATE, leftPos + 8, topPos + 48, 0xFF404040, false);
-        Component linkState = switch (station.getLinkedType())
-        {
+        Component linkState = switch (station.getLinkedType()) {
             case LOADER -> VALUE_LINKED_LOADER;
             case STORAGE -> VALUE_LINKED_STORAGE;
             case null, default -> VALUE_UNLINKED;
         };
         graphics.text(font, linkState, leftPos + 45, topPos + 48, 0xFF404040, false);
 
-        if (lastError != null)
-        {
+        if (lastError != null) {
             graphics.text(font, LABEL_ERROR, leftPos + 8, topPos + 72, 0xFF404040, false);
             graphics.text(font, lastError, leftPos + 45, topPos + 72, 0xFF404040, false);
         }
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick)
-    {
-        if (nameEditBox.isFocused() && !nameEditBox.isMouseOver(event.x(), event.y()))
-        {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (nameEditBox.isFocused() && !nameEditBox.isMouseOver(event.x(), event.y())) {
             setFocused(null);
         }
         return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event)
-    {
-        if (!nameEditBox.isFocused() && Objects.requireNonNull(minecraft).options.keyInventory.matches(event))
-        {
+    public boolean keyPressed(KeyEvent event) {
+        if (!nameEditBox.isFocused() && Objects.requireNonNull(minecraft).options.keyInventory.matches(event)) {
             onClose();
             return true;
         }
@@ -144,30 +134,25 @@ public final class OverheadRailStationScreen extends Screen
     }
 
     @Override
-    public void tick()
-    {
-        if (station.isRemoved() || !station.isUsableByPlayer(Objects.requireNonNull(Objects.requireNonNull(minecraft).player)))
-        {
+    public void tick() {
+        if (station.isRemoved() || !station.isUsableByPlayer(Objects.requireNonNull(Objects.requireNonNull(minecraft).player))) {
             onClose();
             return;
         }
 
         String name = station.getName();
-        if (!name.equals(lastName))
-        {
+        if (!name.equals(lastName)) {
             lastName = name;
             nameEditBox.setValue(name);
         }
         checkButtonStates();
 
-        if (lastError != null && System.currentTimeMillis() - lastErrorStart > ERROR_DISPLAY_DURATION)
-        {
+        if (lastError != null && System.currentTimeMillis() - lastErrorStart > ERROR_DISPLAY_DURATION) {
             lastError = null;
         }
     }
 
-    private void checkButtonStates()
-    {
+    private void checkButtonStates() {
         boolean canEdit = Objects.requireNonNull(Minecraft.getInstance().player).mayBuild();
         String editValue = nameEditBox.getValue();
         nameEditBox.active = canEdit;
@@ -175,25 +160,20 @@ public final class OverheadRailStationScreen extends Screen
         linkButton.active = station.getLinkedType() == null && !linkInProgress && canEdit;
     }
 
-    private void requestNameChange(Button button)
-    {
+    private void requestNameChange(Button button) {
         renameInProgress = true;
         ClientPacketDistributor.sendToServer(new ServerboundRequestStationRenamePayload(blockPos, nameEditBox.getValue()));
     }
 
-    private void requestLink(Button button)
-    {
+    private void requestLink(Button button) {
         linkInProgress = true;
         ClientPacketDistributor.sendToServer(new ServerboundRequestStationLinkPayload(blockPos));
     }
 
-    public void onRenameAck(BlockPos pos, RenameResult result)
-    {
-        if (blockPos.equals(pos))
-        {
+    public void onRenameAck(BlockPos pos, RenameResult result) {
+        if (blockPos.equals(pos)) {
             renameInProgress = false;
-            setError(switch (result)
-            {
+            setError(switch (result) {
                 case SUCCESS -> null;
                 case NAME_INVALID -> MSG_NAME_INVALID;
                 case NAME_TAKEN -> MSG_NAME_TAKEN;
@@ -202,13 +182,10 @@ public final class OverheadRailStationScreen extends Screen
         }
     }
 
-    public void onLinkAck(BlockPos pos, TriState result)
-    {
-        if (blockPos.equals(pos))
-        {
+    public void onLinkAck(BlockPos pos, TriState result) {
+        if (blockPos.equals(pos)) {
             linkInProgress = false;
-            setError(switch (result)
-            {
+            setError(switch (result) {
                 case TRUE -> null;
                 case DEFAULT -> MSG_ALREADY_LINKED;
                 case FALSE -> MSG_LINK_FAILED;
@@ -216,18 +193,15 @@ public final class OverheadRailStationScreen extends Screen
         }
     }
 
-    private void setError(@Nullable Component error)
-    {
-        if (error != null)
-        {
+    private void setError(@Nullable Component error) {
+        if (error != null) {
             lastError = error;
             lastErrorStart = System.currentTimeMillis();
         }
     }
 
     @Override
-    public boolean isPauseScreen()
-    {
+    public boolean isPauseScreen() {
         return false;
     }
 }

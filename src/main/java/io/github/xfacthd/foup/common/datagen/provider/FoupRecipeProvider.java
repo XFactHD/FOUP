@@ -19,16 +19,13 @@ import net.neoforged.neoforge.common.Tags;
 
 import java.util.concurrent.CompletableFuture;
 
-public final class FoupRecipeProvider extends RecipeProvider
-{
-    private FoupRecipeProvider(HolderLookup.Provider registries, RecipeOutput output)
-    {
+public final class FoupRecipeProvider extends RecipeProvider {
+    private FoupRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
         super(registries, output);
     }
 
     @Override
-    protected void buildRecipes()
-    {
+    protected void buildRecipes() {
         shaped(FoupContent.BLOCK_RAIL, 3)
                 .pattern("III")
                 .pattern("RRR")
@@ -125,32 +122,26 @@ public final class FoupRecipeProvider extends RecipeProvider
         output.accept(key("add_foup_to_cart"), new AddFoupToCartRecipe(), null);
     }
 
-    private ShapedRecipeBuilder shaped(Holder<? extends ItemLike> result, int count)
-    {
+    private ShapedRecipeBuilder shaped(Holder<? extends ItemLike> result, int count) {
         return ShapedRecipeBuilder.shaped(items, RecipeCategory.TRANSPORTATION, result.value(), count);
     }
 
-    private static ResourceKey<Recipe<?>> key(String path)
-    {
+    private static ResourceKey<Recipe<?>> key(String path) {
         return ResourceKey.create(Registries.RECIPE, Utils.rl(path));
     }
 
-    public static final class Runner extends RecipeProvider.Runner
-    {
-        public Runner(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries)
-        {
+    public static final class Runner extends RecipeProvider.Runner {
+        public Runner(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
             super(packOutput, registries);
         }
 
         @Override
-        protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output)
-        {
+        protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
             return new FoupRecipeProvider(registries, output);
         }
 
         @Override
-        public String getName()
-        {
+        public String getName() {
             return "FOUP Recipes";
         }
     }

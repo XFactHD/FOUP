@@ -13,30 +13,25 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
-public final class FoupScreen extends AbstractContainerScreen<FoupMenu>
-{
+public final class FoupScreen extends AbstractContainerScreen<FoupMenu> {
     private static final Identifier BACKGROUND = Utils.rl("textures/gui/foup.png");
     private static final Identifier LOCK_ICON = Identifier.withDefaultNamespace("container/cartography_table/locked");
     private static final int SLOT_SIZE_INNER = 16;
 
-    public FoupScreen(FoupMenu menu, Inventory inventory, Component title)
-    {
+    public FoupScreen(FoupMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
         graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, 0, 0, imageWidth, imageHeight, 256, 256);
     }
 
     @Override
-    protected void renderSlotContents(GuiGraphicsExtractor graphics, ItemStack stack, Slot slot, @Nullable String countString)
-    {
+    protected void renderSlotContents(GuiGraphicsExtractor graphics, ItemStack stack, Slot slot, @Nullable String countString) {
         super.renderSlotContents(graphics, stack, slot, countString);
-        if (slot instanceof LockableInventorySlot lockableSlot && lockableSlot.isLocked())
-        {
+        if (slot instanceof LockableInventorySlot lockableSlot && lockableSlot.isLocked()) {
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, LOCK_ICON, slot.x + SLOT_SIZE_INNER - 5, slot.y + SLOT_SIZE_INNER - 7, 5, 7);
         }
     }

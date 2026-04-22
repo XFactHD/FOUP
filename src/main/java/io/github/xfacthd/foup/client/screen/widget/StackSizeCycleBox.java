@@ -14,8 +14,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import org.lwjgl.glfw.GLFW;
 
-public final class StackSizeCycleBox extends AbstractWidget
-{
+public final class StackSizeCycleBox extends AbstractWidget {
     private static final WidgetSprites BACKGROUND_SPRITES = new WidgetSprites(
             Identifier.withDefaultNamespace("widget/text_field"),
             Identifier.withDefaultNamespace("widget/text_field_highlighted")
@@ -37,16 +36,14 @@ public final class StackSizeCycleBox extends AbstractWidget
     private boolean editable = true;
     private boolean empty = true;
 
-    public StackSizeCycleBox(Font font, int x, int y, int width, int height, Component message)
-    {
+    public StackSizeCycleBox(Font font, int x, int y, int width, int height, Component message) {
         super(x, y, width, height, message);
         this.font = font;
         this.value = MIN;
     }
 
     @Override
-    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         Identifier background = BACKGROUND_SPRITES.get(isActive(), isFocused());
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, background, getX(), getY(), width - 13, height);
 
@@ -62,8 +59,7 @@ public final class StackSizeCycleBox extends AbstractWidget
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ICON_SORT_UP, getX() + width - 14, getY() + (height / 4) - 6, 14, 14);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ICON_SORT_DOWN, getX() + width - 14, getY() + (height / 2) + (height / 4) - 7, 14, 14);
 
-        if (!empty)
-        {
+        if (!empty) {
             String text = Integer.toString(getValue());
             int x = getX() + width - 13 - 4 - font.width(text);
             int color = editable ? TEXT_COLOR : TEXT_COLOR_UNEDITABLE;
@@ -72,46 +68,32 @@ public final class StackSizeCycleBox extends AbstractWidget
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick)
-    {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         boolean overButtons = active && editable && isHovered && event.x() >= getX() + width - 13;
-        if (overButtons && value < MAX && event.y() < getY() + height / 2F)
-        {
-            if (empty)
-            {
+        if (overButtons && value < MAX && event.y() < getY() + height / 2F) {
+            if (empty) {
                 empty = false;
-            }
-            else
-            {
+            } else {
                 value++;
             }
-        }
-        else if (overButtons && value > MIN && event.y() >= getY() + height / 2F)
-        {
+        } else if (overButtons && value > MIN && event.y() >= getY() + height / 2F) {
             value--;
         }
         return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean charTyped(CharacterEvent event)
-    {
-        if (isActive() && editable && isFocused() && Character.isDigit(event.codepoint()))
-        {
+    public boolean charTyped(CharacterEvent event) {
+        if (isActive() && editable && isFocused() && Character.isDigit(event.codepoint())) {
             int digit = Character.digit(event.codepoint(), 10);
-            if (empty)
-            {
-                if (digit >= MIN)
-                {
+            if (empty) {
+                if (digit >= MIN) {
                     value = digit;
                     empty = false;
                 }
-            }
-            else
-            {
+            } else {
                 int newValue = value * 10 + digit;
-                if (newValue <= MAX)
-                {
+                if (newValue <= MAX) {
                     value = newValue;
                 }
             }
@@ -121,39 +103,25 @@ public final class StackSizeCycleBox extends AbstractWidget
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event)
-    {
-        if (isActive() && editable && isFocused())
-        {
-            if (event.key() == GLFW.GLFW_KEY_BACKSPACE)
-            {
-                if (!empty)
-                {
-                    if (value < 10)
-                    {
+    public boolean keyPressed(KeyEvent event) {
+        if (isActive() && editable && isFocused()) {
+            if (event.key() == GLFW.GLFW_KEY_BACKSPACE) {
+                if (!empty) {
+                    if (value < 10) {
                         setEmpty();
-                    }
-                    else
-                    {
+                    } else {
                         value /= 10;
                     }
                 }
                 return true;
-            }
-            else if (event.key() == GLFW.GLFW_KEY_DELETE)
-            {
-                if (!empty)
-                {
-                    if (value < 10)
-                    {
+            } else if (event.key() == GLFW.GLFW_KEY_DELETE) {
+                if (!empty) {
+                    if (value < 10) {
                         setEmpty();
-                    }
-                    else
-                    {
+                    } else {
                         int mult = 1;
                         int toDel = value;
-                        while (toDel > 10)
-                        {
+                        while (toDel > 10) {
                             toDel /= 10;
                             mult *= 10;
                         }
@@ -169,30 +137,25 @@ public final class StackSizeCycleBox extends AbstractWidget
     @Override
     protected void updateWidgetNarration(NarrationElementOutput output) { }
 
-    public int getValue()
-    {
+    public int getValue() {
         return value;
     }
 
-    public void setValue(int value)
-    {
+    public void setValue(int value) {
         this.value = value;
         this.empty = false;
     }
 
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return empty;
     }
 
-    public void setEmpty()
-    {
+    public void setEmpty() {
         this.empty = true;
         this.value = MIN;
     }
 
-    public void setEditable(boolean editable)
-    {
+    public void setEditable(boolean editable) {
         this.editable = editable;
     }
 }

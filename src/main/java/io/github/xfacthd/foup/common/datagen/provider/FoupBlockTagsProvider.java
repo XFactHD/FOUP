@@ -10,16 +10,13 @@ import net.neoforged.neoforge.common.data.BlockTagsProvider;
 
 import java.util.concurrent.CompletableFuture;
 
-public final class FoupBlockTagsProvider extends BlockTagsProvider
-{
-    public FoupBlockTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
-    {
+public final class FoupBlockTagsProvider extends BlockTagsProvider {
+    public FoupBlockTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
         super(output, lookupProvider, Foup.MOD_ID);
     }
 
     @Override
-    protected void addTags(HolderLookup.Provider registries)
-    {
+    protected void addTags(HolderLookup.Provider registries) {
         tag(Tags.Blocks.RELOCATION_NOT_SUPPORTED)
                 .add(FoupContent.BLOCK_RAIL.value())
                 .add(FoupContent.BLOCK_RAIL_CURVE.value())

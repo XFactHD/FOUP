@@ -18,8 +18,7 @@ public record ClientboundRefreshStaleSchedulePayload(
         Schedule.RejectedAction rejectedAction,
         List<Schedule.Entry> scheduleEntries,
         Map<String, StationType> stations
-) implements CustomPacketPayload
-{
+) implements CustomPacketPayload {
     public static final Type<ClientboundRefreshStaleSchedulePayload> TYPE = Utils.payloadType("refresh_state_schedule");
     public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundRefreshStaleSchedulePayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT,
@@ -34,13 +33,11 @@ public record ClientboundRefreshStaleSchedulePayload(
     );
 
     @Override
-    public Type<ClientboundRefreshStaleSchedulePayload> type()
-    {
+    public Type<ClientboundRefreshStaleSchedulePayload> type() {
         return TYPE;
     }
 
-    public static ClientboundRefreshStaleSchedulePayload of(OverheadCartEntity cart, Schedule.RejectedAction action)
-    {
+    public static ClientboundRefreshStaleSchedulePayload of(OverheadCartEntity cart, Schedule.RejectedAction action) {
         return new ClientboundRefreshStaleSchedulePayload(cart.getId(), action, cart.getSchedule().getEntriesCopy(), cart.getAvailableStations());
     }
 }

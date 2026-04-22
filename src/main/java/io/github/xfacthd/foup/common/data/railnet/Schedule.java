@@ -27,97 +27,81 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
 
-public final class Schedule
-{
+public final class Schedule {
     private final OverheadCartEntity owner;
     private final List<Entry> entries = new ArrayList<>();
     private final Set<String> stations = new HashSet<>();
     private int activeEntry = 0;
 
-    public Schedule(OverheadCartEntity owner)
-    {
+    public Schedule(OverheadCartEntity owner) {
         this.owner = owner;
     }
 
-    public Entry getActiveEntry()
-    {
+    public Entry getActiveEntry() {
         return entries.get(activeEntry);
     }
 
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return entries.isEmpty();
     }
 
-    public boolean containsStation(String station)
-    {
+    public boolean containsStation(String station) {
         return stations.contains(station);
     }
 
-    public void advance()
-    {
+    public void advance() {
         activeEntry = (activeEntry + 1) % entries.size();
     }
 
-    public List<Entry> getEntriesCopy()
-    {
+    public List<Entry> getEntriesCopy() {
         return List.copyOf(entries);
     }
 
-    public boolean isValid(RailNetwork network)
-    {
+    public boolean isValid(RailNetwork network) {
         return entries.stream().allMatch(e -> e.isValid(network));
     }
 
-    public boolean addEntry(int idx, Entry entry)
-    {
-        if (owner.isIdle() && idx == entries.size())
-        {
+    public boolean addEntry(int idx, Entry entry) {
+        if (owner.isIdle() && idx == entries.size()) {
             entries.add(entry);
             return true;
         }
         return false;
     }
 
-    public boolean updateEntry(int idx, Entry entry)
-    {
-        if (owner.isIdle() && inRange(idx) && entries.get(idx).uuid.equals(entry.uuid))
-        {
+    public boolean updateEntry(int idx, Entry entry) {
+        if (owner.isIdle() && inRange(idx) && entries.get(idx).uuid.equals(entry.uuid)) {
             entries.set(idx, entry);
             return true;
         }
         return false;
     }
 
-    public boolean moveEntry(int idx, boolean down, UUID entryUid)
-    {
+    public boolean moveEntry(int idx, boolean down, UUID entryUid) {
         int newIdx = down ? idx + 1 : idx - 1;
-        if (owner.isIdle() && inRange(idx) && inRange(newIdx) && entries.get(idx).uuid.equals(entryUid))
-        {
+        if (owner.isIdle() && inRange(idx) && inRange(newIdx) && entries.get(idx).uuid.equals(entryUid)) {
             entries.add(newIdx, entries.remove(idx));
             return true;
         }
         return false;
     }
 
-    public boolean removeEntry(int idx, UUID entryUid)
-    {
-        if (owner.isIdle() && inRange(idx) && entries.get(idx).uuid.equals(entryUid))
-        {
+    public boolean removeEntry(int idx, UUID entryUid) {
+        if (owner.isIdle() && inRange(idx) && entries.get(idx).uuid.equals(entryUid)) {
             entries.remove(idx);
             return true;
         }
         return false;
     }
 
-    private boolean inRange(int idx)
-    {
+    private boolean inRange(int idx) {
         return idx >= 0 && idx < entries.size();
     }
 
-    public void applySnapshot(@Nullable ScheduleSnapshot snapshot)
-    {
-        if (snapshot == null || snapshot.entries().isEmpty()) return;
+    public void applySnapshot(@Nullable ScheduleSnapshot snapshot) {
+        if (snapshot == null || snapshot.entries().isEmpty()) {
+            return;
+        }
 
         entries.clear();
         stations.clear();
@@ -129,25 +113,21 @@ public final class Schedule
                 .forEach(stations::add);
     }
 
-    public void save(ValueOutput valueOutput)
-    {
+    public void save(ValueOutput valueOutput) {
         ValueOutput.TypedOutputList<Entry> entriesOutput = valueOutput.list("entries", Entry.CODEC);
         entries.forEach(entriesOutput::add);
         valueOutput.putInt("active_entry", activeEntry);
     }
 
-    public void load(ValueInput valueInput)
-    {
-        for (Entry entry : valueInput.listOrEmpty("entries", Entry.CODEC))
-        {
+    public void load(ValueInput valueInput) {
+        for (Entry entry : valueInput.listOrEmpty("entries", Entry.CODEC)) {
             entries.add(entry);
             stations.add(entry.station);
         }
         activeEntry = valueInput.getIntOr("active_entry", 0);
     }
 
-    public record Entry(UUID uuid, String station, StationType type, StationAction action, Optional<ItemStack> filter, OptionalInt count)
-    {
+    public record Entry(UUID uuid, String station, StationType type, StationAction action, Optional<ItemStack> filter, OptionalInt count) {
         public static final Codec<Entry> CODEC = RecordCodecBuilder.create(inst -> inst.group(
                 UUIDUtil.CODEC.fieldOf("uuid").forGetter(Entry::uuid),
                 Codec.STRING.fieldOf("station").forGetter(Entry::station),
@@ -175,55 +155,42 @@ public final class Schedule
                 Entry::new
         );
 
-        public boolean matchesFilter(ItemStack stack)
-        {
+        public boolean matchesFilter(ItemStack stack) {
             return filter.isEmpty() || ItemStack.isSameItemSameComponents(stack, filter.get());
         }
 
-        public int getCount()
-        {
+        public int getCount() {
             return count.orElse(Item.ABSOLUTE_MAX_STACK_SIZE);
         }
 
-        public boolean isValid(RailNetwork network)
-        {
-            if (type == StationType.UNKNOWN)
-            {
+        public boolean isValid(RailNetwork network) {
+            if (type == StationType.UNKNOWN) {
                 return false;
             }
             TrackNode node = network.getStation(station);
-            if (node == null)
-            {
+            if (node == null) {
                 return false;
             }
             StationType nodeType = node.getStationType();
-            if (nodeType != type)
-            {
+            if (nodeType != type) {
                 return false;
             }
-            if (nodeType == StationType.LOADER)
-            {
-                if (action == StationAction.UNLOAD && filter.isPresent())
-                {
+            if (nodeType == StationType.LOADER) {
+                if (action == StationAction.UNLOAD && filter.isPresent()) {
                     return false;
                 }
-                if (filter.isPresent() && filter.get().isEmpty())
-                {
+                if (filter.isPresent() && filter.get().isEmpty()) {
                     return false;
                 }
-                if (count.isPresent() && (count.getAsInt() < 1 || count.getAsInt() > Item.ABSOLUTE_MAX_STACK_SIZE))
-                {
+                if (count.isPresent() && (count.getAsInt() < 1 || count.getAsInt() > Item.ABSOLUTE_MAX_STACK_SIZE)) {
                     return false;
                 }
             }
-            if (nodeType == StationType.STORAGE)
-            {
-                if (count.isPresent())
-                {
+            if (nodeType == StationType.STORAGE) {
+                if (count.isPresent()) {
                     return false;
                 }
-                if (action == StationAction.UNLOAD && filter.isPresent())
-                {
+                if (action == StationAction.UNLOAD && filter.isPresent()) {
                     return false;
                 }
             }
@@ -231,14 +198,12 @@ public final class Schedule
         }
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             return "Entry[" + "station=" + station + ", type=" + type + ", action=" + action + ", filter=" + filter + ", count=" + count + ']';
         }
     }
 
-    public enum RejectedAction
-    {
+    public enum RejectedAction {
         ADD,
         EDIT,
         MOVE,

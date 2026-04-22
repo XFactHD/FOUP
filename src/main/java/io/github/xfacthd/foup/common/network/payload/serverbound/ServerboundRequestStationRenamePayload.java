@@ -12,8 +12,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record ServerboundRequestStationRenamePayload(BlockPos pos, String name) implements CustomPacketPayload
-{
+public record ServerboundRequestStationRenamePayload(BlockPos pos, String name) implements CustomPacketPayload {
     public static final Type<ServerboundRequestStationRenamePayload> TYPE = Utils.payloadType("request_station_rename");
     public static final StreamCodec<ByteBuf, ServerboundRequestStationRenamePayload> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC,
@@ -24,14 +23,11 @@ public record ServerboundRequestStationRenamePayload(BlockPos pos, String name) 
     );
 
     @SuppressWarnings("deprecation")
-    public void handle(IPayloadContext ctx)
-    {
+    public void handle(IPayloadContext ctx) {
         Level level = ctx.player().level();
         RenameResult result = RenameResult.UNKNOWN;
-        if (level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity station)
-        {
-            if (station.isUsableByPlayer(ctx.player()) && ctx.player().mayBuild())
-            {
+        if (level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity station) {
+            if (station.isUsableByPlayer(ctx.player()) && ctx.player().mayBuild()) {
                 result = station.setName(name);
             }
         }
@@ -39,8 +35,7 @@ public record ServerboundRequestStationRenamePayload(BlockPos pos, String name) 
     }
 
     @Override
-    public Type<ServerboundRequestStationRenamePayload> type()
-    {
+    public Type<ServerboundRequestStationRenamePayload> type() {
         return TYPE;
     }
 }

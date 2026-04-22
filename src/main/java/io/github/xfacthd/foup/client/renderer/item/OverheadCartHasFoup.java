@@ -10,22 +10,19 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
-public final class OverheadCartHasFoup implements ConditionalItemModelProperty
-{
+public final class OverheadCartHasFoup implements ConditionalItemModelProperty {
     public static final OverheadCartHasFoup INSTANCE = new OverheadCartHasFoup();
     public static final MapCodec<OverheadCartHasFoup> CODEC = MapCodec.unit(INSTANCE);
 
     private OverheadCartHasFoup() { }
 
     @Override
-    public boolean get(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, ItemDisplayContext ctx)
-    {
+    public boolean get(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, ItemDisplayContext ctx) {
         return stack.getOrDefault(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.EMPTY).hasFoup();
     }
 
     @Override
-    public MapCodec<? extends ConditionalItemModelProperty> type()
-    {
+    public MapCodec<? extends ConditionalItemModelProperty> type() {
         return CODEC;
     }
 }

@@ -9,16 +9,13 @@ import net.neoforged.neoforge.common.Tags;
 
 import java.util.concurrent.CompletableFuture;
 
-public final class FoupEntityTypeTagsProvider extends EntityTypeTagsProvider
-{
-    public FoupEntityTypeTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> provider)
-    {
+public final class FoupEntityTypeTagsProvider extends EntityTypeTagsProvider {
+    public FoupEntityTypeTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> provider) {
         super(output, provider, Foup.MOD_ID);
     }
 
     @Override
-    protected void addTags(HolderLookup.Provider registries)
-    {
+    protected void addTags(HolderLookup.Provider registries) {
         tag(Tags.EntityTypes.CAPTURING_NOT_SUPPORTED).add(FoupContent.ENTITY_TYPE_CART.value());
         tag(Tags.EntityTypes.TELEPORTING_NOT_SUPPORTED).add(FoupContent.ENTITY_TYPE_CART.value());
     }

@@ -52,78 +52,71 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-public final class OverheadRailInfoRenderer
-{
+public final class OverheadRailInfoRenderer {
     private static final Direction[] HORIZONTAL_DIRECTIONS = Direction.Plane.HORIZONTAL.stream().toArray(Direction[]::new);
     private static final int GHOST_OPACITY = 170;
     private static final Function<@Nullable StationType, @Nullable Component> STATION_FORMATTER = type ->
             type != null && type != StationType.UNKNOWN ? type.getTranslation() : null;
     private static final ContextKey<RailInfoRenderState> DATA_KEY = new ContextKey<>(Utils.rl("rail_info_renderer"));
 
-    public static void onExtractRenderState(ExtractLevelRenderStateEvent event)
-    {
+    public static void onExtractRenderState(ExtractLevelRenderStateEvent event) {
         Minecraft mc = Minecraft.getInstance();
-        if (Objects.requireNonNull(mc.player).isSpectator()) return;
-        if (!(mc.hitResult instanceof BlockHitResult hitResult)) return;
-        if (hitResult.getType() != HitResult.Type.BLOCK) return;
+        if (Objects.requireNonNull(mc.player).isSpectator()) {
+            return;
+        }
+        if (!(mc.hitResult instanceof BlockHitResult hitResult)) {
+            return;
+        }
+        if (hitResult.getType() != HitResult.Type.BLOCK) {
+            return;
+        }
 
         RailInfoRenderState renderState = null;
         ItemStack stack = mc.player.getMainHandItem();
-        if (stack.is(FoupContent.ITEM_RAIL_INSPECTOR))
-        {
+        if (stack.is(FoupContent.ITEM_RAIL_INSPECTOR)) {
             BlockPos pos = hitResult.getBlockPos();
             BlockState state = Objects.requireNonNull(mc.level).getBlockState(pos);
-            if (state.getBlock() instanceof AbstractOverheadRailBlock)
-            {
+            if (state.getBlock() instanceof AbstractOverheadRailBlock) {
                 renderState = extractRailInfoAround(mc.level, pos, state, false);
             }
-        }
-        else if (stack.getItem() instanceof BlockItem item && item.getBlock() instanceof AbstractOverheadRailBlock block)
-        {
+        } else if (stack.getItem() instanceof BlockItem item && item.getBlock() instanceof AbstractOverheadRailBlock block) {
             BlockPlaceContext context = new BlockPlaceContext(mc.player, InteractionHand.MAIN_HAND, stack, hitResult);
             BlockState state = block.getStateForPlacement(context, true);
             BlockPos pos = context.getClickedPos();
-            if (canPlaceAt(Objects.requireNonNull(mc.level), pos, state, context, mc.player))
-            {
+            if (canPlaceAt(Objects.requireNonNull(mc.level), pos, state, context, mc.player)) {
                 renderState = extractRailInfoAround(mc.level, pos, state, true);
             }
         }
-        if (renderState != null)
-        {
+        if (renderState != null) {
             event.getRenderState().setRenderData(DATA_KEY, renderState);
         }
     }
 
-    private static boolean canPlaceAt(Level level, BlockPos pos, @Nullable BlockState state, BlockPlaceContext ctx, Player player)
-    {
-        if (level.getBlockState(pos).canBeReplaced(ctx))
-        {
+    private static boolean canPlaceAt(Level level, BlockPos pos, @Nullable BlockState state, BlockPlaceContext ctx, Player player) {
+        if (level.getBlockState(pos).canBeReplaced(ctx)) {
             return state == null || level.isUnobstructed(state, pos, CollisionContext.of(player));
         }
         return false;
     }
 
-    private static RailInfoRenderState extractRailInfoAround(ClientLevel level, BlockPos pos, @Nullable BlockState state, boolean renderGhost)
-    {
+    private static RailInfoRenderState extractRailInfoAround(ClientLevel level, BlockPos pos, @Nullable BlockState state, boolean renderGhost) {
         List<RailNodeInfoRenderState> nodes = new ArrayList<>(9);
         GhostBlockRenderState ghost = null;
-        if (state != null)
-        {
-            if (renderGhost)
-            {
+        if (state != null) {
+            if (renderGhost) {
                 BlockStateModel model = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(state);
                 ghost = new GhostBlockRenderState(state, pos, model);
             }
             nodes.add(extractRailInfo(level, pos, state, !renderGhost));
         }
 
-        for (BlockPos adjPos : BlockPos.betweenClosed(pos.offset(-1, 0, -1), pos.offset(1, 0, 1)))
-        {
-            if (adjPos.equals(pos)) continue;
+        for (BlockPos adjPos : BlockPos.betweenClosed(pos.offset(-1, 0, -1), pos.offset(1, 0, 1))) {
+            if (adjPos.equals(pos)) {
+                continue;
+            }
 
             BlockState adjState = level.getBlockState(adjPos);
-            if (adjState.getBlock() instanceof AbstractOverheadRailBlock)
-            {
+            if (adjState.getBlock() instanceof AbstractOverheadRailBlock) {
                 nodes.add(extractRailInfo(level, adjPos, adjState, true));
             }
         }
@@ -131,20 +124,19 @@ public final class OverheadRailInfoRenderer
         return new RailInfoRenderState(ghost, nodes);
     }
 
-    private static RailNodeInfoRenderState extractRailInfo(ClientLevel level, BlockPos pos, BlockState state, boolean stationInfo)
-    {
+    private static RailNodeInfoRenderState extractRailInfo(ClientLevel level, BlockPos pos, BlockState state, boolean stationInfo) {
         StationInfoRenderState stationData = null;
-        if (stationInfo && state.is(FoupContent.BLOCK_RAIL_STATION) && level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity station)
-        {
+        if (stationInfo && state.is(FoupContent.BLOCK_RAIL_STATION) && level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity station) {
             stationData = new StationInfoRenderState(station.getName(), station.getLinkedType());
         }
         return new RailNodeInfoRenderState(state, pos.immutable(), stationData);
     }
 
-    public static void onRenderLevelStage(RenderLevelStageEvent.AfterTranslucentParticles event)
-    {
+    public static void onRenderLevelStage(RenderLevelStageEvent.AfterTranslucentParticles event) {
         RailInfoRenderState renderState = event.getLevelRenderState().getRenderData(DATA_KEY);
-        if (renderState == null) return;
+        if (renderState == null) {
+            return;
+        }
 
         Minecraft minecraft = Minecraft.getInstance();
         PoseStack poseStack = event.getPoseStack();
@@ -157,8 +149,7 @@ public final class OverheadRailInfoRenderer
 
         VertexConsumer quadBuilder = buffers.getBuffer(ClientUtils.INFO_QUADS);
         GhostBlockRenderState ghost = renderState.ghost;
-        if (ghost != null)
-        {
+        if (ghost != null) {
             Vec3 offset = Vec3.atLowerCornerOf(ghost.pos).subtract(camera.pos);
             poseStack.pushPose();
             poseStack.translate(offset.x, offset.y, offset.z);
@@ -166,7 +157,7 @@ public final class OverheadRailInfoRenderer
             boolean ambientOcclusion = minecraft.options.ambientOcclusion().get();
             ModelBlockRenderer blockRenderer = new ModelBlockRenderer(ambientOcclusion, false, minecraft.getBlockColors());
             // FIXME: rewrite to not use render types at all
-            RenderType bufferType = Sheets.translucentItemSheet();//NeoForgeRenderTypes.TRANSLUCENT_ON_PARTICLES_TARGET.get();
+            RenderType bufferType = Sheets.translucentBlockItemSheet();//NeoForgeRenderTypes.TRANSLUCENT_ON_PARTICLES_TARGET.get();
             VertexConsumer builder = new GhostVertexConsumer(buffers.getBuffer(bufferType), GHOST_OPACITY);
             BlockQuadOutput output = (_, _, _, quad, instance) ->
                     builder.putBakedQuad(poseStack.last(), quad, instance);
@@ -178,16 +169,14 @@ public final class OverheadRailInfoRenderer
             poseStack.popPose();
         }
 
-        for (RailNodeInfoRenderState node : renderState.nodes)
-        {
+        for (RailNodeInfoRenderState node : renderState.nodes) {
             renderRailInfo(poseStack, camera, buffers, quadBuilder, font, node);
         }
 
         buffers.endBatch(ClientUtils.INFO_QUADS);
-        if (ghost != null)
-        {
+        if (ghost != null) {
             //buffers.endBatch(NeoForgeRenderTypes.TRANSLUCENT_ON_PARTICLES_TARGET.get());
-            buffers.endBatch(Sheets.translucentItemSheet());
+            buffers.endBatch(Sheets.translucentBlockItemSheet());
         }
         buffers.endLastBatch();
 
@@ -201,44 +190,36 @@ public final class OverheadRailInfoRenderer
             VertexConsumer builder,
             Font font,
             RailNodeInfoRenderState node
-    )
-    {
+    ) {
         poseStack.pushPose();
 
         Vec3 offset = Vec3.atCenterOf(node.pos).add(0, .25, 0).subtract(camera.pos);
         poseStack.translate(offset.x, offset.y, offset.z);
 
         BlockState state = node.state;
-        for (Direction dir : HORIZONTAL_DIRECTIONS)
-        {
+        for (Direction dir : HORIZONTAL_DIRECTIONS) {
             AbstractOverheadRailBlock block = (AbstractOverheadRailBlock) state.getBlock();
-            if (block.isEntrySide(state, dir))
-            {
+            if (block.isEntrySide(state, dir)) {
                 renderArrow(poseStack, builder, dir, -.05F, false);
-            }
-            else if (block.isExitSide(state, dir))
-            {
+            } else if (block.isExitSide(state, dir)) {
                 renderArrow(poseStack, builder, dir, -.05F, true);
             }
         }
 
         StationInfoRenderState station = node.station;
-        if (station != null)
-        {
+        if (station != null) {
             renderStationInfo(poseStack, camera, buffers, font, station.name, station.linkedType, STATION_FORMATTER);
         }
 
         poseStack.popPose();
     }
 
-    public static void renderArrow(PoseStack poseStack, VertexConsumer builder, Direction dir, float start, boolean arrow)
-    {
+    public static void renderArrow(PoseStack poseStack, VertexConsumer builder, Direction dir, float start, boolean arrow) {
         Quaternionf yRot = Axis.YN.rotationDegrees(dir.toYRot());
         renderArrow(poseStack, builder, yRot, start, arrow, 0xFF0000FF);
     }
 
-    public static void renderArrow(PoseStack poseStack, VertexConsumer builder, Quaternionfc yRot, float start, boolean arrow, int color)
-    {
+    public static void renderArrow(PoseStack poseStack, VertexConsumer builder, Quaternionfc yRot, float start, boolean arrow, int color) {
         poseStack.pushPose();
         poseStack.mulPose(yRot);
 
@@ -249,8 +230,7 @@ public final class OverheadRailInfoRenderer
         builder.addVertex(pose,  .05F, 0,   end).setColor(color);
         builder.addVertex(pose,  .05F, 0, start).setColor(color);
 
-        if (arrow)
-        {
+        if (arrow) {
             builder.addVertex(pose, -.15F, 0, .35F).setColor(color);
             builder.addVertex(pose,    0F, 0,  .5F).setColor(color);
             builder.addVertex(pose,    0F, 0,  .5F).setColor(color);
@@ -268,22 +248,20 @@ public final class OverheadRailInfoRenderer
             String name,
             @Nullable StationType type,
             Function<@Nullable StationType, @Nullable Component> formatter
-    )
-    {
+    ) {
         poseStack.pushPose();
 
         poseStack.translate(0, .5, 0);
         poseStack.mulPose(camera.orientation);
         poseStack.mulPose(Axis.YP.rotationDegrees(180));
         poseStack.mulPose(Axis.ZN.rotationDegrees(180));
-        poseStack.scale(1F/40F, 1F/40F, 1);
+        poseStack.scale(1F / 40F, 1F / 40F, 1);
 
         Component typeName = formatter.apply(type);
 
         Matrix4f pose = poseStack.last().pose();
         font.drawInBatch(name, -(font.width(name) / 2F), -9, 0xFFBB00FF, false, pose, buffers, Font.DisplayMode.NORMAL, 0, LightCoordsUtil.FULL_BRIGHT);
-        if (typeName != null)
-        {
+        if (typeName != null) {
             font.drawInBatch(typeName, -(font.width(typeName) / 2F), 1, 0xFFBB00FF, false, pose, buffers, Font.DisplayMode.NORMAL, 0, LightCoordsUtil.FULL_BRIGHT);
         }
 

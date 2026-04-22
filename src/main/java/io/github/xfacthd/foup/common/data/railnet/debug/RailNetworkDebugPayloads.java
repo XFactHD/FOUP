@@ -23,31 +23,25 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public final class RailNetworkDebugPayloads
-{
+public final class RailNetworkDebugPayloads {
     private static final boolean DEV_ENV = !FMLEnvironment.isProduction();
     public static final boolean ENABLE_IN_PROD = true;
     private static final Set<ServerPlayer> RECEIVERS = Sets.newIdentityHashSet();
     private static final Set<PendingNetwork> PENDING_UPDATES = new HashSet<>();
 
-    public static void enqueueNetworkDebugUpdate(ServerLevel level, long id)
-    {
-        if ((DEV_ENV || ENABLE_IN_PROD) && !RECEIVERS.isEmpty())
-        {
+    public static void enqueueNetworkDebugUpdate(ServerLevel level, long id) {
+        if ((DEV_ENV || ENABLE_IN_PROD) && !RECEIVERS.isEmpty()) {
             PENDING_UPDATES.add(new PendingNetwork(level, id));
         }
     }
 
-    public static void sendImmediateNetworkDebugUpdate(ServerLevel level, long id)
-    {
-        if ((DEV_ENV || ENABLE_IN_PROD) && !RECEIVERS.isEmpty())
-        {
+    public static void sendImmediateNetworkDebugUpdate(ServerLevel level, long id) {
+        if ((DEV_ENV || ENABLE_IN_PROD) && !RECEIVERS.isEmpty()) {
             sendNetworkDebugUpdate(level, id);
         }
     }
 
-    private static void sendNetworkDebugUpdate(ServerLevel level, long id)
-    {
+    private static void sendNetworkDebugUpdate(ServerLevel level, long id) {
         RailNetworkSavedData savedData = RailNetworkSavedData.get(level);
         Graph<RailNetwork> network = savedData.getNetwork(id);
         Optional<RailNetworkDebugData> debugData = network != null ? pack(network) : Optional.empty();
@@ -55,16 +49,13 @@ public final class RailNetworkDebugPayloads
         RECEIVERS.forEach(player -> PacketDistributor.sendToPlayer(player, payload));
     }
 
-    private static Optional<RailNetworkDebugData> pack(Graph<RailNetwork> network)
-    {
+    private static Optional<RailNetworkDebugData> pack(Graph<RailNetwork> network) {
         List<RailNetworkDebugData.Node> nodes = new ArrayList<>();
-        for (GraphObject<RailNetwork> object : network.getObjects())
-        {
+        for (GraphObject<RailNetwork> object : network.getObjects()) {
             TrackNode node = (TrackNode) object;
             Optional<String> name = node.isStation() ? Optional.of(node.getName()) : Optional.empty();
             List<BlockPos> neighbours = new ArrayList<>();
-            for (GraphObject<RailNetwork> neighbour : network.getNeighbours(object))
-            {
+            for (GraphObject<RailNetwork> neighbour : network.getNeighbours(object)) {
                 neighbours.add(((TrackNode) neighbour).getPos());
             }
             Optional<StationType> type = Optional.ofNullable(node.getStationType());
@@ -73,10 +64,8 @@ public final class RailNetworkDebugPayloads
         return Optional.of(new RailNetworkDebugData(nodes));
     }
 
-    public static boolean addReceiver(ServerPlayer player)
-    {
-        if (RECEIVERS.add(player))
-        {
+    public static boolean addReceiver(ServerPlayer player) {
+        if (RECEIVERS.add(player)) {
             RailNetworkSavedData.get(player.level()).forEach((id, network) ->
                     PacketDistributor.sendToPlayer(player, new ClientboundRailNetworkDebugDataPayload(id, pack(network)))
             );
@@ -85,26 +74,21 @@ public final class RailNetworkDebugPayloads
         return false;
     }
 
-    public static boolean removeReceiver(ServerPlayer player)
-    {
-        if (RECEIVERS.remove(player))
-        {
+    public static boolean removeReceiver(ServerPlayer player) {
+        if (RECEIVERS.remove(player)) {
             PacketDistributor.sendToPlayer(player, ClientboundRailNetworkDebugClearPayload.INSTANCE);
             return true;
         }
         return false;
     }
 
-    public static void onServerTickEnd(@SuppressWarnings("unused") ServerTickEvent.Post event)
-    {
+    public static void onServerTickEnd(@SuppressWarnings("unused") ServerTickEvent.Post event) {
         PENDING_UPDATES.forEach(net -> sendNetworkDebugUpdate(net.level, net.id));
         PENDING_UPDATES.clear();
     }
 
-    public static void onPlayerDisconnect(PlayerEvent.PlayerLoggedOutEvent event)
-    {
-        if (event.getEntity() instanceof ServerPlayer player)
-        {
+    public static void onPlayerDisconnect(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
             RECEIVERS.remove(player);
         }
     }

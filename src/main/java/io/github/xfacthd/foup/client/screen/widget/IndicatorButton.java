@@ -10,23 +10,20 @@ import net.minecraft.resources.Identifier;
 
 import java.util.function.BooleanSupplier;
 
-public final class IndicatorButton extends Button.Plain
-{
+public final class IndicatorButton extends Button.Plain {
     private static final Identifier INDICATOR_TEXTURE = Utils.rl("indicator");
     private static final Identifier INDICATOR_CHECKED_TEXTURE = Utils.rl("indicator_checked");
     private static final int INDICATOR_SIZE = 14;
 
     private final BooleanSupplier checkedSupplier;
 
-    public IndicatorButton(int x, int y, int w, int h, Component text, BooleanSupplier checkedSupplier, OnPress onPress)
-    {
+    public IndicatorButton(int x, int y, int w, int h, Component text, BooleanSupplier checkedSupplier, OnPress onPress) {
         super(x, y, w, h, text, onPress, Button.DEFAULT_NARRATION);
         this.checkedSupplier = checkedSupplier;
     }
 
     @Override
-    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractContents(graphics, mouseX, mouseY, partialTick);
         int x = getX() + width - INDICATOR_SIZE - Math.min(3, (width - INDICATOR_SIZE) / 2);
         int y = getY() + (height - INDICATOR_SIZE) / 2;
@@ -36,8 +33,7 @@ public final class IndicatorButton extends Button.Plain
     }
 
     @Override
-    protected void extractDefaultLabel(ActiveTextCollector textCollector)
-    {
+    protected void extractDefaultLabel(ActiveTextCollector textCollector) {
         int minX = getX() + 3;
         int maxX = getX() + getWidth() - INDICATOR_SIZE - 6;
         textCollector.acceptScrollingWithDefaultCenter(getMessage(), minX, maxX, getY(), getY() + getHeight());

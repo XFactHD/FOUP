@@ -38,9 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public final class OverheadCartEntity extends Entity
-{
-    public static final double PLACEMENT_Y_OFFSET = -7.5/16D;
+public final class OverheadCartEntity extends Entity {
+    public static final double PLACEMENT_Y_OFFSET = -7.5 / 16D;
     // Distance in "pixels" between the bottom of the pod when retracted and to bottom of the block partially occupied by the lower part of the cart
     public static final float CART_BASE_DIST = 8.5F;
     // Height in "pixels" of the base of loader and storage
@@ -66,14 +65,12 @@ public final class OverheadCartEntity extends Entity
     @Nullable
     private ItemStack foupContent;
 
-    public OverheadCartEntity(EntityType<?> entityType, Level level)
-    {
+    public OverheadCartEntity(EntityType<?> entityType, Level level) {
         super(entityType, level);
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder)
-    {
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(ACTION, OverheadCartAction.DEFAULT);
         builder.define(HAS_FOUP, false);
         builder.define(FOUP_CONTENT, ItemStack.EMPTY);
@@ -81,125 +78,96 @@ public final class OverheadCartEntity extends Entity
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> key)
-    {
-        if (key == ACTION)
-        {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        if (key == ACTION) {
             actionStart = tickCount;
         }
     }
 
     @Override
-    public void tick()
-    {
+    public void tick() {
         boolean firstTick = this.firstTick;
         super.tick();
-        if (!level().isClientSide())
-        {
+        if (!level().isClientSide()) {
             behaviour.tick(firstTick);
-        }
-        else
-        {
-            if (isInterpolating()) // Lerping code copied from AbstractMinecart
-            {
+        } else {
+            if (isInterpolating()) { // Lerping code copied from AbstractMinecart
                 interpolation.interpolate();
-            }
-            else
-            {
+            } else {
                 reapplyPosition();
                 setRot(getYRot(), getXRot());
             }
         }
     }
 
-    public OverheadCartState getState()
-    {
+    public OverheadCartState getState() {
         return entityData.get(ACTION).state();
     }
 
-    public int getActionStart()
-    {
+    public int getActionStart() {
         return actionStart;
     }
 
-    public int getActionDuration()
-    {
+    public int getActionDuration() {
         return entityData.get(ACTION).duration();
     }
 
-    public int getHeightDiff()
-    {
+    public int getHeightDiff() {
         return entityData.get(ACTION).heightDiff();
     }
 
-    public boolean getHasFoup()
-    {
+    public boolean getHasFoup() {
         return entityData.get(HAS_FOUP);
     }
 
-    public static float calculateHoistDistance(float heightDiff)
-    {
+    public static float calculateHoistDistance(float heightDiff) {
         return heightDiff * 16F + OverheadCartEntity.CART_BASE_DIST - OverheadCartEntity.STATION_BASE_HEIGHT;
     }
 
-    public void notifyReadyForDeparture()
-    {
+    public void notifyReadyForDeparture() {
         behaviour.notifyReadyForDeparture();
     }
 
-    public void notifyRetry(boolean retry)
-    {
+    public void notifyRetry(boolean retry) {
         behaviour.notifyRetry(retry);
     }
 
     /**
      * Returns the contents of the held FOUP, an empty stack if the FOUP is empty or null if no FOUP is present
      */
-    @Nullable
-    public ItemStack getFoupContent()
-    {
+    public @Nullable ItemStack getFoupContent() {
         return foupContent;
     }
 
-    public ItemStack getFoupContentClient()
-    {
-        if (getHasFoup())
-        {
+    public ItemStack getFoupContentClient() {
+        if (getHasFoup()) {
             return entityData.get(FOUP_CONTENT);
         }
         return ItemStack.EMPTY;
     }
 
-    public void setFoupContent(@Nullable ItemStack stack)
-    {
+    public void setFoupContent(@Nullable ItemStack stack) {
         entityData.set(HAS_FOUP, stack != null);
         entityData.set(FOUP_CONTENT, Objects.requireNonNullElse(stack, ItemStack.EMPTY));
         foupContent = stack;
     }
 
     @Override
-    public InterpolationHandler getInterpolation()
-    {
+    public InterpolationHandler getInterpolation() {
         return interpolation;
     }
 
     @Override
-    public InteractionResult interact(Player player, InteractionHand hand, Vec3 location)
-    {
-        if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty())
-        {
-            if (player.isShiftKeyDown() && player.mayBuild())
-            {
-                if (level() instanceof ServerLevel level)
-                {
+    public InteractionResult interact(Player player, InteractionHand hand, Vec3 location) {
+        if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty()) {
+            if (player.isShiftKeyDown() && player.mayBuild()) {
+                if (level() instanceof ServerLevel level) {
                     killAndDrop(level, player);
                 }
                 return InteractionResult.SUCCESS;
             }
-            if (!player.isShiftKeyDown())
-            {
-                if (player instanceof ServerPlayer)
-                {
+            if (!player.isShiftKeyDown()) {
+                if (player instanceof ServerPlayer) {
                     RailNetwork network = behaviour.getOwningNetwork();
                     CartMenuProvider menuProvider = new CartMenuProvider(
                             this, behaviour.getSchedule().getEntriesCopy(), network.getStations()
@@ -213,151 +181,121 @@ public final class OverheadCartEntity extends Entity
     }
 
     @Override
-    public void move(MoverType type, Vec3 pos)
-    {
-        if (level() instanceof ServerLevel level && !isRemoved() && pos.lengthSqr() > 0D)
-        {
+    public void move(MoverType type, Vec3 pos) {
+        if (level() instanceof ServerLevel level && !isRemoved() && pos.lengthSqr() > 0D) {
             killAndDrop(level, null);
         }
     }
 
-    public void killAndDrop(ServerLevel level, @Nullable Player player)
-    {
+    public void killAndDrop(ServerLevel level, @Nullable Player player) {
         kill(level);
 
         ItemStack stack = FoupContent.ITEM_CART.toStack();
         stack.set(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.of(foupContent));
-        if (!getSchedule().isEmpty())
-        {
+        if (!getSchedule().isEmpty()) {
             stack.set(FoupContent.DC_TYPE_SCHEDULE, new ScheduleSnapshot(getSchedule().getEntriesCopy()));
         }
-        if (player != null)
-        {
-            if (player.isCreative() && player.getInventory().contains(stack))
-            {
+        if (player != null) {
+            if (player.isCreative() && player.getInventory().contains(stack)) {
                 // Don't give the player the cart if they already have this exact one
                 return;
             }
-            if (!player.getInventory().add(stack))
-            {
+            if (!player.getInventory().add(stack)) {
                 player.drop(stack, false);
             }
-        }
-        else if (level.getGameRules().get(GameRules.ENTITY_DROPS))
-        {
+        } else if (level.getGameRules().get(GameRules.ENTITY_DROPS)) {
             spawnAtLocation(level, stack);
         }
     }
 
-    public Schedule getSchedule()
-    {
+    public Schedule getSchedule() {
         return behaviour.getSchedule();
     }
 
-    public Map<String, StationType> getAvailableStations()
-    {
+    public Map<String, StationType> getAvailableStations() {
         return behaviour.getOwningNetwork().getStations();
     }
 
-    public boolean executeSchedule()
-    {
+    public boolean executeSchedule() {
         return behaviour.executeSchedule();
     }
 
-    public void stopSchedule()
-    {
+    public void stopSchedule() {
         behaviour.stopSchedule();
     }
 
-    public boolean isIdle()
-    {
+    public boolean isIdle() {
         return getState() == OverheadCartState.IDLE;
     }
 
-    public boolean isUsableByPlayer(Player player)
-    {
+    public boolean isUsableByPlayer(Player player) {
         return player.distanceToSqr(this) < 64D;
     }
 
-    @Nullable
-    public OverheadCartIssue getIssue()
-    {
+    public @Nullable OverheadCartIssue getIssue() {
         OverheadCartIssue issue = entityData.get(ISSUE);
         return issue == OverheadCartIssue.NONE ? null : issue;
     }
 
-    public void rescue()
-    {
+    public void rescue() {
         behaviour.rescue();
     }
 
     @Override
-    public void remove(RemovalReason reason)
-    {
-        if (!level().isClientSide() && reason.shouldDestroy())
-        {
+    public void remove(RemovalReason reason) {
+        if (!level().isClientSide() && reason.shouldDestroy()) {
             behaviour.destroy();
         }
         super.remove(reason);
     }
 
     @Override
-    public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount)
-    {
+    public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
         return false;
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput valueInput)
-    {
+    protected void readAdditionalSaveData(ValueInput valueInput) {
         behaviour.load(valueInput);
         setFoupContent(valueInput.read("foup_content", ItemStack.OPTIONAL_CODEC).orElse(null));
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput valueOutput)
-    {
+    protected void addAdditionalSaveData(ValueOutput valueOutput) {
         behaviour.save(valueOutput);
         valueOutput.storeNullable("foup_content", ItemStack.OPTIONAL_CODEC, foupContent);
     }
 
     @Override
-    public boolean isPickable()
-    {
+    public boolean isPickable() {
         return true;
     }
 
     @Override
-    public boolean canBeCollidedWith(@Nullable Entity other)
-    {
+    public boolean canBeCollidedWith(@Nullable Entity other) {
         return true;
     }
 
     @Override
-    public boolean isPushedByFluid(FluidType type)
-    {
+    public boolean isPushedByFluid(FluidType type) {
         return false;
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public boolean isPushedByFluid()
-    {
+    public boolean isPushedByFluid() {
         return false;
     }
 
     @Override
-    public boolean canTeleport(Level fromLevel, Level toLevel)
-    {
+    public boolean canTeleport(Level fromLevel, Level toLevel) {
         return false;
     }
 
-    private static final class OverheadCartInterpolationHandler extends InterpolationHandler
-    {
+    private static final class OverheadCartInterpolationHandler extends InterpolationHandler {
         private final OverheadCartEntity entity;
 
-        public OverheadCartInterpolationHandler(OverheadCartEntity entity)
-        {
+        public OverheadCartInterpolationHandler(OverheadCartEntity entity) {
             super(entity, INTERPOLATION_STEPS);
             this.entity = entity;
         }
@@ -365,16 +303,12 @@ public final class OverheadCartEntity extends Entity
         // Pos-only and rot-only packets overwrite the existing target rotation and position respectively with the
         // last interpolation result instead of the existing interpolation target
         @Override
-        public void interpolateTo(Vec3 pos, float yRot, float xRot)
-        {
-            if (hasActiveInterpolation())
-            {
-                if (pos.equals(entity.position()))
-                {
+        public void interpolateTo(Vec3 pos, float yRot, float xRot) {
+            if (hasActiveInterpolation()) {
+                if (pos.equals(entity.position())) {
                     pos = position();
                 }
-                if (yRot == entity.getYRot())
-                {
+                if (yRot == entity.getYRot()) {
                     yRot = yRot();
                 }
             }
@@ -386,22 +320,18 @@ public final class OverheadCartEntity extends Entity
             OverheadCartEntity cart,
             List<Schedule.Entry> entries,
             Map<String, StationType> stations
-    ) implements MenuProvider
-    {
+    ) implements MenuProvider {
         @Override
-        public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
-        {
+        public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
             return new OverheadCartMenu(containerId, inventory, cart, entries, stations);
         }
 
         @Override
-        public Component getDisplayName()
-        {
+        public Component getDisplayName() {
             return OverheadCartMenu.MENU_TITLE;
         }
 
-        public void encodeClientData(RegistryFriendlyByteBuf buf)
-        {
+        public void encodeClientData(RegistryFriendlyByteBuf buf) {
             OverheadCartMenu.ClientData.STREAM_CODEC.encode(buf, new OverheadCartMenu.ClientData(cart.getId(), entries, stations));
         }
     }

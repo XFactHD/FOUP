@@ -12,10 +12,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.UnaryOperator;
 
-public final class DeferredEntityRegister extends DeferredRegister<EntityType<?>>
-{
-    private DeferredEntityRegister(String namespace)
-    {
+public final class DeferredEntityRegister extends DeferredRegister<EntityType<?>> {
+    private DeferredEntityRegister(String namespace) {
         super(Registries.ENTITY_TYPE, namespace);
     }
 
@@ -23,24 +21,19 @@ public final class DeferredEntityRegister extends DeferredRegister<EntityType<?>
     @SuppressWarnings("unchecked")
     protected <I extends EntityType<?>> DeferredHolder<EntityType<?>, I> createHolder(
             ResourceKey<? extends Registry<EntityType<?>>> registryKey, Identifier key
-    )
-    {
+    ) {
         return (DeferredHolder<EntityType<?>, I>) DeferredEntity.createBlockEntity(ResourceKey.create(registryKey, key));
     }
 
     public <T extends Entity> DeferredEntity<T> registerEntity(
             String name, EntityType.EntityFactory<T> factory, MobCategory category, UnaryOperator<EntityType.Builder<T>> builder
-    )
-    {
+    ) {
         ResourceKey<EntityType<?>> dfuKey = ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(getNamespace(), name));
         //noinspection ConstantConditions
         return (DeferredEntity<T>) register(name, () -> builder.apply(EntityType.Builder.of(factory, category)).build(dfuKey));
     }
 
-
-
-    public static DeferredEntityRegister create(String namespace)
-    {
+    public static DeferredEntityRegister create(String namespace) {
         return new DeferredEntityRegister(namespace);
     }
 }

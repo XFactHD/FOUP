@@ -27,10 +27,8 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(value = Foup.MOD_ID, dist = Dist.CLIENT)
-public final class FoupClient
-{
-    public FoupClient(IEventBus modBus)
-    {
+public final class FoupClient {
+    public FoupClient(IEventBus modBus) {
         modBus.addListener(FoupClient::onRegisterLayerDefinitions);
         modBus.addListener(FoupClient::onRegisterRenderers);
         modBus.addListener(FoupClient::onRegisterConditionalItemModelProperties);
@@ -44,32 +42,27 @@ public final class FoupClient
         NeoForge.EVENT_BUS.addListener(OverheadRailInfoRenderer::onExtractRenderState);
         NeoForge.EVENT_BUS.addListener(OverheadRailInfoRenderer::onRenderLevelStage);
 
-        if ((!FMLEnvironment.isProduction() || RailNetworkDebugPayloads.ENABLE_IN_PROD))
-        {
+        if ((!FMLEnvironment.isProduction() || RailNetworkDebugPayloads.ENABLE_IN_PROD)) {
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onExtractRenderState);
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onRenderLevelStage);
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onPlayerDisconnect);
         }
     }
 
-    private static void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event)
-    {
+    private static void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(OverheadCartModel.LAYER_LOCATION, OverheadCartModel::createBodyLayer);
     }
 
-    private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event)
-    {
+    private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(FoupContent.ENTITY_TYPE_CART.value(), OverheadCartRenderer::new);
         event.registerBlockEntityRenderer(FoupContent.BE_TYPE_FOUP_STORAGE_INTERFACE.value(), FoupStorageInterfaceRenderer::new);
     }
 
-    private static void onRegisterConditionalItemModelProperties(RegisterConditionalItemModelPropertyEvent event)
-    {
+    private static void onRegisterConditionalItemModelProperties(RegisterConditionalItemModelPropertyEvent event) {
         event.register(Utils.rl("has_foup"), OverheadCartHasFoup.CODEC);
     }
 
-    private static void onRegisterMenuScreens(RegisterMenuScreensEvent event)
-    {
+    private static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
         event.register(FoupContent.MENU_TYPE_FOUP_LOADER.value(), FoupLoaderScreen::new);
         event.register(FoupContent.MENU_TYPE_FOUP_STORAGE_LOCKER.value(), FoupStorageLockerScreen::new);
         event.register(FoupContent.MENU_TYPE_FOUP.value(), FoupScreen::new);

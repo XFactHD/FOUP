@@ -17,51 +17,41 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
-public final class FoupStorageInterfaceBlock extends AbstractCartInteractorBlock
-{
+public final class FoupStorageInterfaceBlock extends AbstractCartInteractorBlock {
     private static final VoxelShape SHAPE = Shapes.or(box(0, 0, 0, 16, 2, 16), box(1, 2, 1, 15, 5, 15));
 
-    public FoupStorageInterfaceBlock(Properties props)
-    {
+    public FoupStorageInterfaceBlock(Properties props) {
         super(props);
     }
 
     @Override
-    @Nullable
-    public BlockState getStateForPlacement(BlockPlaceContext ctx)
-    {
-        if (canSurvive(defaultBlockState(), ctx.getLevel(), ctx.getClickedPos()))
-        {
+    public @Nullable BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        if (canSurvive(defaultBlockState(), ctx.getLevel(), ctx.getClickedPos())) {
             return defaultBlockState();
         }
         return null;
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess tickAccess, BlockPos pos, Direction side, BlockPos adjPos, BlockState adjState, RandomSource random)
-    {
-        if (side == Direction.DOWN && !canSurvive(state, level, pos))
-        {
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction side, BlockPos adjPos, BlockState adjState, RandomSource random) {
+        if (side == Direction.DOWN && !canSurvive(state, level, pos)) {
             return Blocks.AIR.defaultBlockState();
         }
         return state;
     }
 
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos)
-    {
+    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return level.getBlockState(pos.below()).is(FoupContent.BLOCK_FOUP_STORAGE_LOCKER);
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context)
-    {
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
     @Override
-    protected BlockEntityType<FoupStorageInterfaceBlockEntity> getBlockEntityType(BlockState state)
-    {
+    protected BlockEntityType<FoupStorageInterfaceBlockEntity> getBlockEntityType(BlockState state) {
         return FoupContent.BE_TYPE_FOUP_STORAGE_INTERFACE.value();
     }
 }

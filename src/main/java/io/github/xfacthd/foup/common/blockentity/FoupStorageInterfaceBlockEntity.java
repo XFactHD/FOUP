@@ -25,8 +25,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteractorBlockEntity
-{
+public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteractorBlockEntity {
     @Nullable
     private FoupStorageLockerBlockEntity locker = null;
     @Nullable
@@ -35,46 +34,45 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     private int loadingTarget = -1;
     private float cartRotation = 0;
 
-    public FoupStorageInterfaceBlockEntity(BlockPos pos, BlockState state)
-    {
+    public FoupStorageInterfaceBlockEntity(BlockPos pos, BlockState state) {
         super(FoupContent.BE_TYPE_FOUP_STORAGE_INTERFACE.value(), pos, state, StationType.STORAGE);
     }
 
     @Override
-    protected StartCheck canStartAction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
-    {
+    protected StartCheck canStartAction(OverheadCartEntity cart, Schedule.Entry scheduleEntry) {
         FoupStorageLockerBlockEntity locker = getLocker();
-        if (locker == null) return StartCheck.RETRY;
+        if (locker == null) {
+            return StartCheck.RETRY;
+        }
 
         ItemStack foup = cart.getFoupContent();
-        return switch (scheduleEntry.action())
-        {
-            case LOAD ->
-            {
-                if (foup != null) yield StartCheck.SKIP;
+        return switch (scheduleEntry.action()) {
+            case LOAD -> {
+                if (foup != null) {
+                    yield StartCheck.SKIP;
+                }
 
                 loadingTarget = locker.findMatching(scheduleEntry.filter());
                 yield loadingTarget > -1 ? StartCheck.EXECUTE : StartCheck.WAIT;
             }
-            case UNLOAD ->
-            {
-                if (foup == null) yield StartCheck.SKIP;
-                if (locker.isFull()) yield StartCheck.WAIT;
+            case UNLOAD -> {
+                if (foup == null) {
+                    yield StartCheck.SKIP;
+                }
+                if (locker.isFull()) {
+                    yield StartCheck.WAIT;
+                }
                 yield StartCheck.EXECUTE;
             }
         };
     }
 
     @Override
-    protected void startInteraction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
-    {
-        switch (scheduleEntry.action())
-        {
-            case LOAD ->
-            {
+    protected void startInteraction(OverheadCartEntity cart, Schedule.Entry scheduleEntry) {
+        switch (scheduleEntry.action()) {
+            case LOAD -> {
                 FoupStorageLockerBlockEntity locker = getLocker();
-                if (locker != null)
-                {
+                if (locker != null) {
                     Preconditions.checkState(loadingTarget > -1, "No loading target present");
                     transferBuffer = locker.removeFrom(loadingTarget);
                     loadingTarget = -1;
@@ -82,11 +80,9 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
                     setChangedWithoutSignalUpdate();
                 }
             }
-            case UNLOAD ->
-            {
+            case UNLOAD -> {
                 FoupStorageLockerBlockEntity locker = getLocker();
-                if (locker != null && locker.reserveSlot())
-                {
+                if (locker != null && locker.reserveSlot()) {
                     transferBuffer = FoupContent.ITEM_FOUP.toStack();
                     transferBuffer.set(FoupContent.DC_TYPE_ITEM_CONTENTS, new ItemContents(cart.getFoupContent()));
                     cart.setFoupContent(null);
@@ -100,14 +96,10 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     }
 
     @Override
-    protected void finishInteraction(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
-    {
-        switch (scheduleEntry.action())
-        {
-            case LOAD ->
-            {
-                if (transferBuffer != null)
-                {
+    protected void finishInteraction(OverheadCartEntity cart, Schedule.Entry scheduleEntry) {
+        switch (scheduleEntry.action()) {
+            case LOAD -> {
+                if (transferBuffer != null) {
                     ItemContents contents = transferBuffer.getOrDefault(FoupContent.DC_TYPE_ITEM_CONTENTS, ItemContents.EMPTY);
                     cart.setFoupContent(contents.stack());
                     transferBuffer = null;
@@ -115,11 +107,9 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
                     setChangedWithoutSignalUpdate();
                 }
             }
-            case UNLOAD ->
-            {
+            case UNLOAD -> {
                 FoupStorageLockerBlockEntity locker = getLocker();
-                if (locker != null && transferBuffer != null)
-                {
+                if (locker != null && transferBuffer != null) {
                     locker.insertReserved(transferBuffer);
                     transferBuffer = null;
                     cartRotation = 0;
@@ -131,60 +121,47 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
         sendUpdatePacket();
     }
 
-    @Nullable
-    private FoupStorageLockerBlockEntity getLocker()
-    {
-        if (locker == null)
-        {
+    private @Nullable FoupStorageLockerBlockEntity getLocker() {
+        if (locker == null) {
             locker = level().getBlockEntity(worldPosition.below()) instanceof FoupStorageLockerBlockEntity be ? be : null;
         }
         return locker;
     }
 
-    public long getActionStart()
-    {
+    public long getActionStart() {
         return actionStart;
     }
 
-    @Nullable
-    public ItemStack getFoupInFlight()
-    {
+    public @Nullable ItemStack getFoupInFlight() {
         return transferBuffer;
     }
 
-    public float getCartRotation()
-    {
+    public float getCartRotation() {
         return cartRotation;
     }
 
     @Override
-    public void dropContents(Consumer<ItemStack> dropper)
-    {
-        if (transferBuffer != null)
-        {
+    public void dropContents(Consumer<ItemStack> dropper) {
+        if (transferBuffer != null) {
             dropper.accept(transferBuffer);
             transferBuffer = null;
         }
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getUpdatePacket()
-    {
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
-    public void onDataPacket(Connection net, ValueInput valueInput)
-    {
+    public void onDataPacket(Connection net, ValueInput valueInput) {
         handleUpdateTag(valueInput);
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
-    {
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
-        if (currAction != null)
-        {
+        if (currAction != null) {
             tag.putInt("action", currAction.ordinal());
         }
         tag.putLong("action_start", actionStart);
@@ -195,8 +172,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     }
 
     @Override
-    public void handleUpdateTag(ValueInput valueInput)
-    {
+    public void handleUpdateTag(ValueInput valueInput) {
         currAction = StationAction.byId(valueInput.getIntOr("action", -1));
         actionStart = valueInput.getLongOr("action_start", 0);
         transferBuffer = valueInput.read("transfer_buf", ItemStack.OPTIONAL_CODEC).orElse(null);
@@ -204,8 +180,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     }
 
     @Override
-    protected void loadAdditional(ValueInput valueInput)
-    {
+    protected void loadAdditional(ValueInput valueInput) {
         super.loadAdditional(valueInput);
         transferBuffer = valueInput.read("transfer_buf", ItemStack.OPTIONAL_CODEC).orElse(null);
         actionStart = valueInput.getLongOr("action_start", -1);
@@ -213,8 +188,7 @@ public final class FoupStorageInterfaceBlockEntity extends AbstractCartInteracto
     }
 
     @Override
-    protected void saveAdditional(ValueOutput valueOutput)
-    {
+    protected void saveAdditional(ValueOutput valueOutput) {
         super.saveAdditional(valueOutput);
         valueOutput.storeNullable("transfer_buf", ItemStack.OPTIONAL_CODEC, transferBuffer);
         valueOutput.putLong("action_start", actionStart);

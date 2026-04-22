@@ -19,10 +19,8 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
 
-public final class FoupStorageLockerBlock extends Block implements EntityBlock
-{
-    public FoupStorageLockerBlock(Properties props)
-    {
+public final class FoupStorageLockerBlock extends Block implements EntityBlock {
+    public FoupStorageLockerBlock(Properties props) {
         super(props.mapColor(MapColor.METAL)
                 .pushReaction(PushReaction.BLOCK)
                 .requiresCorrectToolForDrops()
@@ -42,8 +40,7 @@ public final class FoupStorageLockerBlock extends Block implements EntityBlock
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
-    {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(
                 PropertyHolder.FACING_HOR,
                 PropertyHolder.LOCKER_FRONT_BL,
@@ -58,49 +55,40 @@ public final class FoupStorageLockerBlock extends Block implements EntityBlock
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext ctx)
-    {
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
         return defaultBlockState().setValue(PropertyHolder.FACING_HOR, ctx.getHorizontalDirection().getOpposite());
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
-    {
-        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof FoupStorageLockerBlockEntity be)
-        {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof FoupStorageLockerBlockEntity be) {
             player.openMenu(be);
         }
         return InteractionResult.SUCCESS;
     }
 
     @Override
-    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean moved)
-    {
-        if (level.getBlockEntity(pos) instanceof FoupStorageLockerBlockEntity be)
-        {
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean moved) {
+        if (level.getBlockEntity(pos) instanceof FoupStorageLockerBlockEntity be) {
             be.dropContents(stack -> popResource(level, pos, stack));
         }
     }
 
     @Override
-    protected boolean hasAnalogOutputSignal(BlockState state)
-    {
+    protected boolean hasAnalogOutputSignal(BlockState state) {
         return true;
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction face)
-    {
-        if (level.getBlockEntity(pos) instanceof FoupStorageLockerBlockEntity be)
-        {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction face) {
+        if (level.getBlockEntity(pos) instanceof FoupStorageLockerBlockEntity be) {
             return be.getAnalogSignal();
         }
         return 0;
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
-    {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new FoupStorageLockerBlockEntity(pos, state);
     }
 }

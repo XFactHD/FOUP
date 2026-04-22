@@ -9,8 +9,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.Optional;
 
-public record ClientboundRailNetworkDebugDataPayload(long networkId, Optional<RailNetworkDebugData> data) implements CustomPacketPayload
-{
+public record ClientboundRailNetworkDebugDataPayload(long networkId, Optional<RailNetworkDebugData> data) implements CustomPacketPayload {
     public static final Type<ClientboundRailNetworkDebugDataPayload> TYPE = Utils.payloadType("rail_network_debug_data");
     public static final StreamCodec<ByteBuf, ClientboundRailNetworkDebugDataPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_LONG,
@@ -21,8 +20,7 @@ public record ClientboundRailNetworkDebugDataPayload(long networkId, Optional<Ra
     );
 
     @Override
-    public Type<? extends CustomPacketPayload> type()
-    {
+    public Type<? extends CustomPacketPayload> type() {
         return TYPE;
     }
 }

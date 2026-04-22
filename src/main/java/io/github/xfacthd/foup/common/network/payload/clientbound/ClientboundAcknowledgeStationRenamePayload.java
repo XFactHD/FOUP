@@ -7,8 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record ClientboundAcknowledgeStationRenamePayload(BlockPos pos, RenameResult result) implements CustomPacketPayload
-{
+public record ClientboundAcknowledgeStationRenamePayload(BlockPos pos, RenameResult result) implements CustomPacketPayload {
     public static final Type<ClientboundAcknowledgeStationRenamePayload> TYPE = Utils.payloadType("ack_station_rename");
     public static final StreamCodec<ByteBuf, ClientboundAcknowledgeStationRenamePayload> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC,
@@ -19,8 +18,7 @@ public record ClientboundAcknowledgeStationRenamePayload(BlockPos pos, RenameRes
     );
 
     @Override
-    public Type<ClientboundAcknowledgeStationRenamePayload> type()
-    {
+    public Type<ClientboundAcknowledgeStationRenamePayload> type() {
         return TYPE;
     }
 }

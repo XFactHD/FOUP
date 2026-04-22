@@ -23,15 +23,12 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @Mod(value = Foup.MOD_ID)
-public final class GeneratorHandler
-{
-    public GeneratorHandler(IEventBus modBus)
-    {
+public final class GeneratorHandler {
+    public GeneratorHandler(IEventBus modBus) {
         modBus.addListener(GeneratorHandler::onGatherData);
     }
 
-    private static void onGatherData(GatherDataEvent.Client event)
-    {
+    private static void onGatherData(GatherDataEvent.Client event) {
         DataGenerator gen = event.getGenerator();
         PackOutput output = gen.getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();

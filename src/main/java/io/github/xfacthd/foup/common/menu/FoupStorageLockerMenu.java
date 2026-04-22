@@ -16,27 +16,23 @@ import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 import java.util.function.IntSupplier;
 import java.util.function.Predicate;
 
-public final class FoupStorageLockerMenu extends AbstractContainerMenu
-{
+public final class FoupStorageLockerMenu extends AbstractContainerMenu {
     private static final int LOCKER_SLOTS = FoupStorageLockerBlockEntity.SLOT_COUNT;
 
     private final DataSlot lockedSlot;
     private final Predicate<Player> stillValid;
     private final IntSupplier lockedSlotSupplier;
 
-    public FoupStorageLockerMenu(int containerId, Inventory inventory)
-    {
-        this(containerId, inventory, new ClientItemHandler(LOCKER_SLOTS), p -> true, () -> -1);
+    public FoupStorageLockerMenu(int containerId, Inventory inventory) {
+        this(containerId, inventory, new ClientItemHandler(LOCKER_SLOTS), _ -> true, () -> -1);
     }
 
-    public FoupStorageLockerMenu(int containerId, Inventory inventory, ItemStacksResourceHandler beInv, Predicate<Player> stillValid, IntSupplier lockedSlotSupplier)
-    {
+    public FoupStorageLockerMenu(int containerId, Inventory inventory, ItemStacksResourceHandler beInv, Predicate<Player> stillValid, IntSupplier lockedSlotSupplier) {
         super(FoupContent.MENU_TYPE_FOUP_STORAGE_LOCKER.value(), containerId);
         this.lockedSlot = addDataSlot(DataSlot.standalone());
         this.stillValid = stillValid;
         this.lockedSlotSupplier = lockedSlotSupplier;
-        for (int i = 0; i < LOCKER_SLOTS; i++)
-        {
+        for (int i = 0; i < LOCKER_SLOTS; i++) {
             int x = 44 + (i % 2 * 18) + (i >= 4 ? 54 : 0);
             int y = 30 + (i % 4 >= 2 ? 0 : 18);
             addSlot(new LockableSlot(beInv, i, x, y, idx -> idx == lockedSlot.get()));
@@ -46,39 +42,29 @@ public final class FoupStorageLockerMenu extends AbstractContainerMenu
     }
 
     @Override
-    public void broadcastChanges()
-    {
+    public void broadcastChanges() {
         lockedSlot.set(lockedSlotSupplier.getAsInt());
         super.broadcastChanges();
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index)
-    {
+    public ItemStack quickMoveStack(Player player, int index) {
         ItemStack remainder = ItemStack.EMPTY;
         Slot slot = slots.get(index);
-        if (slot.hasItem())
-        {
+        if (slot.hasItem()) {
             ItemStack stack = slot.getItem();
             remainder = stack.copy();
-            if (index < LOCKER_SLOTS)
-            {
-                if (!moveItemStackTo(stack, LOCKER_SLOTS, slots.size(), true))
-                {
+            if (index < LOCKER_SLOTS) {
+                if (!moveItemStackTo(stack, LOCKER_SLOTS, slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
-            }
-            else if (!moveItemStackTo(stack, 0, LOCKER_SLOTS, false))
-            {
+            } else if (!moveItemStackTo(stack, 0, LOCKER_SLOTS, false)) {
                 return ItemStack.EMPTY;
             }
 
-            if (stack.isEmpty())
-            {
+            if (stack.isEmpty()) {
                 slot.set(ItemStack.EMPTY);
-            }
-            else
-            {
+            } else {
                 slot.setChanged();
             }
         }
@@ -86,21 +72,17 @@ public final class FoupStorageLockerMenu extends AbstractContainerMenu
     }
 
     @Override
-    public boolean stillValid(Player player)
-    {
+    public boolean stillValid(Player player) {
         return stillValid.test(player);
     }
 
-    private static final class ClientItemHandler extends ItemStacksResourceHandler
-    {
-        public ClientItemHandler(int slots)
-        {
+    private static final class ClientItemHandler extends ItemStacksResourceHandler {
+        public ClientItemHandler(int slots) {
             super(slots);
         }
 
         @Override
-        public boolean isValid(int slot, ItemResource resource)
-        {
+        public boolean isValid(int slot, ItemResource resource) {
             return FoupStorageLockerBlockEntity.canPlaceInStorage(resource);
         }
     }

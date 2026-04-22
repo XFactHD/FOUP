@@ -11,16 +11,13 @@ import net.neoforged.neoforge.client.data.SpriteSourceProvider;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public final class FoupSpriteSourceProvider extends SpriteSourceProvider
-{
-    public FoupSpriteSourceProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
-    {
+public final class FoupSpriteSourceProvider extends SpriteSourceProvider {
+    public FoupSpriteSourceProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
         super(output, lookupProvider, Foup.MOD_ID);
     }
 
     @Override
-    protected void gather()
-    {
+    protected void gather() {
         atlas(AtlasIds.BLOCKS).addSource(new SingleFile(Utils.rl("entity/overhead_cart"), Optional.empty()));
     }
 }

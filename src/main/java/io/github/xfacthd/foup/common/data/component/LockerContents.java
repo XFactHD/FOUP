@@ -16,8 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("deprecation")
-public final class LockerContents
-{
+public final class LockerContents {
     public static final Codec<LockerContents> CODEC = ItemStack.OPTIONAL_CODEC
             .listOf(FoupStorageLockerBlockEntity.SLOT_COUNT, FoupStorageLockerBlockEntity.SLOT_COUNT)
             .xmap(LockerContents::new, contents -> contents.items);
@@ -28,41 +27,34 @@ public final class LockerContents
     private final NonNullList<ItemStack> items;
     private final int hashCode;
 
-    private LockerContents(List<ItemStack> items)
-    {
+    private LockerContents(List<ItemStack> items) {
         Preconditions.checkArgument(items.size() == FoupStorageLockerBlockEntity.SLOT_COUNT);
         this.items = NonNullList.copyOf(items);
         this.hashCode = ItemStack.hashStackList(items);
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         return obj instanceof LockerContents other && ItemStack.listMatches(items, other.items);
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return hashCode;
     }
 
-    public void applyTo(ItemStacksResourceHandler inventory)
-    {
-        for (int i = 0; i < FoupStorageLockerBlockEntity.SLOT_COUNT; i++)
-        {
+    public void applyTo(ItemStacksResourceHandler inventory) {
+        for (int i = 0; i < FoupStorageLockerBlockEntity.SLOT_COUNT; i++) {
             ItemStack stack = items.get(i);
             inventory.set(i, ItemResource.of(stack), stack.getCount());
         }
     }
 
-    public static LockerContents of(ResourceHandler<ItemResource> inventory)
-    {
+    public static LockerContents of(ResourceHandler<ItemResource> inventory) {
         Preconditions.checkArgument(inventory.size() == FoupStorageLockerBlockEntity.SLOT_COUNT);
 
         List<ItemStack> stacks = new ArrayList<>(FoupStorageLockerBlockEntity.SLOT_COUNT);
-        for (int i = 0; i < FoupStorageLockerBlockEntity.SLOT_COUNT; i++)
-        {
+        for (int i = 0; i < FoupStorageLockerBlockEntity.SLOT_COUNT; i++) {
             stacks.add(inventory.getResource(i).toStack(inventory.getAmountAsInt(i)));
         }
         return new LockerContents(stacks);

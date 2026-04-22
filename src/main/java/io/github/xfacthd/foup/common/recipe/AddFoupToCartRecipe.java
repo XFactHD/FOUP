@@ -13,31 +13,26 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
 
-public final class AddFoupToCartRecipe extends CustomRecipe
-{
+public final class AddFoupToCartRecipe extends CustomRecipe {
     public static final MapCodec<AddFoupToCartRecipe> CODEC = MapCodec.unit(AddFoupToCartRecipe::new);
     public static final StreamCodec<RegistryFriendlyByteBuf, AddFoupToCartRecipe> STREAM_CODEC = NeoForgeStreamCodecs.uncheckedUnit(new AddFoupToCartRecipe());
     private static final int SIZE = 2;
 
     @Override
-    public boolean matches(CraftingInput input, Level level)
-    {
-        if (input.ingredientCount() != SIZE) return false;
+    public boolean matches(CraftingInput input, Level level) {
+        if (input.ingredientCount() != SIZE) {
+            return false;
+        }
 
         ItemStack cart = ItemStack.EMPTY;
         ItemStack foup = ItemStack.EMPTY;
-        for (ItemStack stack : input.items())
-        {
-            if (stack.is(FoupContent.ITEM_CART))
-            {
-                if (stack.getOrDefault(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.EMPTY).hasFoup())
-                {
+        for (ItemStack stack : input.items()) {
+            if (stack.is(FoupContent.ITEM_CART)) {
+                if (stack.getOrDefault(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.EMPTY).hasFoup()) {
                     return false;
                 }
                 cart = stack;
-            }
-            else if (stack.is(FoupContent.ITEM_FOUP))
-            {
+            } else if (stack.is(FoupContent.ITEM_FOUP)) {
                 foup = stack;
             }
         }
@@ -45,29 +40,24 @@ public final class AddFoupToCartRecipe extends CustomRecipe
     }
 
     @Override
-    public ItemStack assemble(CraftingInput input)
-    {
-        if (input.ingredientCount() != SIZE) return ItemStack.EMPTY;
+    public ItemStack assemble(CraftingInput input) {
+        if (input.ingredientCount() != SIZE) {
+            return ItemStack.EMPTY;
+        }
 
         ItemStack cart = ItemStack.EMPTY;
         ItemStack foup = ItemStack.EMPTY;
-        for (ItemStack stack : input.items())
-        {
-            if (stack.is(FoupContent.ITEM_CART))
-            {
-                if (stack.getOrDefault(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.EMPTY).hasFoup())
-                {
+        for (ItemStack stack : input.items()) {
+            if (stack.is(FoupContent.ITEM_CART)) {
+                if (stack.getOrDefault(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.EMPTY).hasFoup()) {
                     return ItemStack.EMPTY;
                 }
                 cart = stack;
-            }
-            else if (stack.is(FoupContent.ITEM_FOUP))
-            {
+            } else if (stack.is(FoupContent.ITEM_FOUP)) {
                 foup = stack;
             }
         }
-        if (!cart.isEmpty() && !foup.isEmpty())
-        {
+        if (!cart.isEmpty() && !foup.isEmpty()) {
             ItemStack result = cart.copy();
             ItemStack foupContent = foup.getOrDefault(FoupContent.DC_TYPE_ITEM_CONTENTS, ItemContents.EMPTY).stack().copy();
             result.set(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.of(foupContent));
@@ -77,8 +67,7 @@ public final class AddFoupToCartRecipe extends CustomRecipe
     }
 
     @Override
-    public RecipeSerializer<AddFoupToCartRecipe> getSerializer()
-    {
+    public RecipeSerializer<AddFoupToCartRecipe> getSerializer() {
         return FoupContent.RECIPE_SERIALIZER_ADD_FOUP_TO_CART.value();
     }
 }

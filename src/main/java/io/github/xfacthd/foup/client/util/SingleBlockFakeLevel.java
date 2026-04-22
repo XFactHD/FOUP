@@ -14,64 +14,53 @@ import net.minecraft.world.level.material.Fluids;
 import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("ConstantConditions")
-public record SingleBlockFakeLevel(BlockAndTintGetter realLevel, BlockPos pos, BlockState state) implements BlockAndTintGetter
-{
+public record SingleBlockFakeLevel(BlockAndTintGetter realLevel, BlockPos pos, BlockState state) implements BlockAndTintGetter {
     @Override
-    public CardinalLighting cardinalLighting()
-    {
+    public CardinalLighting cardinalLighting() {
         return realLevel.cardinalLighting();
     }
 
     @Override
-    public LevelLightEngine getLightEngine()
-    {
+    public LevelLightEngine getLightEngine() {
         return realLevel.getLightEngine();
     }
 
     @Override
-    public int getBrightness(LightLayer layer, BlockPos pos)
-    {
+    public int getBrightness(LightLayer layer, BlockPos pos) {
         return 15;
     }
 
     @Override
-    public int getBlockTint(BlockPos pos, ColorResolver resolver)
-    {
+    public int getBlockTint(BlockPos pos, ColorResolver resolver) {
         return realLevel.getBlockTint(pos, resolver);
     }
 
     @Nullable
     @Override
-    public BlockEntity getBlockEntity(BlockPos pos)
-    {
+    public BlockEntity getBlockEntity(BlockPos pos) {
         return null;
     }
 
     @Override
-    public BlockState getBlockState(BlockPos pos)
-    {
-        if (pos.equals(this.pos))
-        {
+    public BlockState getBlockState(BlockPos pos) {
+        if (pos.equals(this.pos)) {
             return state;
         }
         return Blocks.AIR.defaultBlockState();
     }
 
     @Override
-    public FluidState getFluidState(BlockPos pos)
-    {
+    public FluidState getFluidState(BlockPos pos) {
         return Fluids.EMPTY.defaultFluidState();
     }
 
     @Override
-    public int getHeight()
-    {
+    public int getHeight() {
         return realLevel.getHeight();
     }
 
     @Override
-    public int getMinY()
-    {
+    public int getMinY() {
         return realLevel.getMinY();
     }
 }

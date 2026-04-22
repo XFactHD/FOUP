@@ -10,26 +10,20 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.function.Predicate;
 
-public abstract class AbstractCartInteractorMenu extends AbstractContainerMenu
-{
-    protected static final StateProvider DUMMY = new StateProvider()
-    {
+public abstract class AbstractCartInteractorMenu extends AbstractContainerMenu {
+    protected static final StateProvider DUMMY = new StateProvider() {
         @Override
-        public AbstractCartInteractorBlockEntity.State getState()
-        {
-            throw new UnsupportedOperationException();
-        }
-
-        @Nullable
-        @Override
-        public StationAction getActiveAction()
-        {
+        public AbstractCartInteractorBlockEntity.State getState() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public int getRemainingDuration()
-        {
+        public @Nullable StationAction getActiveAction() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int getRemainingDuration() {
             throw new UnsupportedOperationException();
         }
     };
@@ -40,64 +34,53 @@ public abstract class AbstractCartInteractorMenu extends AbstractContainerMenu
     private final DataSlot actionSlot;
     private final DataSlot timeLeftSlot;
 
-    protected AbstractCartInteractorMenu(MenuType<?> menuType, int containerId, Predicate<Player> stillValid, StateProvider stateProvider)
-    {
+    protected AbstractCartInteractorMenu(MenuType<?> menuType, int containerId, Predicate<Player> stillValid, StateProvider stateProvider) {
         super(menuType, containerId);
         this.stillValid = stillValid;
         this.stateProvider = stateProvider;
         this.stateSlot = addDataSlot(DataSlot.standalone());
         this.actionSlot = addDataSlot(DataSlot.standalone());
         this.timeLeftSlot = addDataSlot(DataSlot.standalone());
-        if (stateProvider instanceof AbstractCartInteractorBlockEntity)
-        {
+        if (stateProvider instanceof AbstractCartInteractorBlockEntity) {
             updateState();
         }
     }
 
     @Override
-    public void broadcastChanges()
-    {
+    public void broadcastChanges() {
         updateState();
         super.broadcastChanges();
     }
 
-    private void updateState()
-    {
+    private void updateState() {
         stateSlot.set(stateProvider.getState().ordinal());
         StationAction action = stateProvider.getActiveAction();
         actionSlot.set(action != null ? action.ordinal() : -1);
         timeLeftSlot.set(stateProvider.getRemainingDuration());
     }
 
-    public final AbstractCartInteractorBlockEntity.State getState()
-    {
+    public final AbstractCartInteractorBlockEntity.State getState() {
         return AbstractCartInteractorBlockEntity.State.byId(stateSlot.get());
     }
 
-    @Nullable
-    public final StationAction getActiveAction()
-    {
+    public final @Nullable StationAction getActiveAction() {
         int id = actionSlot.get();
         return id == -1 ? null : StationAction.byId(id);
     }
 
-    public final int getRemainingDuration()
-    {
+    public final int getRemainingDuration() {
         return timeLeftSlot.get();
     }
 
     @Override
-    public final boolean stillValid(Player player)
-    {
+    public final boolean stillValid(Player player) {
         return stillValid.test(player);
     }
 
-    public interface StateProvider
-    {
+    public interface StateProvider {
         AbstractCartInteractorBlockEntity.State getState();
 
-        @Nullable
-        StationAction getActiveAction();
+        @Nullable StationAction getActiveAction();
 
         int getRemainingDuration();
     }

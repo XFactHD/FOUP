@@ -13,42 +13,37 @@ import java.util.Deque;
 import java.util.Objects;
 import java.util.Queue;
 
-public final class Dijkstra
-{
+public final class Dijkstra {
     /**
      * Computes the shortest path between the given nodes
-     * @param start The starting node (must be the cart's current position to handle single-step paths correctly)
+     *
+     * @param start  The starting node (must be the cart's current position to handle single-step paths correctly)
      * @param target The target node intended to be reached
      * @return The shortest path between the nodes as a queue of nodes to travel along
      */
-    public static TrackPath getShortestPath(Graph<RailNetwork> graph, TrackNode start, TrackNode target)
-    {
+    public static TrackPath getShortestPath(Graph<RailNetwork> graph, TrackNode start, TrackNode target) {
         return getShortestPath(graph, start, target, false);
     }
 
-    private static TrackPath getShortestPath(Graph<RailNetwork> graph, TrackNode start, TrackNode target, boolean recursive)
-    {
+    private static TrackPath getShortestPath(Graph<RailNetwork> graph, TrackNode start, TrackNode target, boolean recursive) {
         Preconditions.checkState(start.getGraph() == graph, "Start node is not part of the graph");
         Preconditions.checkState(target.getGraph() == graph, "Target node is not part of the graph");
 
         // Special-case paths back to the current position
-        if (start == target)
-        {
-            if (recursive) throw new IllegalStateException("Full-circle path search recursed multiple times");
+        if (start == target) {
+            if (recursive) {
+                throw new IllegalStateException("Full-circle path search recursed multiple times");
+            }
 
             Collection<GraphObject<RailNetwork>> neighbours = graph.getNeighbours(start);
-            if (neighbours.isEmpty())
-            {
+            if (neighbours.isEmpty()) {
                 return TrackPath.INVALID;
             }
-            if (neighbours.size() > 1)
-            {
+            if (neighbours.size() > 1) {
                 TrackPath shortestPath = null;
-                for (GraphObject<RailNetwork> neighbour : neighbours)
-                {
+                for (GraphObject<RailNetwork> neighbour : neighbours) {
                     TrackPath path = getShortestPath(graph, (TrackNode) neighbour, target, true);
-                    if (shortestPath == null || path.size() < shortestPath.size())
-                    {
+                    if (shortestPath == null || path.size() < shortestPath.size()) {
                         shortestPath = path;
                     }
                 }
@@ -57,8 +52,7 @@ public final class Dijkstra
             start = (TrackNode) neighbours.iterator().next();
         }
         // Special-case single-step paths
-        if (graph.getNeighbours(start).contains(target))
-        {
+        if (graph.getNeighbours(start).contains(target)) {
             Queue<TrackPath.PathNode> nodes = new ArrayDeque<>();
             nodes.offer(TrackPath.PathNode.of(target));
             return createPath(graph, nodes);
@@ -70,32 +64,26 @@ public final class Dijkstra
         Objects.requireNonNull(queue.findNode(start)).distance = 0;
 
         boolean pathFound = false;
-        while (!queue.isEmpty())
-        {
+        while (!queue.isEmpty()) {
             SearchNode node = queue.remove();
-            if (node.node == target)
-            {
+            if (node.node == target) {
                 pathFound = true;
                 break;
             }
 
-            for (GraphObject<RailNetwork> neighbour : graph.getNeighbours(node.node))
-            {
+            for (GraphObject<RailNetwork> neighbour : graph.getNeighbours(node.node)) {
                 TrackNode adjNode = (TrackNode) neighbour;
                 SearchNode adjSearchNode = queue.findNode(adjNode);
-                if (adjSearchNode != null)
-                {
+                if (adjSearchNode != null) {
                     int altDist = node.distance + adjNode.getPathingCost();
-                    if (altDist < adjSearchNode.distance)
-                    {
+                    if (altDist < adjSearchNode.distance) {
                         adjSearchNode.distance = altDist;
                         predecessors.put(adjNode, node.node);
                     }
                 }
             }
         }
-        if (!pathFound)
-        {
+        if (!pathFound) {
             return TrackPath.INVALID;
         }
 
@@ -103,86 +91,75 @@ public final class Dijkstra
 
         nodes.offer(TrackPath.PathNode.of(target));
         TrackNode currNode = target;
-        while ((currNode = predecessors.get(currNode)) != null)
-        {
+        while ((currNode = predecessors.get(currNode)) != null) {
             nodes.offerFirst(TrackPath.PathNode.of(currNode));
         }
 
         return createPath(graph, nodes);
     }
 
-    private static final class SearchNode
-    {
+    private static final class SearchNode {
         private final TrackNode node;
         private int distance = Integer.MAX_VALUE;
 
-        private SearchNode(TrackNode node)
-        {
+        private SearchNode(TrackNode node) {
             this.node = node;
         }
     }
 
-    private static final class SearchQueue
-    {
-        private final SearchNode[] nodes;
+    private static final class SearchQueue {
+        private final @Nullable SearchNode[] nodes;
         private int size;
 
-        private SearchQueue(Collection<GraphObject<RailNetwork>> nodes)
-        {
+        private SearchQueue(Collection<GraphObject<RailNetwork>> nodes) {
             this.nodes = new SearchNode[nodes.size()];
             int i = 0;
-            for (GraphObject<RailNetwork> node : nodes)
-            {
+            for (GraphObject<RailNetwork> node : nodes) {
                 this.nodes[i] = new SearchNode((TrackNode) node);
                 i++;
             }
             this.size = nodes.size();
         }
 
-        SearchNode remove()
-        {
-            if (size == 0) throw new IllegalStateException("Queue is empty");
+        SearchNode remove() {
+            if (size == 0) {
+                throw new IllegalStateException("Queue is empty");
+            }
 
             int minDist = Integer.MAX_VALUE;
             SearchNode result = null;
             int resultIdx = -1;
-            for (int i = 0; i < nodes.length; i++)
-            {
+            for (int i = 0; i < nodes.length; i++) {
                 SearchNode node = nodes[i];
-                if (node != null && (result == null || node.distance < minDist))
-                {
+                if (node != null && (result == null || node.distance < minDist)) {
                     minDist = node.distance;
                     result = node;
                     resultIdx = i;
                 }
             }
-            if (resultIdx == -1) throw new IllegalStateException("No node found");
+            if (resultIdx == -1) {
+                throw new IllegalStateException("No node found");
+            }
             nodes[resultIdx] = null;
             size--;
             return Objects.requireNonNull(result, "No node found");
         }
 
-        @Nullable
-        SearchNode findNode(TrackNode node)
-        {
-            for (SearchNode searchNode : nodes)
-            {
-                if (searchNode != null && searchNode.node == node)
-                {
+        @Nullable SearchNode findNode(TrackNode node) {
+            for (SearchNode searchNode : nodes) {
+                if (searchNode != null && searchNode.node == node) {
                     return searchNode;
                 }
             }
             return null;
         }
 
-        boolean isEmpty()
-        {
+        boolean isEmpty() {
             return size == 0;
         }
     }
 
-    private static TrackPath createPath(Graph<RailNetwork> graph, Queue<TrackPath.PathNode> nodes)
-    {
+    private static TrackPath createPath(Graph<RailNetwork> graph, Queue<TrackPath.PathNode> nodes) {
         TrackPath path = new TrackPath(nodes);
         graph.getContextData().registerPath(path);
         return path;

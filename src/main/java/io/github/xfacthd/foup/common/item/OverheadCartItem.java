@@ -19,27 +19,27 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.function.Consumer;
 
-public final class OverheadCartItem extends Item
-{
-    public OverheadCartItem(Properties props)
-    {
+public final class OverheadCartItem extends Item {
+    public OverheadCartItem(Properties props) {
         super(props.component(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.EMPTY));
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext ctx)
-    {
+    public InteractionResult useOn(UseOnContext ctx) {
         Level level = ctx.getLevel();
         BlockPos pos = ctx.getClickedPos();
         BlockState state = level.getBlockState(pos);
-        if (state.is(FoupContent.BLOCK_RAIL) || state.is(FoupContent.BLOCK_RAIL_STATION))
-        {
+        if (state.is(FoupContent.BLOCK_RAIL) || state.is(FoupContent.BLOCK_RAIL_STATION)) {
             OverheadCartEntity cart = FoupContent.ENTITY_TYPE_CART.value().create(level, EntitySpawnReason.SPAWN_ITEM_USE);
-            if (cart == null) return InteractionResult.FAIL;
+            if (cart == null) {
+                return InteractionResult.FAIL;
+            }
 
             cart.setPos(Vec3.atBottomCenterOf(pos).add(0, OverheadCartEntity.PLACEMENT_Y_OFFSET, 0));
             cart.setYRot(state.getValue(PropertyHolder.FACING_HOR).toYRot());
-            if (!level.noCollision(cart)) return InteractionResult.FAIL;
+            if (!level.noCollision(cart)) {
+                return InteractionResult.FAIL;
+            }
 
             ItemStack stack = ctx.getItemInHand();
             stack.getOrDefault(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.EMPTY).applyToCart(cart);
@@ -51,22 +51,19 @@ public final class OverheadCartItem extends Item
     }
 
     @Override
-    public boolean canFitInsideContainerItems(ItemStack stack)
-    {
+    public boolean canFitInsideContainerItems(ItemStack stack) {
         return !stack.getOrDefault(FoupContent.DC_TYPE_HELD_FOUP, HeldFoup.EMPTY).stack().isEmpty();
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public boolean canFitInsideContainerItems()
-    {
+    public boolean canFitInsideContainerItems() {
         return false;
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public void appendHoverText(ItemStack stack, TooltipContext ctx, TooltipDisplay display, Consumer<Component> appender, TooltipFlag flag)
-    {
+    public void appendHoverText(ItemStack stack, TooltipContext ctx, TooltipDisplay display, Consumer<Component> appender, TooltipFlag flag) {
         stack.addToTooltip(FoupContent.DC_TYPE_HELD_FOUP, ctx, display, appender, flag);
     }
 }

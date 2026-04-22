@@ -8,17 +8,13 @@ import net.neoforged.neoforge.client.pipeline.RegisterPipelineModifiersEvent;
 
 import java.util.Optional;
 
-public final class PipelineModifiers
-{
+public final class PipelineModifiers {
     public static final ResourceKey<PipelineModifier> NO_DEPTH_TEST = key("no_depth_test");
 
-    public static void onRegisterPipelineModifiers(RegisterPipelineModifiersEvent event)
-    {
-        event.register(NO_DEPTH_TEST, (pipeline, name) ->
-        {
+    public static void onRegisterPipelineModifiers(RegisterPipelineModifiersEvent event) {
+        event.register(NO_DEPTH_TEST, (pipeline, name) -> {
             DepthStencilState depthTest = pipeline.getDepthStencilState();
-            if (depthTest != null)
-            {
+            if (depthTest != null) {
                 return pipeline.toBuilder()
                         .withLocation(name)
                         .withDepthStencilState(Optional.empty())
@@ -28,8 +24,7 @@ public final class PipelineModifiers
         });
     }
 
-    private static ResourceKey<PipelineModifier> key(String path)
-    {
+    private static ResourceKey<PipelineModifier> key(String path) {
         return ResourceKey.create(PipelineModifier.MODIFIERS_KEY, Utils.rl(path));
     }
 

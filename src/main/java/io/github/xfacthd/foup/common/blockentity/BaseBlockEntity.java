@@ -12,66 +12,54 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
-public abstract class BaseBlockEntity extends BlockEntity
-{
+public abstract class BaseBlockEntity extends BlockEntity {
     // Keep around the chunk holding this BE to avoid having to look it up every tick to mark it as unsaved
     @Nullable
     private LevelChunk owningChunk = null;
 
-    protected BaseBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState)
-    {
+    protected BaseBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
     }
 
-    protected final Level level()
-    {
+    protected final Level level() {
         return Objects.requireNonNull(level, "Level missing");
     }
 
-    protected final void sendUpdatePacket()
-    {
+    protected final void sendUpdatePacket() {
         level().sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
     }
 
-    public final boolean isUsableByPlayer(Player player)
-    {
-        if (level().getBlockEntity(worldPosition) != this)
-        {
+    public final boolean isUsableByPlayer(Player player) {
+        if (level().getBlockEntity(worldPosition) != this) {
             return false;
         }
         return !(player.distanceToSqr(worldPosition.getX() + .5, worldPosition.getY() + .5, worldPosition.getZ() + .5) > 64D);
     }
 
-    public final void setChangedWithoutSignalUpdate()
-    {
-        if (owningChunk != null)
-        {
+    public final void setChangedWithoutSignalUpdate() {
+        if (owningChunk != null) {
             owningChunk.markUnsaved();
         }
     }
 
     @Override
-    public final void setChanged()
-    {
+    public final void setChanged() {
         setChangedWithoutSignalUpdate();
 
         BlockState state = getBlockState();
-        if (!state.isAir())
-        {
+        if (!state.isAir()) {
             level().updateNeighbourForOutputSignal(worldPosition, state.getBlock());
         }
     }
 
     @Override
-    public void clearRemoved()
-    {
+    public void clearRemoved() {
         super.clearRemoved();
         owningChunk = level().getChunkAt(worldPosition);
     }
 
     @Override
-    public void setRemoved()
-    {
+    public void setRemoved() {
         super.setRemoved();
         owningChunk = null;
     }

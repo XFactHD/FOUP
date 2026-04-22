@@ -5,8 +5,7 @@ import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import org.jspecify.annotations.Nullable;
 
-public final class FoupStorageInterfaceRenderState extends BlockEntityRenderState
-{
+public final class FoupStorageInterfaceRenderState extends BlockEntityRenderState {
     long actionStart;
     float actionTime;
     @Nullable

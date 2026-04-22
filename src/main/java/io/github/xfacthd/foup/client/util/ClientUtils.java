@@ -10,8 +10,7 @@ import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 
 import java.util.Optional;
 
-public final class ClientUtils
-{
+public final class ClientUtils {
     private static final RenderPipeline INFO_QUADS_PIPELINE = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
             .withLocation(Utils.rl("info_quads"))
             .withDepthStencilState(Optional.empty())
@@ -24,13 +23,11 @@ public final class ClientUtils
                     .createRenderSetup()
     );
 
-    public static void onRegisterRenderPipelines(RegisterRenderPipelinesEvent event)
-    {
+    public static void onRegisterRenderPipelines(RegisterRenderPipelinesEvent event) {
         event.registerPipeline(INFO_QUADS_PIPELINE);
     }
 
-    public static void onRegisterRenderBuffers(RegisterRenderBuffersEvent event)
-    {
+    public static void onRegisterRenderBuffers(RegisterRenderBuffersEvent event) {
         event.registerRenderBuffer(INFO_QUADS);
     }
 

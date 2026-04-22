@@ -10,8 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record ServerboundAddScheduleEntryPayload(int cartId, int idx, Schedule.Entry entry) implements CustomPacketPayload
-{
+public record ServerboundAddScheduleEntryPayload(int cartId, int idx, Schedule.Entry entry) implements CustomPacketPayload {
     public static final Type<ServerboundAddScheduleEntryPayload> TYPE = Utils.payloadType("add_schedule_entry");
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerboundAddScheduleEntryPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT,
@@ -23,20 +22,16 @@ public record ServerboundAddScheduleEntryPayload(int cartId, int idx, Schedule.E
             ServerboundAddScheduleEntryPayload::new
     );
 
-    public void handle(IPayloadContext ctx)
-    {
-        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId && ctx.player().mayBuild())
-        {
-            if (!menu.getCart().getSchedule().addEntry(idx, entry))
-            {
+    public void handle(IPayloadContext ctx) {
+        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId && ctx.player().mayBuild()) {
+            if (!menu.getCart().getSchedule().addEntry(idx, entry)) {
                 ctx.reply(ClientboundRefreshStaleSchedulePayload.of(menu.getCart(), Schedule.RejectedAction.ADD));
             }
         }
     }
 
     @Override
-    public Type<ServerboundAddScheduleEntryPayload> type()
-    {
+    public Type<ServerboundAddScheduleEntryPayload> type() {
         return TYPE;
     }
 }

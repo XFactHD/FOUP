@@ -3,9 +3,9 @@ package io.github.xfacthd.foup.common.data;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
-public enum TrackShape
-{
+public enum TrackShape {
     STRAIGHT_NORTH(Direction.NORTH, Direction.NORTH),
     STRAIGHT_SOUTH(Direction.SOUTH, Direction.SOUTH),
     STRAIGHT_EAST(Direction.EAST, Direction.EAST),
@@ -20,7 +20,7 @@ public enum TrackShape
     CURVE_WEST_SOUTH(Direction.WEST, Direction.SOUTH),
     ;
 
-    private static final TrackShape[] SHAPES_BY_DIR_PAIR = computeShapesByDirPair();
+    private static final @Nullable TrackShape[] SHAPES_BY_DIR_PAIR = computeShapesByDirPair();
 
     private final Direction entryDir;
     private final Direction exitDir;
@@ -28,8 +28,7 @@ public enum TrackShape
     private final Vec3 entryPoint;
     private final Vec3 exitPoint;
 
-    TrackShape(Direction entryDir, Direction exitDir)
-    {
+    TrackShape(Direction entryDir, Direction exitDir) {
         this.entryDir = entryDir;
         this.exitDir = exitDir;
         this.entryPoint = computeEntryPoint(entryDir.getOpposite());
@@ -37,43 +36,35 @@ public enum TrackShape
         this.straight = entryDir == exitDir;
     }
 
-    public Direction getEntryDir()
-    {
+    public Direction getEntryDir() {
         return entryDir;
     }
 
-    public Direction getExitDir()
-    {
+    public Direction getExitDir() {
         return exitDir;
     }
 
-    public boolean isStraight()
-    {
+    public boolean isStraight() {
         return straight;
     }
 
-    public Vec3 getEntryPoint()
-    {
+    public Vec3 getEntryPoint() {
         return entryPoint;
     }
 
-    public Vec3 getExitPoint()
-    {
+    public Vec3 getExitPoint() {
         return exitPoint;
     }
 
-    public static TrackShape byDirPair(Direction incoming, Direction outgoing)
-    {
+    public static TrackShape byDirPair(Direction incoming, Direction outgoing) {
         TrackShape shape = SHAPES_BY_DIR_PAIR[dirPairIdx(incoming, outgoing)];
-        if (shape == null)
-        {
+        if (shape == null) {
             throw new IllegalArgumentException("Invalid direction pair: incoming=" + incoming + ", outgoing=" + outgoing);
         }
         return shape;
     }
 
-    private static Vec3 computeEntryPoint(Direction dir)
-    {
+    private static Vec3 computeEntryPoint(Direction dir) {
         Vec3i normal = dir.getUnitVec3i();
         Direction.Axis axis = dir.getAxis();
         Direction.Axis perpAxis = dir.getClockWise().getAxis();
@@ -82,16 +73,13 @@ public enum TrackShape
         return new Vec3(x, 0, z);
     }
 
-    private static int dirPairIdx(Direction incoming, Direction outgoing)
-    {
+    private static int dirPairIdx(Direction incoming, Direction outgoing) {
         return (incoming.get2DDataValue() << 2) | outgoing.get2DDataValue();
     }
 
-    private static TrackShape[] computeShapesByDirPair()
-    {
+    private static TrackShape[] computeShapesByDirPair() {
         TrackShape[] arr = new TrackShape[4 * 4];
-        for (TrackShape shape : values())
-        {
+        for (TrackShape shape : values()) {
             arr[dirPairIdx(shape.entryDir, shape.exitDir)] = shape;
         }
         return arr;

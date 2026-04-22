@@ -16,16 +16,13 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import java.util.List;
 import java.util.Set;
 
-public final class FoupBlockLootProvider extends BlockLootSubProvider
-{
-    public FoupBlockLootProvider(HolderLookup.Provider registries)
-    {
+public final class FoupBlockLootProvider extends BlockLootSubProvider {
+    public FoupBlockLootProvider(HolderLookup.Provider registries) {
         super(Set.of(), FeatureFlags.DEFAULT_FLAGS, registries);
     }
 
     @Override
-    protected void generate()
-    {
+    protected void generate() {
         dropSelf(FoupContent.BLOCK_RAIL.value());
         dropSelf(FoupContent.BLOCK_RAIL_CURVE.value());
         dropSelf(FoupContent.BLOCK_RAIL_SWITCH.value());
@@ -37,8 +34,7 @@ public final class FoupBlockLootProvider extends BlockLootSubProvider
         ));
     }
 
-    private void dropSelfWithComponents(Block block, List<DataComponentType<?>> components)
-    {
+    private void dropSelfWithComponents(Block block, List<DataComponentType<?>> components) {
         CopyComponentsFunction.Builder function = CopyComponentsFunction.copyComponentsFromBlockEntity(LootContextParams.BLOCK_ENTITY);
         components.forEach(function::include);
         add(block, LootTable.lootTable().withPool(applyExplosionCondition(block, LootPool.lootPool()
@@ -48,8 +44,7 @@ public final class FoupBlockLootProvider extends BlockLootSubProvider
     }
 
     @Override
-    protected Iterable<Block> getKnownBlocks()
-    {
+    protected Iterable<Block> getKnownBlocks() {
         return FoupContent.getAllBlocks();
     }
 }

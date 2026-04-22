@@ -19,14 +19,12 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.function.Predicate;
 
-public abstract class AbstractOverheadRailBlock extends Block implements EntityBlock
-{
+public abstract class AbstractOverheadRailBlock extends Block implements EntityBlock {
     private static final Direction[] HORIZONTAL_DIRECTIONS = Direction.Plane.HORIZONTAL.stream().toArray(Direction[]::new);
 
     private final RailType type;
 
-    protected AbstractOverheadRailBlock(Properties props, RailType type)
-    {
+    protected AbstractOverheadRailBlock(Properties props, RailType type) {
         super(props.noOcclusion()
                 .mapColor(MapColor.METAL)
                 .pushReaction(PushReaction.BLOCK)
@@ -38,28 +36,22 @@ public abstract class AbstractOverheadRailBlock extends Block implements EntityB
     }
 
     @Override
-    @Nullable
-    public final BlockState getStateForPlacement(BlockPlaceContext ctx)
-    {
+    public final @Nullable BlockState getStateForPlacement(BlockPlaceContext ctx) {
         return getStateForPlacement(ctx, false);
     }
 
-    @Nullable
-    public abstract BlockState getStateForPlacement(BlockPlaceContext ctx, boolean simulate);
+    public abstract @Nullable BlockState getStateForPlacement(BlockPlaceContext ctx, boolean simulate);
 
     @Override
-    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean moved)
-    {
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean moved) {
         AABB area = AABB.encapsulatingFullBlocks(pos, pos.below());
-        for (OverheadCartEntity entity : level.getEntitiesOfClass(OverheadCartEntity.class, area))
-        {
+        for (OverheadCartEntity entity : level.getEntitiesOfClass(OverheadCartEntity.class, area)) {
             entity.killAndDrop(level, null);
         }
     }
 
     @Override
-    public final BlockEntity newBlockEntity(BlockPos pos, BlockState state)
-    {
+    public final BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return type.getBlockEntity().create(pos, state);
     }
 
@@ -67,23 +59,18 @@ public abstract class AbstractOverheadRailBlock extends Block implements EntityB
 
     public abstract boolean isExitSide(BlockState state, Direction side);
 
-    @Nullable
-    protected static Connection findConnectionTowardsExit(Level level, BlockPos placePos, Predicate<Direction> validEntryDir)
-    {
+    protected static @Nullable Connection findConnectionTowardsExit(Level level, BlockPos placePos, Predicate<Direction> validEntryDir) {
         Connection con = null;
-        for (Direction dir : HORIZONTAL_DIRECTIONS)
-        {
-            if (!validEntryDir.test(dir)) continue;
+        for (Direction dir : HORIZONTAL_DIRECTIONS) {
+            if (!validEntryDir.test(dir)) {
+                continue;
+            }
 
             BlockState state = level.getBlockState(placePos.relative(dir));
-            if (state.getBlock() instanceof AbstractOverheadRailBlock block)
-            {
-                if (block.isExitSide(state, dir.getOpposite()))
-                {
+            if (state.getBlock() instanceof AbstractOverheadRailBlock block) {
+                if (block.isExitSide(state, dir.getOpposite())) {
                     return new Connection(dir, false);
-                }
-                else if (block.isEntrySide(state, dir.getOpposite()))
-                {
+                } else if (block.isEntrySide(state, dir.getOpposite())) {
                     con = new Connection(dir, true);
                 }
             }
@@ -91,23 +78,18 @@ public abstract class AbstractOverheadRailBlock extends Block implements EntityB
         return con;
     }
 
-    @Nullable
-    protected static Connection findConnectionTowardsEntry(Level level, BlockPos placePos, Predicate<Direction> validExitDir)
-    {
+    protected static @Nullable Connection findConnectionTowardsEntry(Level level, BlockPos placePos, Predicate<Direction> validExitDir) {
         Connection con = null;
-        for (Direction dir : HORIZONTAL_DIRECTIONS)
-        {
-            if (!validExitDir.test(dir)) continue;
+        for (Direction dir : HORIZONTAL_DIRECTIONS) {
+            if (!validExitDir.test(dir)) {
+                continue;
+            }
 
             BlockState state = level.getBlockState(placePos.relative(dir));
-            if (state.getBlock() instanceof AbstractOverheadRailBlock block)
-            {
-                if (block.isEntrySide(state, dir.getOpposite()))
-                {
+            if (state.getBlock() instanceof AbstractOverheadRailBlock block) {
+                if (block.isEntrySide(state, dir.getOpposite())) {
                     return new Connection(dir, true);
-                }
-                else if (block.isExitSide(state, dir.getOpposite()))
-                {
+                } else if (block.isExitSide(state, dir.getOpposite())) {
                     con = new Connection(dir, false);
                 }
             }

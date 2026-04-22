@@ -16,10 +16,8 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import org.jspecify.annotations.Nullable;
 
-public abstract sealed class AbstractCartInteractorBlock extends Block implements EntityBlock permits FoupLoaderBlock, FoupStorageInterfaceBlock
-{
-    protected AbstractCartInteractorBlock(Properties props)
-    {
+public abstract sealed class AbstractCartInteractorBlock extends Block implements EntityBlock permits FoupLoaderBlock, FoupStorageInterfaceBlock {
+    protected AbstractCartInteractorBlock(Properties props) {
         super(props.mapColor(MapColor.METAL)
                 .pushReaction(PushReaction.BLOCK)
                 .requiresCorrectToolForDrops()
@@ -29,10 +27,8 @@ public abstract sealed class AbstractCartInteractorBlock extends Block implement
     }
 
     @Override
-    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean moved)
-    {
-        if (level.getBlockEntity(pos) instanceof AbstractCartInteractorBlockEntity be)
-        {
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean moved) {
+        if (level.getBlockEntity(pos) instanceof AbstractCartInteractorBlockEntity be) {
             be.unlink();
             be.dropContents(stack -> popResource(level, pos, stack));
         }
@@ -41,17 +37,13 @@ public abstract sealed class AbstractCartInteractorBlock extends Block implement
     protected abstract BlockEntityType<? extends AbstractCartInteractorBlockEntity> getBlockEntityType(BlockState state);
 
     @Override
-    public final BlockEntity newBlockEntity(BlockPos pos, BlockState state)
-    {
+    public final BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return getBlockEntityType(state).create(pos, state);
     }
 
     @Override
-    @Nullable
-    public final  <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
-    {
-        if (!level.isClientSide())
-        {
+    public final <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        if (!level.isClientSide()) {
             return BaseEntityBlock.createTickerHelper(type, getBlockEntityType(state), AbstractCartInteractorBlockEntity::tick);
         }
         return null;

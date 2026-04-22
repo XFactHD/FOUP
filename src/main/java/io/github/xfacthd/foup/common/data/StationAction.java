@@ -11,8 +11,7 @@ import net.minecraft.util.StringRepresentable;
 import java.util.Locale;
 import java.util.function.IntFunction;
 
-public enum StationAction implements StringRepresentable
-{
+public enum StationAction implements StringRepresentable {
     LOAD,
     UNLOAD;
 
@@ -24,18 +23,15 @@ public enum StationAction implements StringRepresentable
     private final Component translation = Component.translatable("desc.foup.station_action." + name);
 
     @Override
-    public String getSerializedName()
-    {
+    public String getSerializedName() {
         return name;
     }
 
-    public Component getTranslation()
-    {
+    public Component getTranslation() {
         return translation;
     }
 
-    public static StationAction byId(int id)
-    {
+    public static StationAction byId(int id) {
         return BY_ID.apply(id);
     }
 }

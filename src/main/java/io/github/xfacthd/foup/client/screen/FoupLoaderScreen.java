@@ -25,8 +25,7 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Objects;
 
-public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMenu>
-{
+public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMenu> {
     private static final Identifier BACKGROUND = Utils.rl("textures/gui/foup_loader.png");
     private static final Identifier LOCK_ICON = Identifier.withDefaultNamespace("container/cartography_table/locked");
     private static final Identifier PROGRESS_ICON = Identifier.withDefaultNamespace("container/furnace/burn_progress");
@@ -53,14 +52,12 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
     @UnknownNullability
     private Button autoEjectButton;
 
-    public FoupLoaderScreen(FoupLoaderMenu menu, Inventory inventory, Component title)
-    {
+    public FoupLoaderScreen(FoupLoaderMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, WIDTH, HEIGHT);
     }
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         super.init();
 
         autoEjectButton = addRenderableWidget(new IndicatorButton(
@@ -77,8 +74,7 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
 
         graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, 0, 0, WIDTH, HEIGHT, 256, 256);
@@ -90,64 +86,60 @@ public final class FoupLoaderScreen extends AbstractContainerScreen<FoupLoaderMe
         graphics.pose().popMatrix();
 
         StationAction action = menu.getActiveAction();
-        if (action == null) return;
+        if (action == null) {
+            return;
+        }
 
         AbstractCartInteractorBlockEntity.State state = menu.getState();
         int x = action == StationAction.LOAD ? ARROW_LOAD_X : ARROW_UNLOAD_X;
-        if (state == AbstractCartInteractorBlockEntity.State.INTERACTING)
-        {
+        if (state == AbstractCartInteractorBlockEntity.State.INTERACTING) {
             float factor = 1F - (menu.getRemainingDuration() / (float) INTERACT_DURATION);
             int width = (int) (ARROW_WIDTH * factor);
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, PROGRESS_ICON, ARROW_WIDTH, ARROW_HEIGHT, 0, 0, leftPos + x, topPos + ARROW_Y, width, ARROW_HEIGHT);
-        }
-        else if (state == AbstractCartInteractorBlockEntity.State.BLOCKED)
-        {
+        } else if (state == AbstractCartInteractorBlockEntity.State.BLOCKED) {
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, CROSS_ICON, leftPos + x + CROSS_OFFSET_X, topPos + ARROW_Y + CROSS_OFFSET_Y, CROSS_SIZE, CROSS_SIZE);
         }
     }
 
     @Override
-    protected void extractTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
-    {
+    protected void extractTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractTooltip(graphics, mouseX, mouseY);
 
-        if (menu.getState() != AbstractCartInteractorBlockEntity.State.BLOCKED) return;
+        if (menu.getState() != AbstractCartInteractorBlockEntity.State.BLOCKED) {
+            return;
+        }
 
         StationAction action = menu.getActiveAction();
-        if (action == null) return;
+        if (action == null) {
+            return;
+        }
 
         boolean load = action == StationAction.LOAD;
         int minX = leftPos + (load ? ARROW_LOAD_X : ARROW_UNLOAD_X) + CROSS_OFFSET_X;
         int minY = topPos + ARROW_Y + CROSS_OFFSET_Y;
-        if (mouseX >= minX && mouseX < minX + CROSS_SIZE && mouseY >= minY && mouseY < minY + CROSS_SIZE)
-        {
+        if (mouseX >= minX && mouseX < minX + CROSS_SIZE && mouseY >= minY && mouseY < minY + CROSS_SIZE) {
             graphics.setTooltipForNextFrame(font, load ? MSG_LOADING_BLOCKED : MSG_UNLOADING_BLOCKED, mouseX, mouseY);
         }
     }
 
     @Override
-    protected void renderSlotContents(GuiGraphicsExtractor graphics, ItemStack stack, Slot slot, @Nullable String countString)
-    {
+    protected void renderSlotContents(GuiGraphicsExtractor graphics, ItemStack stack, Slot slot, @Nullable String countString) {
         super.renderSlotContents(graphics, stack, slot, countString);
-        if (slot instanceof LockableSlot lockableSlot && lockableSlot.isLocked())
-        {
+        if (slot instanceof LockableSlot lockableSlot && lockableSlot.isLocked()) {
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, LOCK_ICON, slot.x + SLOT_SIZE_INNER - 5, slot.y + SLOT_SIZE_INNER - 7, 5, 7);
         }
     }
 
     @Override
-    protected void containerTick()
-    {
+    protected void containerTick() {
         checkButtonState();
     }
 
-    private void checkButtonState()
-    {
+    private void checkButtonState() {
         autoEjectButton.active = Objects.requireNonNull(Minecraft.getInstance().player).mayBuild();
     }
 
-    private void toggleAutoEject(Button button)
-    {
+    private void toggleAutoEject(Button button) {
         ClientPacketDistributor.sendToServer(new ServerboundToggleLoaderAutoEjectPayload(menu.containerId, !menu.isAutoEject()));
     }
 }

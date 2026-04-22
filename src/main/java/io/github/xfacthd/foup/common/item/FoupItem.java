@@ -20,23 +20,18 @@ import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
 
-public final class FoupItem extends Item
-{
+public final class FoupItem extends Item {
     public static final Component MENU_TITLE = Component.translatable("foup.container.foup");
 
-    public FoupItem(Properties props)
-    {
+    public FoupItem(Properties props) {
         super(props.component(FoupContent.DC_TYPE_ITEM_CONTENTS, ItemContents.EMPTY));
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand)
-    {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (hand == InteractionHand.MAIN_HAND)
-        {
-            if (!level.isClientSide())
-            {
+        if (hand == InteractionHand.MAIN_HAND) {
+            if (!level.isClientSide()) {
                 player.openMenu(new FoupMenuProvider(stack));
             }
             return InteractionResult.SUCCESS;
@@ -45,51 +40,42 @@ public final class FoupItem extends Item
     }
 
     @Override
-    public boolean canFitInsideContainerItems(ItemStack stack)
-    {
+    public boolean canFitInsideContainerItems(ItemStack stack) {
         return stack.getOrDefault(FoupContent.DC_TYPE_ITEM_CONTENTS, ItemContents.EMPTY).stack().isEmpty();
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public boolean canFitInsideContainerItems()
-    {
+    public boolean canFitInsideContainerItems() {
         return false;
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public void appendHoverText(ItemStack stack, TooltipContext ctx, TooltipDisplay display, Consumer<Component> appender, TooltipFlag flag)
-    {
+    public void appendHoverText(ItemStack stack, TooltipContext ctx, TooltipDisplay display, Consumer<Component> appender, TooltipFlag flag) {
         appender.accept(Component.translatable("item.foup.foup.desc").withStyle(ChatFormatting.GRAY));
         stack.addToTooltip(FoupContent.DC_TYPE_ITEM_CONTENTS, ctx, display, appender, flag);
     }
 
-    public static boolean canPlaceInFoup(ItemStack stack)
-    {
+    public static boolean canPlaceInFoup(ItemStack stack) {
         return stack.getItem().canFitInsideContainerItems(stack);
     }
 
-    public static DataResult<ItemStack> validateCanPlaceInFoup(ItemStack stack)
-    {
-        if (!canPlaceInFoup(stack))
-        {
+    public static DataResult<ItemStack> validateCanPlaceInFoup(ItemStack stack) {
+        if (!canPlaceInFoup(stack)) {
             return DataResult.error(() -> "Given item cannot be placed in container items", stack);
         }
         return DataResult.success(stack);
     }
 
-    private record FoupMenuProvider(ItemStack foupStack) implements MenuProvider
-    {
+    private record FoupMenuProvider(ItemStack foupStack) implements MenuProvider {
         @Override
-        public Component getDisplayName()
-        {
+        public Component getDisplayName() {
             return MENU_TITLE;
         }
 
         @Override
-        public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
-        {
+        public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
             return new FoupMenu(containerId, inventory, foupStack);
         }
     }

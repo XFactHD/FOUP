@@ -24,15 +24,14 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-final class OverheadCartBehaviour
-{
+final class OverheadCartBehaviour {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     // The minimum offset needed to compute the rail's BlockPos from the entity's position
     private static final double ENTITY_TO_RAIL_POS_OFFSET = .6;
     // The amount of ticks it takes the hoist to travel up/down one block
     private static final int HOIST_TICKS_PER_BLOCK = 16;
-    private static final double MOVE_BLOCKS_PER_TICK = 1D/12D;
+    private static final double MOVE_BLOCKS_PER_TICK = 1D / 12D;
     // The amount of ticks to wait after arrival before hoisting and after hoisting before departure
     private static final int PARK_DURATION = 10;
 
@@ -54,57 +53,49 @@ final class OverheadCartBehaviour
     private boolean haltRequested = false;
     private boolean retry = false;
 
-    OverheadCartBehaviour(OverheadCartEntity cart)
-    {
+    OverheadCartBehaviour(OverheadCartEntity cart) {
         this.cart = cart;
         this.schedule = new Schedule(cart);
     }
 
-    void tick(boolean firstTick)
-    {
-        if (currNode == null)
-        {
-            if (!firstTick && cart.tickCount % 20 != 0) return;
+    void tick(boolean firstTick) {
+        if (currNode == null) {
+            if (!firstTick && cart.tickCount % 20 != 0) {
+                return;
+            }
 
             currNode = findTrackNode(currNodePos, true);
-            if (currNode == null) return;
+            if (currNode == null) {
+                return;
+            }
 
             currNode.setOccupied(true);
             currNodePos = null;
 
-            if (path != null)
-            {
+            if (path != null) {
                 currNode.getNetwork().registerPath(path);
             }
         }
-        if (prevNodePos != null && (firstTick || cart.tickCount % 20 == 0))
-        {
+        if (prevNodePos != null && (firstTick || cart.tickCount % 20 == 0)) {
             prevNode = findTrackNode(prevNodePos, false);
-            if (prevNode != null)
-            {
+            if (prevNode != null) {
                 prevNode.setOccupied(true);
                 prevNodePos = null;
             }
         }
-        if (prevNode != null && prevNode.isInvalid())
-        {
+        if (prevNode != null && prevNode.isInvalid()) {
             // Rail block of previous node broken and node removed from graph
             prevNode = null;
         }
 
-        switch (action.state())
-        {
+        switch (action.state()) {
             case IDLE, POD_IN_LOADER_OR_STORAGE -> { }
-            case MOVING ->
-            {
-                if (prevNode == null && prevNodePos != null)
-                {
+            case MOVING -> {
+                if (prevNode == null && prevNodePos != null) {
                     break;
                 }
-                if (path == null || !path.isValid())
-                {
-                    if (path != null)
-                    {
+                if (path == null || !path.isValid()) {
+                    if (path != null) {
                         currNode.getNetwork().removePath(path);
                         path = null;
                     }
@@ -114,38 +105,28 @@ final class OverheadCartBehaviour
 
                 boolean done;
                 boolean errored = false;
-                try
-                {
+                try {
                     done = move(path, prevNode, currNode, path.peek(currNode.getNetwork()));
-                }
-                catch (Throwable error)
-                {
+                } catch (Throwable error) {
                     LOGGER.error("OverheadCartBehaviour encountered an error while moving", error);
                     done = true;
                     errored = true;
                 }
-                if (done)
-                {
+                if (done) {
                     currNode.getNetwork().removePath(path);
                     path = null;
-                    if (errored)
-                    {
+                    if (errored) {
                         setIdleOnError(OverheadCartIssue.Type.MOVEMENT_ERROR, null);
-                    }
-                    else
-                    {
+                    } else {
                         setAction(OverheadCartState.PARK_AFTER_ARRIVAL, PARK_DURATION, 0);
                     }
                 }
             }
-            case PARK_AFTER_ARRIVAL ->
-            {
-                if (cart.tickCount - actionStart > action.duration())
-                {
+            case PARK_AFTER_ARRIVAL -> {
+                if (cart.tickCount - actionStart > action.duration()) {
                     int heightDiff;
                     AbstractOverheadRailBlockEntity owner = currNode.getOwner();
-                    if (!currNode.isStation() || owner == null || (heightDiff = owner.getStationHeightDifference()) <= 0)
-                    {
+                    if (!currNode.isStation() || owner == null || (heightDiff = owner.getStationHeightDifference()) <= 0) {
                         setIdleOnError(OverheadCartIssue.Type.TARGET_INVALID, schedule.getActiveEntry().station());
                         return;
                     }
@@ -153,12 +134,9 @@ final class OverheadCartBehaviour
                     startHoist(true, heightDiff);
                 }
             }
-            case LOWERING_HOIST ->
-            {
-                if (cart.tickCount - actionStart > action.duration())
-                {
-                    if (schedule.isEmpty())
-                    {
+            case LOWERING_HOIST -> {
+                if (cart.tickCount - actionStart > action.duration()) {
+                    if (schedule.isEmpty()) {
                         setIdleOnError(OverheadCartIssue.Type.EMPTY_SCHEDULE, null);
                         break;
                     }
@@ -167,38 +145,28 @@ final class OverheadCartBehaviour
                     currNode.notifyArrival(cart, schedule.getActiveEntry());
                 }
             }
-            case RAISING_HOIST ->
-            {
-                if (cart.tickCount - actionStart > action.duration())
-                {
+            case RAISING_HOIST -> {
+                if (cart.tickCount - actionStart > action.duration()) {
                     setAction(OverheadCartState.PARK_BEFORE_DEPARTURE, PARK_DURATION, 0);
                 }
             }
-            case PARK_BEFORE_DEPARTURE ->
-            {
-                if (cart.tickCount - actionStart > action.duration())
-                {
-                    if (!retry)
-                    {
+            case PARK_BEFORE_DEPARTURE -> {
+                if (cart.tickCount - actionStart > action.duration()) {
+                    if (!retry) {
                         schedule.advance();
                     }
                     retry = false;
 
-                    if (haltRequested)
-                    {
+                    if (haltRequested) {
                         setAction(OverheadCartState.IDLE, 0, 0);
                         haltRequested = false;
-                    }
-                    else
-                    {
+                    } else {
                         setAction(OverheadCartState.PATHING, 0, 0);
                     }
                 }
             }
-            case PATHING ->
-            {
-                if (schedule.isEmpty())
-                {
+            case PATHING -> {
+                if (schedule.isEmpty()) {
                     setIdleOnError(OverheadCartIssue.Type.EMPTY_SCHEDULE, null);
                     break;
                 }
@@ -207,20 +175,17 @@ final class OverheadCartBehaviour
                 RailNetwork network = graph.getContextData();
                 String station = schedule.getActiveEntry().station();
                 TrackNode targetNode = network.getStation(station);
-                if (targetNode == null)
-                {
+                if (targetNode == null) {
                     setIdleOnError(OverheadCartIssue.Type.TARGET_MISSING, station);
                     break;
                 }
 
                 path = Dijkstra.getShortestPath(graph, currNode, targetNode);
-                if (!path.isValid())
-                {
+                if (!path.isValid()) {
                     setIdleOnError(OverheadCartIssue.Type.TARGET_UNREACHABLE, station);
                     break;
                 }
-                if (path.peek(network) == currNode)
-                {
+                if (path.peek(network) == currNode) {
                     // Drop the first path node if it's the one the cart is on
                     path.remove(network);
                 }
@@ -229,38 +194,30 @@ final class OverheadCartBehaviour
         }
     }
 
-    private boolean move(TrackPath path, @Nullable TrackNode prevNode, TrackNode currNode, @Nullable TrackNode nextNode)
-    {
+    private boolean move(TrackPath path, @Nullable TrackNode prevNode, TrackNode currNode, @Nullable TrackNode nextNode) {
         Direction dirOne = prevNode != null ? getNodeConnectionDirection(prevNode, currNode) : Utils.getDirByViewVec(cart);
         Direction dirTwo = nextNode != null ? getNodeConnectionDirection(currNode, nextNode) : dirOne;
         TrackShape shape = TrackShape.byDirPair(dirOne, dirTwo);
         Vec3 pos = cart.getPosition(1F);
         Vec3 newPos;
-        if (shape.isStraight())
-        {
+        if (shape.isStraight()) {
             boolean done = false;
             Vec3 diff = dirOne.getUnitVec3().multiply(MOVE_BLOCKS_PER_TICK, 0, MOVE_BLOCKS_PER_TICK);
             newPos = pos.add(diff);
-            if (nextNode == null || nextNode.isOccupied())
-            {
+            if (nextNode == null || nextNode.isOccupied()) {
                 double frac = Utils.fractionInDir(newPos, dirOne);
-                if (frac > .5)
-                {
+                if (frac > .5) {
                     double value = Math.floor(dirOne.getAxis().choose(newPos.x, 0, newPos.z));
                     newPos = Utils.setAlongAxis(newPos, value + .5, dirOne);
                     done = nextNode == null;
                 }
             }
             cart.setPos(newPos);
-            if (done)
-            {
+            if (done) {
                 return true;
             }
-        }
-        else
-        {
-            if (rotating)
-            {
+        } else {
+            if (rotating) {
                 newPos = pos;
 
                 float srcRot = cart.getYRot();
@@ -270,32 +227,24 @@ final class OverheadCartBehaviour
                 diff = Math.clamp(diff, -maximumChange, maximumChange);
 
                 float newRot = srcRot + diff;
-                if (newRot < 0.0F)
-                {
+                if (newRot < 0.0F) {
                     newRot += 360.0F;
-                }
-                else if (newRot >= 360.0F)
-                {
+                } else if (newRot >= 360.0F) {
                     newRot -= 360.0F;
                 }
 
-                if (Mth.equal(newRot, destRot))
-                {
+                if (Mth.equal(newRot, destRot)) {
                     newRot = destRot;
                     rotating = false;
                 }
                 cart.setYRot(newRot);
-            }
-            else
-            {
+            } else {
                 Direction dir = Utils.getDirByViewVec(cart);
                 Vec3 diff = dir.getUnitVec3().multiply(MOVE_BLOCKS_PER_TICK, 0, MOVE_BLOCKS_PER_TICK);
                 newPos = pos.add(diff);
-                if (dir == dirOne)
-                {
+                if (dir == dirOne) {
                     double frac = Utils.fractionInDir(newPos, dirOne);
-                    if (frac > .5)
-                    {
+                    if (frac > .5) {
                         double value = Math.floor(dirOne.getAxis().choose(newPos.x, 0, newPos.z));
                         newPos = Utils.setAlongAxis(newPos, value + .5, dirOne);
                         rotating = true;
@@ -306,10 +255,8 @@ final class OverheadCartBehaviour
         }
 
         // Handle moving between blocks
-        if (Math.floor(pos.x) != Math.floor(newPos.x) || Math.floor(pos.z) != Math.floor(newPos.z))
-        {
-            if (prevNode != null)
-            {
+        if (Math.floor(pos.x) != Math.floor(newPos.x) || Math.floor(pos.z) != Math.floor(newPos.z)) {
+            if (prevNode != null) {
                 prevNode.setOccupied(false);
             }
             this.prevNode = currNode;
@@ -321,11 +268,9 @@ final class OverheadCartBehaviour
         return false;
     }
 
-    private static Direction getNodeConnectionDirection(TrackNode srcNode, TrackNode destNode)
-    {
+    private static Direction getNodeConnectionDirection(TrackNode srcNode, TrackNode destNode) {
         Direction dir = Utils.getDirByNormal(srcNode.getPos(), destNode.getPos());
-        if (dir == null)
-        {
+        if (dir == null) {
             throw new IllegalStateException(String.format(
                     Locale.ROOT,
                     "Track nodes %s and %s are not adjacent",
@@ -335,84 +280,65 @@ final class OverheadCartBehaviour
         return dir;
     }
 
-    @Nullable
-    private TrackNode findTrackNode(@Nullable BlockPos trackPos, boolean computeIfNull)
-    {
-        if (trackPos == null)
-        {
-            if (!computeIfNull)
-            {
+    private @Nullable TrackNode findTrackNode(@Nullable BlockPos trackPos, boolean computeIfNull) {
+        if (trackPos == null) {
+            if (!computeIfNull) {
                 return null;
             }
             trackPos = BlockPos.containing(cart.getX(), cart.getY() + ENTITY_TO_RAIL_POS_OFFSET, cart.getZ());
         }
-        if (cart.level().getBlockEntity(trackPos) instanceof AbstractOverheadRailBlockEntity be)
-        {
+        if (cart.level().getBlockEntity(trackPos) instanceof AbstractOverheadRailBlockEntity be) {
             return be.getTrackNode();
         }
         return null;
     }
 
-    void notifyReadyForDeparture()
-    {
-        if (action.state() == OverheadCartState.POD_IN_LOADER_OR_STORAGE)
-        {
+    void notifyReadyForDeparture() {
+        if (action.state() == OverheadCartState.POD_IN_LOADER_OR_STORAGE) {
             startHoist(false, action.heightDiff());
         }
     }
 
-    void notifyRetry(boolean retry)
-    {
+    void notifyRetry(boolean retry) {
         this.retry = retry;
     }
 
-    private void startHoist(boolean downward, int heightDiff)
-    {
+    private void startHoist(boolean downward, int heightDiff) {
         OverheadCartState state = downward ? OverheadCartState.LOWERING_HOIST : OverheadCartState.RAISING_HOIST;
         float dist = OverheadCartEntity.calculateHoistDistance(heightDiff);
         int duration = (int) Math.ceil(dist / 16F * HOIST_TICKS_PER_BLOCK);
         setAction(state, duration, heightDiff);
     }
 
-    void setAction(OverheadCartState state, int duration, int heightDiff)
-    {
+    void setAction(OverheadCartState state, int duration, int heightDiff) {
         this.actionStart = cart.tickCount;
         this.action = new OverheadCartAction(state, duration, heightDiff);
         cart.getEntityData().set(OverheadCartEntity.ACTION, action);
-        if (state != OverheadCartState.IDLE)
-        {
+        if (state != OverheadCartState.IDLE) {
             cart.getEntityData().set(OverheadCartEntity.ISSUE, OverheadCartIssue.NONE);
         }
     }
 
-    void setIdleOnError(OverheadCartIssue.Type type, @Nullable String detail)
-    {
+    void setIdleOnError(OverheadCartIssue.Type type, @Nullable String detail) {
         setAction(OverheadCartState.IDLE, 0, 0);
         cart.getEntityData().set(OverheadCartEntity.ISSUE, new OverheadCartIssue(type, Optional.ofNullable(detail)));
     }
 
-    Schedule getSchedule()
-    {
+    Schedule getSchedule() {
         return schedule;
     }
 
-    RailNetwork getOwningNetwork()
-    {
+    RailNetwork getOwningNetwork() {
         return Objects.requireNonNull(currNode).getNetwork();
     }
 
-    boolean executeSchedule()
-    {
+    boolean executeSchedule() {
         RailNetwork network = getOwningNetwork();
-        if (action.state() == OverheadCartState.IDLE && schedule.isValid(network))
-        {
+        if (action.state() == OverheadCartState.IDLE && schedule.isValid(network)) {
             TrackNode node = network.getStation(schedule.getActiveEntry().station());
-            if (node == currNode && isOnPosition())
-            {
+            if (node == currNode && isOnPosition()) {
                 setAction(OverheadCartState.PARK_AFTER_ARRIVAL, PARK_DURATION, 0);
-            }
-            else
-            {
+            } else {
                 setAction(OverheadCartState.PATHING, 0, 0);
             }
             return true;
@@ -420,53 +346,43 @@ final class OverheadCartBehaviour
         return false;
     }
 
-    private boolean isOnPosition()
-    {
+    private boolean isOnPosition() {
         return Mth.equal(Mth.frac(Math.abs(cart.getX())), .5) && Mth.equal(Mth.frac(Math.abs(cart.getZ())), .5);
     }
 
-    void stopSchedule()
-    {
+    void stopSchedule() {
         OverheadCartState state = action.state();
-        if (state == OverheadCartState.IDLE) return;
-
-        if (state == OverheadCartState.PATHING || state == OverheadCartState.MOVING)
-        {
-            setAction(OverheadCartState.IDLE, 0, 0);
+        if (state == OverheadCartState.IDLE) {
+            return;
         }
-        else
-        {
+
+        if (state == OverheadCartState.PATHING || state == OverheadCartState.MOVING) {
+            setAction(OverheadCartState.IDLE, 0, 0);
+        } else {
             haltRequested = true;
         }
     }
 
-    void rescue()
-    {
-        if (action.state() == OverheadCartState.POD_IN_LOADER_OR_STORAGE)
-        {
+    void rescue() {
+        if (action.state() == OverheadCartState.POD_IN_LOADER_OR_STORAGE) {
             startHoist(false, action.heightDiff());
             retry = true;
         }
     }
 
-    void destroy()
-    {
-        if (currNode != null)
-        {
+    void destroy() {
+        if (currNode != null) {
             currNode.setOccupied(false);
-            if (path != null)
-            {
+            if (path != null) {
                 currNode.getNetwork().removePath(path);
             }
         }
-        if (prevNode != null)
-        {
+        if (prevNode != null) {
             prevNode.setOccupied(false);
         }
     }
 
-    void save(ValueOutput valueOutput)
-    {
+    void save(ValueOutput valueOutput) {
         valueOutput.putInt("state", action.state().ordinal());
         valueOutput.putInt("action_start", actionStart);
         valueOutput.putInt("action_duration", action.duration());
@@ -474,36 +390,29 @@ final class OverheadCartBehaviour
         valueOutput.putBoolean("rotating", rotating);
         valueOutput.putBoolean("halt_requested", haltRequested);
         valueOutput.putBoolean("retry", retry);
-        if (prevNode != null)
-        {
+        if (prevNode != null) {
             valueOutput.putLong("prev_node", prevNode.getPos().asLong());
         }
-        if (currNode != null)
-        {
+        if (currNode != null) {
             valueOutput.putLong("curr_node", currNode.getPos().asLong());
         }
-        if (path != null)
-        {
+        if (path != null) {
             path.save(valueOutput.list("path", FoupCodecs.POS_AS_LONG));
         }
-        if (!schedule.isEmpty())
-        {
+        if (!schedule.isEmpty()) {
             schedule.save(valueOutput.child("schedule"));
         }
         OverheadCartIssue issue = cart.getIssue();
-        if (issue != null)
-        {
+        if (issue != null) {
             ValueOutput issueOutput = valueOutput.child("issue");
             issueOutput.putString("type", issue.type().getSerializedName());
-            if (issue.detail().isPresent())
-            {
+            if (issue.detail().isPresent()) {
                 issueOutput.putString("detail", issue.detail().get());
             }
         }
     }
 
-    void load(ValueInput valueInput)
-    {
+    void load(ValueInput valueInput) {
         actionStart = valueInput.getIntOr("action_start", -1);
         OverheadCartState state = OverheadCartState.of(valueInput.getIntOr("state", 0));
         setAction(state, valueInput.getIntOr("action_duration", 0), valueInput.getIntOr("height_diff", 0));
@@ -514,11 +423,9 @@ final class OverheadCartBehaviour
         currNodePos = valueInput.getLong("curr_node").map(BlockPos::of).orElse(null);
         path = valueInput.list("path", FoupCodecs.POS_AS_LONG).map(TrackPath::load).orElse(null);
         valueInput.child("schedule").ifPresent(schedule::load);
-        valueInput.child("issue").ifPresent(issueInput ->
-        {
+        valueInput.child("issue").ifPresent(issueInput -> {
             OverheadCartIssue.Type type = OverheadCartIssue.Type.byName(issueInput.getStringOr("type", ""));
-            if (type != null)
-            {
+            if (type != null) {
                 Optional<String> detail = issueInput.getString("detail");
                 cart.getEntityData().set(OverheadCartEntity.ISSUE, new OverheadCartIssue(type, detail));
             }

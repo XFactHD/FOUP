@@ -16,8 +16,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public record OverheadCartIssue(Type type, Optional<String> detail)
-{
+public record OverheadCartIssue(Type type, Optional<String> detail) {
     public static final StreamCodec<RegistryFriendlyByteBuf, OverheadCartIssue> STREAM_CODEC = StreamCodec.composite(
             Type.STREAM_CODEC,
             OverheadCartIssue::type,
@@ -27,8 +26,7 @@ public record OverheadCartIssue(Type type, Optional<String> detail)
     );
     public static final OverheadCartIssue NONE = new OverheadCartIssue(Type.NONE, Optional.empty());
 
-    public enum Type implements StringRepresentable
-    {
+    public enum Type implements StringRepresentable {
         NONE,
         EMPTY_SCHEDULE,
         TARGET_MISSING,
@@ -50,25 +48,20 @@ public record OverheadCartIssue(Type type, Optional<String> detail)
         private final String translationKey = "msg.foup.overhead_cart.issue." + name;
         private final Component translation = Component.translatable(translationKey);
 
-        public String getTranslationKey()
-        {
+        public String getTranslationKey() {
             return translationKey;
         }
 
-        public Component getTranslation()
-        {
+        public Component getTranslation() {
             return translation;
         }
 
         @Override
-        public String getSerializedName()
-        {
+        public String getSerializedName() {
             return name;
         }
 
-        @Nullable
-        public static Type byName(String name)
-        {
+        public static @Nullable Type byName(String name) {
             return LOOKUP.get(name);
         }
     }

@@ -9,32 +9,26 @@ import net.minecraft.util.TriState;
 
 import java.util.OptionalInt;
 
-public final class FoupStreamCodecs
-{
+public final class FoupStreamCodecs {
     public static final StreamCodec<ByteBuf, TriState> TRI_STATE = ByteBufCodecs.idMapper(
             ByIdMap.continuous(TriState::ordinal, TriState.values(), ByIdMap.OutOfBoundsStrategy.ZERO),
             TriState::ordinal
     );
 
-    public static final StreamCodec<ByteBuf, OptionalInt> OPTIONAL_VAR_INT = new StreamCodec<>()
-    {
+    public static final StreamCodec<ByteBuf, OptionalInt> OPTIONAL_VAR_INT = new StreamCodec<>() {
         @Override
-        public OptionalInt decode(ByteBuf buffer)
-        {
-            if (buffer.readBoolean())
-            {
+        public OptionalInt decode(ByteBuf buffer) {
+            if (buffer.readBoolean()) {
                 return OptionalInt.of(VarInt.read(buffer));
             }
             return OptionalInt.empty();
         }
 
         @Override
-        public void encode(ByteBuf buffer, OptionalInt value)
-        {
+        public void encode(ByteBuf buffer, OptionalInt value) {
             boolean present = value.isPresent();
             buffer.writeBoolean(present);
-            if (present)
-            {
+            if (present) {
                 VarInt.write(buffer, value.getAsInt());
             }
         }

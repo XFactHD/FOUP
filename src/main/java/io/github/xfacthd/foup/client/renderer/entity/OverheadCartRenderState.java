@@ -5,8 +5,7 @@ import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.world.item.ItemStack;
 
-public final class OverheadCartRenderState extends EntityRenderState
-{
+public final class OverheadCartRenderState extends EntityRenderState {
     float yRot;
     boolean hasFoup;
     OverheadCartState state;

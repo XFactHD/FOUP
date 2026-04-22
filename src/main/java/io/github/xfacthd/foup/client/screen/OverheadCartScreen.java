@@ -54,8 +54,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 // TODO: add description tooltips for filter and count
-public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCartMenu>
-{
+public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCartMenu> {
     private static final Identifier BACKGROUND = Utils.rl("background");
     private static final Identifier INVENTORY = Identifier.withDefaultNamespace("textures/gui/container/generic_54.png");
     private static final int WIDTH = 300;
@@ -116,8 +115,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     private boolean cartIdle;
     private boolean canEdit;
 
-    public OverheadCartScreen(OverheadCartMenu menu, Inventory inventory, Component title)
-    {
+    public OverheadCartScreen(OverheadCartMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, WIDTH, MIN_HEIGHT);
         this.cart = menu.getCart();
         this.scheduleEntries = menu.getInitialScheduleEntries();
@@ -127,9 +125,8 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     }
 
     @Override
-    protected void init()
-    {
-        imageHeight = Math.min(Math.max(MIN_HEIGHT, height), MAX_HEIGHT);
+    protected void init() {
+        imageHeight = Math.clamp(height, MIN_HEIGHT, MAX_HEIGHT);
         super.init();
 
         buttonAddStation = addRenderableWidget(Button.builder(BUTTON_ADD_ENTRY, this::addStation)
@@ -157,27 +154,23 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         ScheduleList oldList = scheduleList;
         int listHeight = imageHeight - LIST_Y - INVENTORY_Y_OFF - PADDING;
         scheduleList = addRenderableWidget(new ScheduleList(Objects.requireNonNull(minecraft), leftPos + EDGE_PADDING_X, topPos + LIST_Y, listHeight, scheduleList));
-        if (oldList == null)
-        {
+        if (oldList == null) {
             rebuiltScheduleList();
         }
 
         int invTop = imageHeight - INVENTORY_Y_OFF + 1;
-        for (Slot slot : menu.slots)
-        {
+        for (Slot slot : menu.slots) {
             slot.y = invTop + (slot.index / 9 * 18) + (slot.index >= 27 ? 4 : 0);
         }
     }
 
     @Override
-    public void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
-    {
+    public void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         graphics.text(font, title, titleLabelX, titleLabelY, 0xFF404040, false);
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
 
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, WIDTH, imageHeight);
@@ -188,15 +181,13 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         boolean hasIssue = issue != null;
 
         graphics.text(font, LABEL_STATE, leftPos + EDGE_PADDING_X, topPos + STATE_Y, 0xFF404040, false);
-        if (hasIssue)
-        {
+        if (hasIssue) {
             graphics.text(font, LABEL_ISSUE, leftPos + EDGE_PADDING_X, topPos + ISSUE_Y, 0xFF404040, false);
         }
 
         int offset = Math.max(font.width(LABEL_STATE), hasIssue ? font.width(LABEL_ISSUE) : 0) + 4;
         graphics.text(font, cart.getState().getTranslation(), leftPos + EDGE_PADDING_X + offset, topPos + STATE_Y, 0xFF404040, false);
-        if (hasIssue)
-        {
+        if (hasIssue) {
             graphics.text(font, formatIssue(issue), leftPos + EDGE_PADDING_X + offset, topPos + ISSUE_Y, 0xFF404040, false);
         }
 
@@ -204,39 +195,31 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick)
-    {
-        if (getFocused() != null && !getFocused().isMouseOver(event.x(), event.y()))
-        {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (getFocused() != null && !getFocused().isMouseOver(event.x(), event.y())) {
             setFocused(null);
         }
         return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event)
-    {
+    public boolean keyPressed(KeyEvent event) {
         boolean anyFocused = false;
-        for (ScheduleList.ScheduleEntry child : scheduleList.children())
-        {
-            if (child.getFocused() instanceof EditBox || child.getFocused() instanceof StackSizeCycleBox)
-            {
+        for (ScheduleList.ScheduleEntry child : scheduleList.children()) {
+            if (child.getFocused() instanceof EditBox || child.getFocused() instanceof StackSizeCycleBox) {
                 anyFocused = true;
                 break;
             }
         }
-        if ((getFocused() instanceof EditBox || anyFocused) && Objects.requireNonNull(minecraft).options.keyInventory.matches(event))
-        {
+        if ((getFocused() instanceof EditBox || anyFocused) && Objects.requireNonNull(minecraft).options.keyInventory.matches(event)) {
             return false;
         }
         return super.keyPressed(event);
     }
 
     @Override
-    public void containerTick()
-    {
-        if (cart.isRemoved() || !cart.isUsableByPlayer(Objects.requireNonNull(Minecraft.getInstance().player)))
-        {
+    public void containerTick() {
+        if (cart.isRemoved() || !cart.isUsableByPlayer(Objects.requireNonNull(Minecraft.getInstance().player))) {
             onClose();
             return;
         }
@@ -248,64 +231,53 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         buttonAddStation.active = cartIdle && canEdit;
         buttonExecute.visible = cartIdle;
         buttonStop.visible = !cartIdle;
-        if (lastIdle != cartIdle || lastCanEdit != canEdit)
-        {
+        if (lastIdle != cartIdle || lastCanEdit != canEdit) {
             buttonExecute.active = canEdit;
             buttonStop.active = canEdit;
         }
     }
 
     @Override // For some reason AbstractContainerScreen doesn't forward dragging to widgets
-    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY)
-    {
-        if (getFocused() == scheduleList && isDragging() && event.button() == InputConstants.MOUSE_BUTTON_LEFT && scheduleList.isMouseOver(event.x(), event.y()))
-        {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        if (getFocused() == scheduleList && isDragging() && event.button() == InputConstants.MOUSE_BUTTON_LEFT && scheduleList.isMouseOver(event.x(), event.y())) {
             return scheduleList.mouseDragged(event, dragX, dragY);
         }
         return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
-    {
-        if (getChildAt(mouseX, mouseY).orElse(null) == scheduleList)
-        {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (getChildAt(mouseX, mouseY).orElse(null) == scheduleList) {
             return scheduleList.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
-    private static Component formatIssue(OverheadCartIssue issue)
-    {
-        if (issue.detail().isPresent())
-        {
+    private static Component formatIssue(OverheadCartIssue issue) {
+        if (issue.detail().isPresent()) {
             return Component.translatable(issue.type().getTranslationKey(), issue.detail().get());
         }
         return issue.type().getTranslation();
     }
 
-    private void requestExecute(Button btn)
-    {
+    private void requestExecute(Button btn) {
         ClientPacketDistributor.sendToServer(new ServerboundExecuteSchedulePayload(cart.getId()));
         buttonExecute.active = false;
     }
 
-    private void requestStop(Button btn)
-    {
+    private void requestStop(Button btn) {
         ClientPacketDistributor.sendToServer(new ServerboundStopSchedulePayload(cart.getId()));
         buttonStop.active = false;
     }
 
-    private void addStation(Button btn)
-    {
+    private void addStation(Button btn) {
         Schedule.Entry entry = new Schedule.Entry(Mth.createInsecureUUID(RANDOM), "", StationType.UNKNOWN, StationAction.LOAD, Optional.empty(), OptionalInt.empty());
         scheduleEntries.add(entry);
         scheduleList.addEntry(new ScheduleList.ScheduleEntry(this, entry, true));
         ClientPacketDistributor.sendToServer(new ServerboundAddScheduleEntryPayload(cart.getId(), scheduleEntries.size() - 1, entry));
     }
 
-    public void updateStaleSchedule(List<Schedule.Entry> scheduleEntries, Schedule.RejectedAction rejectedAction, Map<String, StationType> stations)
-    {
+    public void updateStaleSchedule(List<Schedule.Entry> scheduleEntries, Schedule.RejectedAction rejectedAction, Map<String, StationType> stations) {
         this.scheduleEntries.clear();
         this.scheduleEntries.addAll(scheduleEntries);
         this.stations.clear();
@@ -314,28 +286,21 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         // TODO: notify user
     }
 
-    private void rebuiltScheduleList()
-    {
+    private void rebuiltScheduleList() {
         scheduleList.clearEntries();
-        for (Schedule.Entry entry : scheduleEntries)
-        {
+        for (Schedule.Entry entry : scheduleEntries) {
             scheduleList.addEntry(new ScheduleList.ScheduleEntry(this, entry, false));
         }
     }
 
-    public OverheadCartEntity getCart()
-    {
+    public OverheadCartEntity getCart() {
         return cart;
     }
 
-    public boolean setFilterSlotFromDrop(ItemStack stack, int x, int y)
-    {
-        if (scheduleList.isMouseOver(x, y))
-        {
-            for (ScheduleList.ScheduleEntry entry : scheduleList.children())
-            {
-                if (entry.filterSlot.isMouseOver(x, y))
-                {
+    public boolean setFilterSlotFromDrop(ItemStack stack, int x, int y) {
+        if (scheduleList.isMouseOver(x, y)) {
+            for (ScheduleList.ScheduleEntry entry : scheduleList.children()) {
+                if (entry.filterSlot.isMouseOver(x, y)) {
                     return entry.filterSlot.setFilterFromDrop(stack);
                 }
             }
@@ -343,59 +308,49 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
         return false;
     }
 
-    private static final class ScheduleList extends ContainerObjectSelectionList<ScheduleList.ScheduleEntry>
-    {
+    private static final class ScheduleList extends ContainerObjectSelectionList<ScheduleList.ScheduleEntry> {
         private static final int LIST_ENTRY_WIDTH = LIST_WIDTH - 15;
         private static final int LIST_ENTRY_HEIGHT = 48;
 
-        public ScheduleList(Minecraft minecraft, int x, int y, int height, @Nullable ScheduleList oldList)
-        {
+        public ScheduleList(Minecraft minecraft, int x, int y, int height, @Nullable ScheduleList oldList) {
             super(minecraft, LIST_WIDTH, height, y, LIST_ENTRY_HEIGHT);
             setX(x);
-            if (oldList != null)
-            {
+            if (oldList != null) {
                 oldList.children().forEach(this::addEntry);
             }
         }
 
         @Override
-        protected int addEntry(ScheduleEntry entry)
-        {
+        protected int addEntry(ScheduleEntry entry) {
             return super.addEntry(entry);
         }
 
         @Override
-        protected void removeEntry(ScheduleEntry entry)
-        {
+        protected void removeEntry(ScheduleEntry entry) {
             super.removeEntry(entry);
         }
 
         @Override
-        public int getRowLeft()
-        {
+        public int getRowLeft() {
             return super.getRowLeft() - 2 - 3;
         }
 
         @Override
-        public int getRowWidth()
-        {
+        public int getRowWidth() {
             return LIST_ENTRY_WIDTH;
         }
 
         @Override
-        protected int scrollBarX()
-        {
+        protected int scrollBarX() {
             return getRowRight() + 4;
         }
 
         @Override
-        protected boolean isValidClickButton(MouseButtonInfo button)
-        {
+        protected boolean isValidClickButton(MouseButtonInfo button) {
             return button.button() == InputConstants.MOUSE_BUTTON_LEFT || button.button() == InputConstants.MOUSE_BUTTON_RIGHT;
         }
 
-        private static final class ScheduleEntry extends Entry<ScheduleEntry>
-        {
+        private static final class ScheduleEntry extends Entry<ScheduleEntry> {
             private static final Identifier ICON_UP = Identifier.withDefaultNamespace("statistics/sort_up");
             private static final Identifier ICON_DOWN = Identifier.withDefaultNamespace("statistics/sort_down");
             private static final Identifier ICON_EDIT = Utils.rl("edit");
@@ -441,8 +396,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
             private boolean mutable;
             private EntryValidity validity;
 
-            public ScheduleEntry(OverheadCartScreen owner, Schedule.Entry entry, boolean mutable)
-            {
+            public ScheduleEntry(OverheadCartScreen owner, Schedule.Entry entry, boolean mutable) {
                 this.owner = owner;
                 this.entry = entry;
                 this.type = entry.type();
@@ -486,15 +440,13 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
             }
 
             @Override
-            public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick)
-            {
+            public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick) {
                 validity = getValidity();
 
-                // Can't use GuiGraphicsExtractor#submitOutline() as it renders too late
-                renderOutline(graphics, validity == EntryValidity.VALID ? 0xFF444444 : 0xFFAA0000);
+                int color = validity == EntryValidity.VALID ? 0xFF444444 : 0xFFAA0000;
+                graphics.outline(getX(), getY(), getWidth(), getHeight(), color);
 
-                for (AbstractWidget child : children)
-                {
+                for (AbstractWidget child : children) {
                     child.active = true;
                 }
 
@@ -542,162 +494,118 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
 
                 buttonDelete.setPosition(left + width - EDGE_PADDING - SPRITE_SIZE, top + height - EDGE_PADDING - ELEM_HEIGHT);
 
-                if (filterSlot.visible)
-                {
+                if (filterSlot.visible) {
                     graphics.text(owner.font, LABEL_FILTER, left + FILTER_LABEL_X, top + FILTER_LABEL_Y, 0xFFFFFFFF);
                 }
-                if (boxCount.visible)
-                {
+                if (boxCount.visible) {
                     graphics.text(owner.font, LABEL_COUNT, left + FILTER_LABEL_X, top + height - COUNT_LABEL_Y_OFF, 0xFFFFFFFF);
                 }
-                for (AbstractWidget child : children)
-                {
-                    if (!owner.cartIdle || !owner.canEdit)
-                    {
+                for (AbstractWidget child : children) {
+                    if (!owner.cartIdle || !owner.canEdit) {
                         child.active = false;
                     }
                     child.extractRenderState(graphics, mouseX, mouseY, partialTick);
                 }
-                if (validity != EntryValidity.VALID)
-                {
+                if (validity != EntryValidity.VALID) {
                     graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ICON_ERROR, left + ERROR_X, top + ERROR_Y, ERROR_SIZE, ERROR_SIZE);
-                    if (mouseX >= left + ERROR_X && mouseX < left + ERROR_X + ERROR_SIZE && mouseY >= top + ERROR_Y && mouseY < top + ERROR_Y + ERROR_SIZE)
-                    {
+                    if (mouseX >= left + ERROR_X && mouseX < left + ERROR_X + ERROR_SIZE && mouseY >= top + ERROR_Y && mouseY < top + ERROR_Y + ERROR_SIZE) {
                         graphics.setTooltipForNextFrame(validity.description, mouseX, mouseY);
                     }
                 }
             }
 
-            private void renderOutline(GuiGraphicsExtractor graphics, int color)
-            {
-                // Can't use GuiGraphicsExtractor#submitOutline() as it renders too late
-                int x = getX();
-                int y = getY();
-                int width = getWidth();
-                int height = getHeight();
-                graphics.fill(x,             y,              x + width, y + 1,          color);
-                graphics.fill(x,             y + height - 1, x + width, y + height,     color);
-                graphics.fill(x,             y + 1,          x + 1,     y + height - 1, color);
-                graphics.fill(x + width - 1, y + 1,          x + width, y + height - 1, color);
-            }
-
             @Override
-            public List<? extends GuiEventListener> children()
-            {
+            public List<? extends GuiEventListener> children() {
                 return children;
             }
 
             @Override
-            public List<? extends NarratableEntry> narratables()
-            {
+            public List<? extends NarratableEntry> narratables() {
                 return children;
             }
 
-            private EntryValidity getValidity()
-            {
-                if (type == StationType.UNKNOWN)
-                {
+            private EntryValidity getValidity() {
+                if (type == StationType.UNKNOWN) {
                     return EntryValidity.INVALID_STATION;
                 }
-                if (!owner.stations.containsKey(boxStation.getValue()))
-                {
+                if (!owner.stations.containsKey(boxStation.getValue())) {
                     return EntryValidity.INVALID_STATION;
                 }
-                if (type == StationType.LOADER)
-                {
-                    if (useFilter && filterSlot.getFilter().isEmpty())
-                    {
+                if (type == StationType.LOADER) {
+                    if (useFilter && filterSlot.getFilter().isEmpty()) {
                         return EntryValidity.LOADER_FILTER_EMPTY;
                     }
-                    if (useCount && (boxCount.isEmpty() || boxCount.getValue() <= 0 || boxCount.getValue() > Item.ABSOLUTE_MAX_STACK_SIZE))
-                    {
+                    if (useCount && (boxCount.isEmpty() || boxCount.getValue() <= 0 || boxCount.getValue() > Item.ABSOLUTE_MAX_STACK_SIZE)) {
                         return EntryValidity.NO_COUNT_SET;
                     }
                 }
                 return EntryValidity.VALID;
             }
 
-            private void moveUp(Button btn)
-            {
+            private void moveUp(Button btn) {
                 int idx = list().children().indexOf(this);
-                if (idx > 0)
-                {
+                if (idx > 0) {
                     move(idx, -1);
                 }
             }
 
-            private void moveDown(Button btn)
-            {
+            private void moveDown(Button btn) {
                 int idx = list().children().indexOf(this);
-                if (idx < list().children().size() - 1)
-                {
+                if (idx < list().children().size() - 1) {
                     move(idx, 1);
                 }
             }
 
-            private void move(int idx, int dir)
-            {
+            private void move(int idx, int dir) {
                 list().swap(idx, idx + dir);
 
                 ClientPacketDistributor.sendToServer(new ServerboundMoveScheduleEntryPayload(owner.cart.getId(), idx, dir > 0, entry.uuid()));
             }
 
-            private void onStationChange(String name)
-            {
+            private void onStationChange(String name) {
                 type = owner.stations.getOrDefault(name, StationType.UNKNOWN);
-                if (type == StationType.STORAGE)
-                {
+                if (type == StationType.STORAGE) {
                     useCount = false;
                     boxCount.setEmpty();
                 }
             }
 
-            private void onActionChange(CycleButton<StationAction> btn, StationAction action)
-            {
-                if (action == StationAction.UNLOAD)
-                {
+            private void onActionChange(CycleButton<StationAction> btn, StationAction action) {
+                if (action == StationAction.UNLOAD) {
                     useFilter = false;
                     filterSlot.setFilter(ItemStack.EMPTY);
                 }
             }
 
-            private void onCheckFilterToggle(Button btn)
-            {
+            private void onCheckFilterToggle(Button btn) {
                 useFilter = !useFilter;
-                if (!useFilter)
-                {
+                if (!useFilter) {
                     filterSlot.setFilter(ItemStack.EMPTY);
                 }
             }
 
-            private void onCheckCountToggle(Button btn)
-            {
+            private void onCheckCountToggle(Button btn) {
                 useCount = !useCount;
-                if (!useCount)
-                {
+                if (!useCount) {
                     boxCount.setEmpty();
                 }
             }
 
-            private void edit(Button btn)
-            {
+            private void edit(Button btn) {
                 mutable = true;
             }
 
-            private void save(Button btn)
-            {
+            private void save(Button btn) {
                 mutable = false;
 
                 String station = boxStation.getValue();
                 StationType type = owner.stations.get(station);
                 Optional<ItemStack> filter = Optional.empty();
-                if (buttonAction.getValue() == StationAction.LOAD && useFilter)
-                {
+                if (buttonAction.getValue() == StationAction.LOAD && useFilter) {
                     filter = Optional.of(filterSlot.getFilter());
                 }
                 OptionalInt count = OptionalInt.empty();
-                if (type == StationType.LOADER && useCount)
-                {
+                if (type == StationType.LOADER && useCount) {
                     count = OptionalInt.of(boxCount.getValue());
                 }
                 entry = new Schedule.Entry(entry.uuid(), station, type, buttonAction.getValue(), filter, count);
@@ -706,8 +614,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
                 ClientPacketDistributor.sendToServer(new ServerboundEditScheduleEntryPayload(owner.cart.getId(), idx, entry));
             }
 
-            private void delete(Button btn)
-            {
+            private void delete(Button btn) {
                 list().removeEntry(this);
 
                 int idx = list().children().indexOf(this);
@@ -715,15 +622,13 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
             }
 
             @SuppressWarnings("deprecation")
-            private ScheduleList list()
-            {
+            private ScheduleList list() {
                 return (ScheduleList) list;
             }
         }
     }
 
-    public enum EntryValidity
-    {
+    public enum EntryValidity {
         VALID,
         INVALID_STATION,
         LOADER_FILTER_EMPTY,
@@ -733,8 +638,7 @@ public final class OverheadCartScreen extends AbstractContainerScreen<OverheadCa
                 "msg.foup.overhead_cart.schedule.error." + toString().toLowerCase(Locale.ROOT)
         );
 
-        public Component getDescription()
-        {
+        public Component getDescription() {
             return description;
         }
     }

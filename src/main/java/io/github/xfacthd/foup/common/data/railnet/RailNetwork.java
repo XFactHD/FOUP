@@ -20,85 +20,68 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public final class RailNetwork implements Mergeable<RailNetwork>
-{
+public final class RailNetwork implements Mergeable<RailNetwork> {
     private final ServerLevel level;
     private final Map<String, TrackNode> stations = new HashMap<>();
     private final Long2ObjectMap<TrackNode> nodes = new Long2ObjectOpenHashMap<>();
     private final ReferenceSet<TrackPath> activePaths = new ReferenceOpenHashSet<>();
     private long id;
 
-    RailNetwork(ServerLevel level)
-    {
+    RailNetwork(ServerLevel level) {
         this.level = level;
         this.id = -1;
     }
 
-    private RailNetwork(ServerLevel level, long id, Long2ObjectMap<TrackNode> nodes, Map<String, TrackNode> stations)
-    {
+    private RailNetwork(ServerLevel level, long id, Long2ObjectMap<TrackNode> nodes, Map<String, TrackNode> stations) {
         this.level = level;
         this.id = id;
         this.nodes.putAll(nodes);
         this.stations.putAll(stations);
     }
 
-    ServerLevel getLevel()
-    {
+    ServerLevel getLevel() {
         return level;
     }
 
-    long getId()
-    {
+    long getId() {
         return id;
     }
 
-    void setId(long id)
-    {
+    void setId(long id) {
         Preconditions.checkState(this.id == -1, "Can't assign ID to network with existing ID");
         this.id = id;
     }
 
-    void addNode(TrackNode node)
-    {
+    void addNode(TrackNode node) {
         nodes.put(node.getPos().asLong(), node);
-        if (node.isStation() && !node.getName().isBlank())
-        {
+        if (node.isStation() && !node.getName().isBlank()) {
             stations.put(node.getName(), node);
         }
         invalidatePaths();
     }
 
-    void removeNode(TrackNode node)
-    {
+    void removeNode(TrackNode node) {
         nodes.remove(node.getPos().asLong());
-        if (node.isStation())
-        {
+        if (node.isStation()) {
             stations.remove(node.getName());
         }
         invalidatePaths();
     }
 
-    @Nullable
-    public TrackNode getNode(BlockPos pos)
-    {
+    public @Nullable TrackNode getNode(BlockPos pos) {
         return getNode(pos.asLong());
     }
 
-    @Nullable
     @SuppressWarnings("DataFlowIssue")
-    public TrackNode getNode(long pos)
-    {
+    public @Nullable TrackNode getNode(long pos) {
         return nodes.get(pos);
     }
 
-    @Nullable
-    public TrackNode getStation(String name)
-    {
+    public @Nullable TrackNode getStation(String name) {
         return stations.get(name);
     }
 
-    public Map<String, StationType> getStations()
-    {
+    public Map<String, StationType> getStations() {
         return stations.entrySet()
                 .stream()
                 .map(e -> Pair.of(
@@ -108,48 +91,43 @@ public final class RailNetwork implements Mergeable<RailNetwork>
                 .collect(Pair.toMap());
     }
 
-    public Collection<TrackNode> getStationNodes()
-    {
+    public Collection<TrackNode> getStationNodes() {
         return stations.values();
     }
 
-    void addStation(String name, TrackNode node)
-    {
+    void addStation(String name, TrackNode node) {
         stations.put(name, node);
     }
 
-    void removeStation(String name)
-    {
+    void removeStation(String name) {
         stations.remove(name);
     }
 
-    RenameResult isAvailableStationName(String name)
-    {
-        if (!isValidStationName(name)) return RenameResult.NAME_INVALID;
-        if (stations.containsKey(name)) return RenameResult.NAME_TAKEN;
+    RenameResult isAvailableStationName(String name) {
+        if (!isValidStationName(name)) {
+            return RenameResult.NAME_INVALID;
+        }
+        if (stations.containsKey(name)) {
+            return RenameResult.NAME_TAKEN;
+        }
         return RenameResult.SUCCESS;
     }
 
-    public static boolean isValidStationName(String name)
-    {
+    public static boolean isValidStationName(String name) {
         return !name.isBlank();
     }
 
-    public void registerPath(TrackPath path)
-    {
+    public void registerPath(TrackPath path) {
         activePaths.add(path);
     }
 
-    public void removePath(TrackPath path)
-    {
+    public void removePath(TrackPath path) {
         activePaths.remove(path);
     }
 
     // TODO: separate into path invalidation and schedule invalidation (latter mainly for station name and link changes)
-    void invalidatePaths()
-    {
-        if (!activePaths.isEmpty())
-        {
+    void invalidatePaths() {
+        if (!activePaths.isEmpty()) {
             activePaths.forEach(TrackPath::invalidate);
             activePaths.clear();
         }
@@ -157,10 +135,8 @@ public final class RailNetwork implements Mergeable<RailNetwork>
     }
 
     @Override
-    public RailNetwork mergeWith(RailNetwork other)
-    {
-        if (!TrackNode.inhibitDataAccess)
-        {
+    public RailNetwork mergeWith(RailNetwork other) {
+        if (!TrackNode.inhibitDataAccess) {
             // Must happen here because the graph where other comes from is never cleared
             // and therefor not caught by the removal through TrackNode#setGraph()
             RailNetworkSavedData.get(level).removeNetwork(other.id);
@@ -174,8 +150,7 @@ public final class RailNetwork implements Mergeable<RailNetwork>
     }
 
     @Override
-    public RailNetwork copy()
-    {
+    public RailNetwork copy() {
         return new RailNetwork(level, -1, Long2ObjectMaps.emptyMap(), Map.of());
     }
 }

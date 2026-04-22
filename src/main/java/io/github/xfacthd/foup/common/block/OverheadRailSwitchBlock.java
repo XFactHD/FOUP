@@ -18,13 +18,11 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.function.Predicate;
 
-public final class OverheadRailSwitchBlock extends AbstractOverheadRailBlock
-{
+public final class OverheadRailSwitchBlock extends AbstractOverheadRailBlock {
     private static final VoxelShape SHAPE = ShapeUtils.orUnoptimized(box(3, 9, 0, 13, 16, 16), box(0, 9, 3, 13, 16, 13));
     private static final VoxelShape[] SHAPES = ShapeUtils.makeHorizontalRotations(SHAPE, Direction.NORTH);
 
-    public OverheadRailSwitchBlock(Properties props)
-    {
+    public OverheadRailSwitchBlock(Properties props) {
         super(props, RailType.SWITCH);
         registerDefaultState(defaultBlockState()
                 .setValue(PropertyHolder.RIGHT, false)
@@ -33,17 +31,14 @@ public final class OverheadRailSwitchBlock extends AbstractOverheadRailBlock
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
-    {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(PropertyHolder.FACING_HOR, PropertyHolder.RIGHT, PropertyHolder.OUTWARD);
     }
 
     // FIXME: all orientations must be tested in case all three legs can connect in one of them
     // FIXME: a third leg being present must force the outward flag to the correct value
     @Override
-    @Nullable
-    public BlockState getStateForPlacement(BlockPlaceContext ctx, boolean simulate)
-    {
+    public @Nullable BlockState getStateForPlacement(BlockPlaceContext ctx, boolean simulate) {
         Level level = ctx.getLevel();
         BlockPos pos = ctx.getClickedPos();
         Direction face = ctx.getClickedFace();
@@ -54,21 +49,15 @@ public final class OverheadRailSwitchBlock extends AbstractOverheadRailBlock
         Connection adjEntry = findConnectionTowardsEntry(level, pos, localEntry);
 
         Direction dir;
-        if (adjExit != null && !adjExit.entry())
-        {
+        if (adjExit != null && !adjExit.entry()) {
             dir = adjExit.dir().getOpposite();
-            if (adjEntry != null && !adjEntry.entry())
-            {
+            if (adjEntry != null && !adjEntry.entry()) {
                 // TODO: message
                 return null;
             }
-        }
-        else if (adjEntry != null)
-        {
+        } else if (adjEntry != null) {
             dir = adjEntry.dir();
-        }
-        else
-        {
+        } else {
             dir = ctx.getHorizontalDirection();
         }
 
@@ -76,25 +65,17 @@ public final class OverheadRailSwitchBlock extends AbstractOverheadRailBlock
         Connection secAdjCon = outward ? findConnectionTowardsEntry(level, pos, localCon) : findConnectionTowardsExit(level, pos, localCon);
 
         boolean right;
-        if (secAdjCon != null)
-        {
-            if (secAdjCon.entry() != outward)
-            {
+        if (secAdjCon != null) {
+            if (secAdjCon.entry() != outward) {
                 // TODO: message
                 return null;
             }
             right = secAdjCon.dir() == dir.getClockWise();
-        }
-        else if (face == dir.getClockWise())
-        {
+        } else if (face == dir.getClockWise()) {
             right = true;
-        }
-        else if (face == dir.getCounterClockWise())
-        {
+        } else if (face == dir.getCounterClockWise()) {
             right = false;
-        }
-        else
-        {
+        } else {
             right = Utils.fractionInDir(ctx.getClickLocation(), dir.getClockWise()) > .5;
         }
 
@@ -104,26 +85,21 @@ public final class OverheadRailSwitchBlock extends AbstractOverheadRailBlock
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context)
-    {
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         Direction dir = state.getValue(PropertyHolder.FACING_HOR);
-        if (state.getValue(PropertyHolder.RIGHT))
-        {
+        if (state.getValue(PropertyHolder.RIGHT)) {
             dir = dir.getOpposite();
         }
         return SHAPES[dir.get2DDataValue()];
     }
 
     @Override
-    public boolean isEntrySide(BlockState state, Direction side)
-    {
+    public boolean isEntrySide(BlockState state, Direction side) {
         Direction dir = state.getValue(PropertyHolder.FACING_HOR);
-        if (side == dir.getOpposite())
-        {
+        if (side == dir.getOpposite()) {
             return true;
         }
-        if (!state.getValue(PropertyHolder.OUTWARD))
-        {
+        if (!state.getValue(PropertyHolder.OUTWARD)) {
             boolean right = state.getValue(PropertyHolder.RIGHT);
             return right ? side == dir.getClockWise() : side == dir.getCounterClockWise();
         }
@@ -131,15 +107,12 @@ public final class OverheadRailSwitchBlock extends AbstractOverheadRailBlock
     }
 
     @Override
-    public boolean isExitSide(BlockState state, Direction side)
-    {
+    public boolean isExitSide(BlockState state, Direction side) {
         Direction dir = state.getValue(PropertyHolder.FACING_HOR);
-        if (side == dir)
-        {
+        if (side == dir) {
             return true;
         }
-        if (state.getValue(PropertyHolder.OUTWARD))
-        {
+        if (state.getValue(PropertyHolder.OUTWARD)) {
             boolean right = state.getValue(PropertyHolder.RIGHT);
             return right ? side == dir.getClockWise() : side == dir.getCounterClockWise();
         }

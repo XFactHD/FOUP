@@ -17,12 +17,10 @@ import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundStop
 import io.github.xfacthd.foup.common.network.payload.serverbound.ServerboundToggleLoaderAutoEjectPayload;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
-public final class NetworkSetup
-{
+public final class NetworkSetup {
     private static final String NET_VERSION = "1";
 
-    public static void onRegisterPayloadHandlers(RegisterPayloadHandlersEvent event)
-    {
+    public static void onRegisterPayloadHandlers(RegisterPayloadHandlersEvent event) {
         event.registrar(NET_VERSION)
                 .playToClient(
                         ClientboundRailNetworkDebugDataPayload.TYPE,

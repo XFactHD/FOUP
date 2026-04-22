@@ -19,16 +19,13 @@ import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 
-public final class FoupLanguageProvider extends LanguageProvider
-{
-    public FoupLanguageProvider(PackOutput output)
-    {
+public final class FoupLanguageProvider extends LanguageProvider {
+    public FoupLanguageProvider(PackOutput output) {
         super(output, Foup.MOD_ID, "en_us");
     }
 
     @Override
-    protected void addTranslations()
-    {
+    protected void addTranslations() {
         add(FoupContent.BLOCK_RAIL.value(), "Overhead Rail");
         add(FoupContent.BLOCK_RAIL_CURVE.value(), "Overhead Rail Curve");
         add(FoupContent.BLOCK_RAIL_SWITCH.value(), "Overhead Rail Switch");
@@ -121,15 +118,11 @@ public final class FoupLanguageProvider extends LanguageProvider
         add(FoupLoaderScreen.BUTTON_AUTO_EJECT, "Auto-eject");
     }
 
-    private void add(Component key, String value)
-    {
+    private void add(Component key, String value) {
         ComponentContents contents = key.getContents();
-        if (contents instanceof TranslatableContents translatable)
-        {
+        if (contents instanceof TranslatableContents translatable) {
             add(translatable.getKey(), value);
-        }
-        else
-        {
+        } else {
             add(key.getString(), value);
         }
     }

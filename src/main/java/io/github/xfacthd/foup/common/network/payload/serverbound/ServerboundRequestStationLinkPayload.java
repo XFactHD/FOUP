@@ -11,21 +11,17 @@ import net.minecraft.util.TriState;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record ServerboundRequestStationLinkPayload(BlockPos pos) implements CustomPacketPayload
-{
+public record ServerboundRequestStationLinkPayload(BlockPos pos) implements CustomPacketPayload {
     public static final Type<ServerboundRequestStationLinkPayload> TYPE = Utils.payloadType("request_station_link");
     public static final StreamCodec<ByteBuf, ServerboundRequestStationLinkPayload> STREAM_CODEC = BlockPos.STREAM_CODEC
             .map(ServerboundRequestStationLinkPayload::new, ServerboundRequestStationLinkPayload::pos);
 
     @SuppressWarnings("deprecation")
-    public void handle(IPayloadContext ctx)
-    {
+    public void handle(IPayloadContext ctx) {
         Level level = ctx.player().level();
         TriState result = TriState.FALSE;
-        if (level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity station)
-        {
-            if (station.isUsableByPlayer(ctx.player()) && ctx.player().mayBuild())
-            {
+        if (level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity station) {
+            if (station.isUsableByPlayer(ctx.player()) && ctx.player().mayBuild()) {
                 result = station.tryLink();
             }
         }
@@ -33,8 +29,7 @@ public record ServerboundRequestStationLinkPayload(BlockPos pos) implements Cust
     }
 
     @Override
-    public Type<ServerboundRequestStationLinkPayload> type()
-    {
+    public Type<ServerboundRequestStationLinkPayload> type() {
         return TYPE;
     }
 }

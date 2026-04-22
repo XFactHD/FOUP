@@ -16,8 +16,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class TrackNode implements GraphObject<RailNetwork>
-{
+public final class TrackNode implements GraphObject<RailNetwork> {
     static final MapCodec<TrackNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Codec.STRING.fieldOf("name").forGetter(TrackNode::getName),
             BlockPos.CODEC.fieldOf("pos").forGetter(TrackNode::getPos),
@@ -40,18 +39,15 @@ public final class TrackNode implements GraphObject<RailNetwork>
     @Nullable
     private AbstractOverheadRailBlockEntity blockEntity = null;
 
-    private static TrackNode of(String name, BlockPos pos, boolean station, Optional<StationType> stationType, boolean occupied)
-    {
+    private static TrackNode of(String name, BlockPos pos, boolean station, Optional<StationType> stationType, boolean occupied) {
         return new TrackNode(name, pos, station, stationType.orElse(null), occupied);
     }
 
-    public TrackNode(String name, BlockPos pos, boolean station)
-    {
+    public TrackNode(String name, BlockPos pos, boolean station) {
         this(name, pos, station, null, false);
     }
 
-    TrackNode(String name, BlockPos pos, boolean station, @Nullable StationType stationType, boolean occupied)
-    {
+    TrackNode(String name, BlockPos pos, boolean station, @Nullable StationType stationType, boolean occupied) {
         this.name = name;
         this.pos = pos;
         this.station = station;
@@ -59,128 +55,101 @@ public final class TrackNode implements GraphObject<RailNetwork>
         this.occupied = occupied;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    void setName(String name)
-    {
+    void setName(String name) {
         this.name = name;
         saveAndDebugSync();
     }
 
-    public BlockPos getPos()
-    {
+    public BlockPos getPos() {
         return pos;
     }
 
-    public boolean isStation()
-    {
+    public boolean isStation() {
         return station;
     }
 
-    @Nullable
-    public StationType getStationType()
-    {
+    public @Nullable StationType getStationType() {
         return stationType;
     }
 
-    public void setLinkedStationType(@Nullable StationType stationType)
-    {
+    public void setLinkedStationType(@Nullable StationType stationType) {
         this.stationType = stationType;
         getNetwork().invalidatePaths();
         saveAndDebugSync();
     }
 
-    public boolean isOccupied()
-    {
+    public boolean isOccupied() {
         return occupied;
     }
 
-    public void setOccupied(boolean occupied)
-    {
+    public void setOccupied(boolean occupied) {
         this.occupied = occupied;
         saveAndDebugSync();
     }
 
-    public boolean isAccessible()
-    {
+    public boolean isAccessible() {
         return !station || blockEntity != null;
     }
 
-    public int getPathingCost()
-    {
+    public int getPathingCost() {
         return station ? 5 : 1;
     }
 
-    public boolean isInvalid()
-    {
+    public boolean isInvalid() {
         return graph == null;
     }
 
-    public void attach(AbstractOverheadRailBlockEntity blockEntity)
-    {
+    public void attach(AbstractOverheadRailBlockEntity blockEntity) {
         this.blockEntity = blockEntity;
     }
 
-    public void detach()
-    {
+    public void detach() {
         this.blockEntity = null;
     }
 
-    @Nullable
-    public AbstractOverheadRailBlockEntity getOwner()
-    {
+    public @Nullable AbstractOverheadRailBlockEntity getOwner() {
         return blockEntity;
     }
 
-    public RailNetwork getNetwork()
-    {
+    public RailNetwork getNetwork() {
         return Objects.requireNonNull(graph).getContextData();
     }
 
-    public void notifyArrival(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
-    {
-        if (blockEntity != null)
-        {
+    public void notifyArrival(OverheadCartEntity cart, Schedule.Entry scheduleEntry) {
+        if (blockEntity != null) {
             blockEntity.notifyArrival(cart, scheduleEntry);
         }
     }
 
-    private void saveAndDebugSync()
-    {
+    private void saveAndDebugSync() {
         RailNetwork network = getNetwork();
         RailNetworkSavedData.get(network.getLevel()).setDirty();
         RailNetworkDebugPayloads.sendImmediateNetworkDebugUpdate(network.getLevel(), network.getId());
     }
 
     @Override
-    @Nullable
-    public Graph<RailNetwork> getGraph()
-    {
+    public @Nullable Graph<RailNetwork> getGraph() {
         return graph;
     }
 
     @Override
-    public void setGraph(@Nullable Graph<RailNetwork> graph)
-    {
+    public void setGraph(@Nullable Graph<RailNetwork> graph) {
         boolean graphChanged = ((this.graph == null) != (graph == null)) || (this.graph != graph);
-        if (this.graph != null && graphChanged)
-        {
+        if (this.graph != null && graphChanged) {
             this.graph.getContextData().removeNode(this);
-            if (!inhibitDataAccess)
-            {
+            if (!inhibitDataAccess) {
                 ServerLevel level = this.graph.getContextData().getLevel();
                 RailNetworkSavedData.get(level).tryRemoveNetwork(level, this.graph, this);
             }
         }
         this.graph = graph;
-        if (graph != null && graphChanged)
-        {
+        if (graph != null && graphChanged) {
             this.graph.getContextData().addNode(this);
-            if (!inhibitDataAccess)
-            {
+            if (!inhibitDataAccess) {
                 ServerLevel level = this.graph.getContextData().getLevel();
                 RailNetworkSavedData.get(level).tryAddNetwork(level, this.graph);
             }
@@ -188,8 +157,7 @@ public final class TrackNode implements GraphObject<RailNetwork>
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "TrackNode[" + name + "@(" + pos.toShortString() + ")]";
     }
 }

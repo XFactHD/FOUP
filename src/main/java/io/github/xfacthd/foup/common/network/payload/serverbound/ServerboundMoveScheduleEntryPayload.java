@@ -13,8 +13,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
 
-public record ServerboundMoveScheduleEntryPayload(int cartId, int idx, boolean down, UUID entryUid) implements CustomPacketPayload
-{
+public record ServerboundMoveScheduleEntryPayload(int cartId, int idx, boolean down, UUID entryUid) implements CustomPacketPayload {
     public static final Type<ServerboundMoveScheduleEntryPayload> TYPE = Utils.payloadType("move_schedule_entry");
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerboundMoveScheduleEntryPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT,
@@ -28,20 +27,16 @@ public record ServerboundMoveScheduleEntryPayload(int cartId, int idx, boolean d
             ServerboundMoveScheduleEntryPayload::new
     );
 
-    public void handle(IPayloadContext ctx)
-    {
-        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId && ctx.player().mayBuild())
-        {
-            if (!menu.getCart().getSchedule().moveEntry(idx, down, entryUid))
-            {
+    public void handle(IPayloadContext ctx) {
+        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId && ctx.player().mayBuild()) {
+            if (!menu.getCart().getSchedule().moveEntry(idx, down, entryUid)) {
                 ctx.reply(ClientboundRefreshStaleSchedulePayload.of(menu.getCart(), Schedule.RejectedAction.MOVE));
             }
         }
     }
 
     @Override
-    public Type<ServerboundMoveScheduleEntryPayload> type()
-    {
+    public Type<ServerboundMoveScheduleEntryPayload> type() {
         return TYPE;
     }
 }

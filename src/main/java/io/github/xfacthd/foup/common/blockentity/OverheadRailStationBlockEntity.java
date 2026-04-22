@@ -25,8 +25,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
-public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBlockEntity
-{
+public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBlockEntity {
     private static final int MAX_HEIGHT_DIFF = 6;
 
     private String name;
@@ -38,63 +37,50 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     private StationType linkedType;
     private boolean aboutToBeDestroyed = false;
 
-    public OverheadRailStationBlockEntity(BlockPos pos, BlockState state)
-    {
+    public OverheadRailStationBlockEntity(BlockPos pos, BlockState state) {
         super(FoupContent.BE_TYPE_RAIL_STATION.value(), pos, state);
         this.name = "(" + pos.toShortString() + ")";
     }
 
     @Override
-    public void notifyArrival(OverheadCartEntity cart, Schedule.Entry scheduleEntry)
-    {
+    public void notifyArrival(OverheadCartEntity cart, Schedule.Entry scheduleEntry) {
         AbstractCartInteractorBlockEntity linked = getLinkedBlock();
-        if (linked != null)
-        {
+        if (linked != null) {
             linked.notifyArrival(cart, scheduleEntry);
         }
     }
 
-    @Nullable
-    public AbstractCartInteractorBlockEntity getLinkedBlock()
-    {
-        if (linkedBlock == null && linkedPos != null)
-        {
+    public @Nullable AbstractCartInteractorBlockEntity getLinkedBlock() {
+        if (linkedBlock == null && linkedPos != null) {
             //noinspection ConstantConditions
             linkedBlock = level().getBlockEntity(linkedPos) instanceof AbstractCartInteractorBlockEntity be ? be : null;
-            if (linkedBlock == null)
-            {
+            if (linkedBlock == null) {
                 clearLinkedBlock();
             }
         }
-        if (linkedBlock != null && linkedBlock.isRemoved())
-        {
+        if (linkedBlock != null && linkedBlock.isRemoved()) {
             clearLinkedBlock();
         }
         return linkedBlock;
     }
 
-    private void clearLinkedBlock()
-    {
+    private void clearLinkedBlock() {
         linkedBlock = null;
         linkedPos = null;
         linkedType = null;
         Objects.requireNonNull(getTrackNode()).setLinkedStationType(null);
-        if (!aboutToBeDestroyed)
-        {
+        if (!aboutToBeDestroyed) {
             level().setBlockAndUpdate(worldPosition, getBlockState().setValue(PropertyHolder.LINKED, false));
             sendUpdatePacket();
         }
         setChangedWithoutSignalUpdate();
     }
 
-    public RenameResult setName(String name)
-    {
+    public RenameResult setName(String name) {
         TrackNode node = getTrackNode();
-        if (node != null && level instanceof ServerLevel serverLevel)
-        {
+        if (node != null && level instanceof ServerLevel serverLevel) {
             RenameResult result = RailNetworkSavedData.setStationName(serverLevel, node, name);
-            if (result == RenameResult.SUCCESS)
-            {
+            if (result == RenameResult.SUCCESS) {
                 this.name = name;
                 setChangedWithoutSignalUpdate();
                 sendUpdatePacket();
@@ -105,43 +91,36 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
     @Override
-    protected boolean isStation()
-    {
+    protected boolean isStation() {
         return true;
     }
 
-    @Nullable
-    public StationType getLinkedType()
-    {
+    public @Nullable StationType getLinkedType() {
         return linkedType;
     }
 
     @Override
-    public int getStationHeightDifference()
-    {
-        if (linkedPos != null)
-        {
+    public int getStationHeightDifference() {
+        if (linkedPos != null) {
             return worldPosition.getY() - linkedPos.getY() - 1;
         }
         return -1;
     }
 
-    public TriState tryLink()
-    {
-        if (getLinkedBlock() != null) return TriState.DEFAULT;
+    public TriState tryLink() {
+        if (getLinkedBlock() != null) {
+            return TriState.DEFAULT;
+        }
 
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        for (int i = 2; i <= MAX_HEIGHT_DIFF; i++)
-        {
+        for (int i = 2; i <= MAX_HEIGHT_DIFF; i++) {
             pos.setWithOffset(worldPosition, 0, -i, 0);
-            if (level().getBlockEntity(pos) instanceof AbstractCartInteractorBlockEntity be)
-            {
+            if (level().getBlockEntity(pos) instanceof AbstractCartInteractorBlockEntity be) {
                 linkedPos = pos.immutable();
                 linkedBlock = be;
                 linkedType = be.getStationType();
@@ -157,41 +136,34 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
         return TriState.FALSE;
     }
 
-    public void unlink(boolean destroy)
-    {
+    public void unlink(boolean destroy) {
         aboutToBeDestroyed = destroy;
         AbstractCartInteractorBlockEntity linked = getLinkedBlock();
-        if (linked != null)
-        {
+        if (linked != null) {
             linked.clearLink();
             clearLinkedBlock();
         }
     }
 
     @Override
-    protected void postProcessNewNode(TrackNode node)
-    {
-        if (linkedType != null)
-        {
+    protected void postProcessNewNode(TrackNode node) {
+        if (linkedType != null) {
             node.setLinkedStationType(linkedType);
         }
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getUpdatePacket()
-    {
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
-    public void onDataPacket(Connection net, ValueInput valueInput)
-    {
+    public void onDataPacket(Connection net, ValueInput valueInput) {
         handleUpdateTag(valueInput);
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
-    {
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
         tag.putString("name", name);
         tag.putInt("linked_type", linkedType != null ? linkedType.ordinal() : -1);
@@ -199,15 +171,13 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     }
 
     @Override
-    public void handleUpdateTag(ValueInput valueInput)
-    {
+    public void handleUpdateTag(ValueInput valueInput) {
         name = valueInput.getStringOr("name", "");
         linkedType = StationType.byId(valueInput.getIntOr("linked_type", -1));
     }
 
     @Override
-    protected void loadAdditional(ValueInput valueInput)
-    {
+    protected void loadAdditional(ValueInput valueInput) {
         super.loadAdditional(valueInput);
         name = valueInput.getStringOr("name", "");
         linkedPos = valueInput.read("linked_pos", FoupCodecs.POS_AS_LONG).orElse(null);
@@ -215,8 +185,7 @@ public final class OverheadRailStationBlockEntity extends AbstractOverheadRailBl
     }
 
     @Override
-    protected void saveAdditional(ValueOutput valueOutput)
-    {
+    protected void saveAdditional(ValueOutput valueOutput) {
         super.saveAdditional(valueOutput);
         valueOutput.putString("name", name);
         valueOutput.storeNullable("linked_pos", FoupCodecs.POS_AS_LONG, linkedPos);

@@ -13,8 +13,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
 
-public record ServerboundDeleteScheduleEntryPayload(int cartId, int idx, UUID entryUid) implements CustomPacketPayload
-{
+public record ServerboundDeleteScheduleEntryPayload(int cartId, int idx, UUID entryUid) implements CustomPacketPayload {
     public static final Type<ServerboundDeleteScheduleEntryPayload> TYPE = Utils.payloadType("delete_schedule_entry");
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerboundDeleteScheduleEntryPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT,
@@ -26,20 +25,16 @@ public record ServerboundDeleteScheduleEntryPayload(int cartId, int idx, UUID en
             ServerboundDeleteScheduleEntryPayload::new
     );
 
-    public void handle(IPayloadContext ctx)
-    {
-        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId && ctx.player().mayBuild())
-        {
-            if (!menu.getCart().getSchedule().removeEntry(idx, entryUid))
-            {
+    public void handle(IPayloadContext ctx) {
+        if (ctx.player().containerMenu instanceof OverheadCartMenu menu && menu.getCart().getId() == cartId && ctx.player().mayBuild()) {
+            if (!menu.getCart().getSchedule().removeEntry(idx, entryUid)) {
                 ctx.reply(ClientboundRefreshStaleSchedulePayload.of(menu.getCart(), Schedule.RejectedAction.DELETE));
             }
         }
     }
 
     @Override
-    public Type<ServerboundDeleteScheduleEntryPayload> type()
-    {
+    public Type<ServerboundDeleteScheduleEntryPayload> type() {
         return TYPE;
     }
 }

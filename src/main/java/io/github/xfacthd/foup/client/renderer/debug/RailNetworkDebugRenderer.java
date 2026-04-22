@@ -34,40 +34,38 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-public final class RailNetworkDebugRenderer
-{
+public final class RailNetworkDebugRenderer {
     private static final Long2ObjectMap<RailNetworkDebugData> DEBUG_DATA = new Long2ObjectOpenHashMap<>();
     private static final Function<@Nullable StationType, @Nullable Component> STATION_FORMATTER = stationType ->
             Component.literal(stationType != null ? stationType.name() : "NULL");
     private static final ContextKey<List<RailNetworkDebugRenderState>> DATA_KEY = new ContextKey<>(Utils.rl("rail_net_debug_renderer"));
 
-    public static void onExtractRenderState(ExtractLevelRenderStateEvent event)
-    {
-        if (DEBUG_DATA.isEmpty()) return;
+    public static void onExtractRenderState(ExtractLevelRenderStateEvent event) {
+        if (DEBUG_DATA.isEmpty()) {
+            return;
+        }
 
         List<RailNetworkDebugRenderState> renderStates = new ArrayList<>();
         boolean showNetId = Objects.requireNonNull(Minecraft.getInstance().player).isShiftKeyDown();
-        for (Long2ObjectMap.Entry<RailNetworkDebugData> entry : DEBUG_DATA.long2ObjectEntrySet())
-        {
+        for (Long2ObjectMap.Entry<RailNetworkDebugData> entry : DEBUG_DATA.long2ObjectEntrySet()) {
             renderStates.add(new RailNetworkDebugRenderState(entry.getLongKey(), entry.getValue(), showNetId));
         }
-        if (!renderStates.isEmpty())
-        {
+        if (!renderStates.isEmpty()) {
             event.getRenderState().setRenderData(DATA_KEY, renderStates);
         }
     }
 
-    public static void onRenderLevelStage(RenderLevelStageEvent.AfterTranslucentParticles event)
-    {
+    public static void onRenderLevelStage(RenderLevelStageEvent.AfterTranslucentParticles event) {
         List<RailNetworkDebugRenderState> renderStates = event.getLevelRenderState().getRenderData(DATA_KEY);
-        if (renderStates == null) return;
+        if (renderStates == null) {
+            return;
+        }
 
         RenderSystem.pushPipelineModifier(PipelineModifiers.NO_DEPTH_TEST);
         MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
         CameraRenderState camera = event.getLevelRenderState().cameraRenderState;
         Font font = Minecraft.getInstance().font;
-        for (RailNetworkDebugRenderState renderState : renderStates)
-        {
+        for (RailNetworkDebugRenderState renderState : renderStates) {
             renderNetwork(renderState, buffer, event.getPoseStack(), camera, font);
         }
         buffer.endBatch(ClientUtils.INFO_QUADS);
@@ -75,11 +73,9 @@ public final class RailNetworkDebugRenderer
         RenderSystem.popPipelineModifier();
     }
 
-    private static void renderNetwork(RailNetworkDebugRenderState renderState, MultiBufferSource.BufferSource buffer, PoseStack poseStack, CameraRenderState camera, Font font)
-    {
+    private static void renderNetwork(RailNetworkDebugRenderState renderState, MultiBufferSource.BufferSource buffer, PoseStack poseStack, CameraRenderState camera, Font font) {
         VertexConsumer builder = buffer.getBuffer(ClientUtils.INFO_QUADS);
-        for (RailNetworkDebugData.Node node : renderState.data.nodes())
-        {
+        for (RailNetworkDebugData.Node node : renderState.data.nodes()) {
             poseStack.pushPose();
 
             Vec3 offset = Vec3.atCenterOf(node.pos()).add(0, .25, 0).subtract(camera.pos);
@@ -92,20 +88,15 @@ public final class RailNetworkDebugRenderer
             builder.addVertex(pose,  .15F, 0,  .15F).setColor(color);
             builder.addVertex(pose,  .15F, 0, -.15F).setColor(color);
 
-            if (renderState.showNetId)
-            {
+            if (renderState.showNetId) {
                 renderNetworkId(buffer, poseStack, camera, font, renderState.netId);
             }
 
-            for (BlockPos neighbour : node.neighbours())
-            {
+            for (BlockPos neighbour : node.neighbours()) {
                 Direction dir = Utils.getDirByNormal(node.pos(), neighbour);
-                if (dir != null)
-                {
+                if (dir != null) {
                     OverheadRailInfoRenderer.renderArrow(poseStack, builder, dir, .15F, true);
-                }
-                else
-                {
+                } else {
                     Vec3 diff = Vec3.atCenterOf(neighbour).subtract(Vec3.atCenterOf(node.pos())).normalize();
                     double angle = Math.atan2(diff.z, diff.x) - Math.toRadians(90F);
                     Quaternionfc yRot = Axis.YN.rotation((float) angle);
@@ -113,8 +104,7 @@ public final class RailNetworkDebugRenderer
                 }
             }
 
-            if (node.stationName().isPresent())
-            {
+            if (node.stationName().isPresent()) {
                 OverheadRailInfoRenderer.renderStationInfo(
                         poseStack, camera, buffer, font, node.stationName().get(), node.stationType().orElse(null), STATION_FORMATTER
                 );
@@ -124,15 +114,14 @@ public final class RailNetworkDebugRenderer
         }
     }
 
-    private static void renderNetworkId(MultiBufferSource.BufferSource buffer, PoseStack poseStack, CameraRenderState camera, Font font, long netId)
-    {
+    private static void renderNetworkId(MultiBufferSource.BufferSource buffer, PoseStack poseStack, CameraRenderState camera, Font font, long netId) {
         poseStack.pushPose();
 
         poseStack.translate(0, 0, 0);
         poseStack.mulPose(camera.orientation);
         poseStack.mulPose(Axis.YP.rotationDegrees(180));
         poseStack.mulPose(Axis.ZN.rotationDegrees(180));
-        poseStack.scale(1F/40F, 1F/40F, 1);
+        poseStack.scale(1F / 40F, 1F / 40F, 1);
 
         String name = Long.toString(netId);
         Matrix4f pose = poseStack.last().pose();
@@ -141,25 +130,19 @@ public final class RailNetworkDebugRenderer
         poseStack.popPose();
     }
 
-    public static void handleData(long networkId, @Nullable RailNetworkDebugData data)
-    {
-        if (data != null)
-        {
+    public static void handleData(long networkId, @Nullable RailNetworkDebugData data) {
+        if (data != null) {
             DEBUG_DATA.put(networkId, data);
-        }
-        else
-        {
+        } else {
             DEBUG_DATA.remove(networkId);
         }
     }
 
-    public static void clearData()
-    {
+    public static void clearData() {
         DEBUG_DATA.clear();
     }
 
-    public static void onPlayerDisconnect(@SuppressWarnings("unused") ClientPlayerNetworkEvent.LoggingOut event)
-    {
+    public static void onPlayerDisconnect(@SuppressWarnings("unused") ClientPlayerNetworkEvent.LoggingOut event) {
         DEBUG_DATA.clear();
     }
 

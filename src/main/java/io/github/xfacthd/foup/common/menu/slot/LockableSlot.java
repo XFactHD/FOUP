@@ -7,32 +7,27 @@ import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 import java.util.function.IntPredicate;
 
-public final class LockableSlot extends ResourceHandlerSlot
-{
+public final class LockableSlot extends ResourceHandlerSlot {
     private final int index;
     private final IntPredicate isLocked;
 
-    public LockableSlot(ItemStacksResourceHandler itemHandler, int index, int xPosition, int yPosition, IntPredicate isLocked)
-    {
+    public LockableSlot(ItemStacksResourceHandler itemHandler, int index, int xPosition, int yPosition, IntPredicate isLocked) {
         super(itemHandler, itemHandler::set, index, xPosition, yPosition);
         this.index = index;
         this.isLocked = isLocked;
     }
 
     @Override
-    public boolean mayPickup(Player player)
-    {
+    public boolean mayPickup(Player player) {
         return !isLocked() && super.mayPickup(player);
     }
 
     @Override
-    public boolean mayPlace(ItemStack stack)
-    {
+    public boolean mayPlace(ItemStack stack) {
         return !isLocked() && super.mayPlace(stack);
     }
 
-    public boolean isLocked()
-    {
+    public boolean isLocked() {
         return isLocked.test(index);
     }
 }

@@ -15,8 +15,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public enum StationType implements StringRepresentable
-{
+public enum StationType implements StringRepresentable {
     UNKNOWN,
     LOADER,
     STORAGE,
@@ -33,26 +32,20 @@ public enum StationType implements StringRepresentable
     private final String name = toString().toLowerCase(Locale.ROOT);
     private final Component translation = Component.translatable("desc.foup.station_type." + name);
 
-    public Component getTranslation()
-    {
+    public Component getTranslation() {
         return translation;
     }
 
     @Override
-    public String getSerializedName()
-    {
+    public String getSerializedName() {
         return name;
     }
 
-    @Nullable
-    public static StationType byName(String name)
-    {
+    public @Nullable static StationType byName(String name) {
         return LOOKUP.get(name);
     }
 
-    @Nullable
-    public static StationType byId(int id)
-    {
+    public @Nullable static StationType byId(int id) {
         return id >= 0 && id < VALUES.length ? VALUES[id] : null;
     }
 }

@@ -13,8 +13,7 @@ import net.minecraft.world.item.component.TooltipProvider;
 
 import java.util.function.Consumer;
 
-public record ItemContents(ItemStack stack) implements TooltipProvider
-{
+public record ItemContents(ItemStack stack) implements TooltipProvider {
     public static final Codec<ItemContents> CODEC = ItemStack.OPTIONAL_CODEC.validate(FoupItem::validateCanPlaceInFoup)
             .xmap(ItemContents::new, ItemContents::stack);
     public static final StreamCodec<RegistryFriendlyByteBuf, ItemContents> STREAM_CODEC = ItemStack.OPTIONAL_STREAM_CODEC
@@ -22,25 +21,21 @@ public record ItemContents(ItemStack stack) implements TooltipProvider
     public static final ItemContents EMPTY = new ItemContents(ItemStack.EMPTY);
 
     @Override
-    public void addToTooltip(Item.TooltipContext ctx, Consumer<Component> tooltipAdder, TooltipFlag flag, DataComponentGetter componentGetter)
-    {
-        if (!stack.isEmpty())
-        {
+    public void addToTooltip(Item.TooltipContext ctx, Consumer<Component> tooltipAdder, TooltipFlag flag, DataComponentGetter componentGetter) {
+        if (!stack.isEmpty()) {
             tooltipAdder.accept(Component.translatable("desc.foup.component.item_contents.contents", stack.getCount(), stack.getHoverName()));
         }
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         return obj instanceof ItemContents(ItemStack otherStack) &&
                 ItemStack.isSameItemSameComponents(stack, otherStack) &&
                 otherStack.getCount() == stack.getCount();
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return ItemStack.hashItemAndComponents(stack) * 31 + stack.getCount();
     }
 }

@@ -14,13 +14,11 @@ import org.slf4j.Logger;
 
 @Mod(Foup.MOD_ID)
 @SuppressWarnings("UtilityClassWithPublicConstructor")
-public final class Foup
-{
+public final class Foup {
     public static final String MOD_ID = "foup";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public Foup(IEventBus modBus)
-    {
+    public Foup(IEventBus modBus) {
         FoupContent.init(modBus);
 
         modBus.addListener(NetworkSetup::onRegisterPayloadHandlers);
@@ -28,8 +26,7 @@ public final class Foup
 
         NeoForge.EVENT_BUS.addListener(FoupCommands::registerCommands);
 
-        if ((!FMLEnvironment.isProduction() || RailNetworkDebugPayloads.ENABLE_IN_PROD))
-        {
+        if ((!FMLEnvironment.isProduction() || RailNetworkDebugPayloads.ENABLE_IN_PROD)) {
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugPayloads::onServerTickEnd);
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugPayloads::onPlayerDisconnect);
         }

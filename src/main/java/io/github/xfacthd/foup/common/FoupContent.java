@@ -61,8 +61,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public final class FoupContent
-{
+public final class FoupContent {
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Foup.MOD_ID);
     private static final DeferredDataComponentTypeRegister DATA_COMPONENTS = DeferredDataComponentTypeRegister.create(Foup.MOD_ID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Foup.MOD_ID);
@@ -133,8 +132,7 @@ public final class FoupContent
     // region Creative Tabs
     public static final Holder<CreativeModeTab> TAB_MAIN = CREATIVE_TABS.register("main", () -> CreativeModeTab.builder()
             .title(Component.translatable("foup.itemGroup.main"))
-            .icon(() ->
-            {
+            .icon(() -> {
                 ItemStack stack = ITEM_CART.toStack();
                 stack.set(DC_TYPE_HELD_FOUP, HeldFoup.of(ItemStack.EMPTY));
                 return stack;
@@ -142,11 +140,9 @@ public final class FoupContent
             .displayItems((_, output) -> ITEMS.getEntries()
                     .stream()
                     .map(Holder::value)
-                    .mapMulti((Item item, Consumer<ItemStack> consumer) ->
-                    {
+                    .mapMulti((Item item, Consumer<ItemStack> consumer) -> {
                         consumer.accept(new ItemStack(item));
-                        if (item == ITEM_CART.value())
-                        {
+                        if (item == ITEM_CART.value()) {
                             ItemStack stack = new ItemStack(item);
                             stack.set(DC_TYPE_HELD_FOUP, HeldFoup.of(ItemStack.EMPTY));
                             consumer.accept(stack);
@@ -185,29 +181,25 @@ public final class FoupContent
             ENTITY_DATA_SERIALIZERS.register("cart_issue", () -> EntityDataSerializer.forValueType(OverheadCartIssue.STREAM_CODEC));
     // endregion
 
-    private static <T extends Block> DeferredBlock<T> registerBlock(String name, Function<BlockBehaviour.Properties, T> factory)
-    {
+    private static <T extends Block> DeferredBlock<T> registerBlock(String name, Function<BlockBehaviour.Properties, T> factory) {
         DeferredBlock<T> block = BLOCKS.registerBlock(name, factory);
         ITEMS.registerSimpleBlockItem(block);
         return block;
     }
 
     @SafeVarargs
-    private static <T extends BlockEntity>DeferredBlockEntity<T> registerBlockEntity(
+    private static <T extends BlockEntity> DeferredBlockEntity<T> registerBlockEntity(
             String name, BlockEntityType.BlockEntitySupplier<T> factory, Holder<Block>... blockHolders
-    )
-    {
+    ) {
         Supplier<Block[]> blocks = () -> Arrays.stream(blockHolders).map(Holder::value).toArray(Block[]::new);
         return BLOCK_ENTITIES.registerBlockEntity(name, factory, blocks);
     }
 
-    public static List<Block> getAllBlocks()
-    {
+    public static List<Block> getAllBlocks() {
         return BLOCKS.getEntries().stream().map(Holder::value).toList();
     }
 
-    public static void init(IEventBus modBus)
-    {
+    public static void init(IEventBus modBus) {
         BLOCKS.register(modBus);
         DATA_COMPONENTS.register(modBus);
         ITEMS.register(modBus);

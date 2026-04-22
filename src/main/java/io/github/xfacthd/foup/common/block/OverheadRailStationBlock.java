@@ -22,31 +22,25 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-public final class OverheadRailStationBlock extends OverheadRailBlock
-{
+public final class OverheadRailStationBlock extends OverheadRailBlock {
     public static final VoxelShape STATION_SHAPE_X = Shapes.or(SHAPE_X, box(0, 11, 0, 16, 16, 16));
     public static final VoxelShape STATION_SHAPE_Z = Shapes.or(SHAPE_Z, box(0, 11, 0, 16, 16, 16));
 
-    public OverheadRailStationBlock(Properties props)
-    {
+    public OverheadRailStationBlock(Properties props) {
         super(props, RailType.STATION);
         registerDefaultState(defaultBlockState().setValue(PropertyHolder.LINKED, false));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
-    {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(PropertyHolder.LINKED);
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
-    {
-        if (!player.getMainHandItem().is(FoupContent.ITEM_CART) && !player.getOffhandItem().is(FoupContent.ITEM_CART))
-        {
-            if (player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity)
-            {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (!player.getMainHandItem().is(FoupContent.ITEM_CART) && !player.getOffhandItem().is(FoupContent.ITEM_CART)) {
+            if (player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity) {
                 PacketDistributor.sendToPlayer(serverPlayer, new ClientboundOpenOverheadRailStationScreenPayload(pos));
             }
             return InteractionResult.SUCCESS;
@@ -55,17 +49,14 @@ public final class OverheadRailStationBlock extends OverheadRailBlock
     }
 
     @Override
-    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean moved)
-    {
-        if (level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity be)
-        {
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean moved) {
+        if (level.getBlockEntity(pos) instanceof OverheadRailStationBlockEntity be) {
             be.unlink(true);
         }
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context)
-    {
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return Utils.isX(state.getValue(PropertyHolder.FACING_HOR)) ? STATION_SHAPE_X : STATION_SHAPE_Z;
     }
 }

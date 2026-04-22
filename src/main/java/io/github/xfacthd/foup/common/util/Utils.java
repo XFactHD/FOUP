@@ -23,8 +23,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public final class Utils
-{
+public final class Utils {
     private static final Long2ObjectMap<@Nullable Direction> DIRECTION_BY_NORMAL = Arrays.stream(Direction.values())
             .collect(Collectors.toMap(
                     side -> new BlockPos(side.getUnitVec3i()).asLong(),
@@ -33,23 +32,19 @@ public final class Utils
                     Long2ObjectOpenHashMap::new
             ));
 
-    public static Identifier rl(String path)
-    {
+    public static Identifier rl(String path) {
         return Identifier.fromNamespaceAndPath(Foup.MOD_ID, path);
     }
 
-    public static Vec3 fraction(Vec3 vec)
-    {
+    public static Vec3 fraction(Vec3 vec) {
         return new Vec3(Mth.frac(vec.x()), Mth.frac(vec.y()), Mth.frac(vec.z()));
     }
 
     /**
      * Calculate how far into the block the coordinate of the given direction's axis points in the given direction
      */
-    public static double fractionInDir(Vec3 vec, Direction dir)
-    {
-        double coord = switch (dir.getAxis())
-        {
+    public static double fractionInDir(Vec3 vec, Direction dir) {
+        double coord = switch (dir.getAxis()) {
             case X -> vec.x;
             case Y -> vec.y;
             case Z -> vec.z;
@@ -58,49 +53,39 @@ public final class Utils
         return isPositive(dir) ? coord : (1D - coord);
     }
 
-    public static boolean isPositive(Direction dir)
-    {
+    public static boolean isPositive(Direction dir) {
         return dir.getAxisDirection() == Direction.AxisDirection.POSITIVE;
     }
 
-    public static boolean isX(Direction dir)
-    {
+    public static boolean isX(Direction dir) {
         return dir.getAxis() == Direction.Axis.X;
     }
 
-    public static boolean isY(Direction dir)
-    {
+    public static boolean isY(Direction dir) {
         return dir.getAxis() == Direction.Axis.Y;
     }
 
-    public static boolean isZ(Direction dir)
-    {
+    public static boolean isZ(Direction dir) {
         return dir.getAxis() == Direction.Axis.Z;
     }
 
-    @Nullable
-    public static Direction getDirByNormal(int x, int y, int z)
-    {
+    public static @Nullable Direction getDirByNormal(int x, int y, int z) {
         return DIRECTION_BY_NORMAL.get(BlockPos.asLong(x, y, z));
     }
 
-    @Nullable
-    public static Direction getDirByNormal(BlockPos from, BlockPos to)
-    {
+    public static @Nullable Direction getDirByNormal(BlockPos from, BlockPos to) {
         int nx = to.getX() - from.getX();
         int ny = to.getY() - from.getY();
         int nz = to.getZ() - from.getZ();
         return getDirByNormal(nx, ny, nz);
     }
 
-    public static Direction getDirByViewVec(Entity entity)
-    {
+    public static Direction getDirByViewVec(Entity entity) {
         Vec3 view = entity.getViewVector(1F);
         return Direction.getApproximateNearest(view);
     }
 
-    public static Vec3 setAlongAxis(Vec3 vec, double value, Direction dir)
-    {
+    public static Vec3 setAlongAxis(Vec3 vec, double value, Direction dir) {
         Direction.Axis axis = dir.getAxis();
         Direction.Axis perpAxis = dir.getClockWise().getAxis();
         double x = axis.choose(value, 0, 0) + perpAxis.choose(vec.x, 0, 0);
@@ -108,46 +93,37 @@ public final class Utils
         return new Vec3(x, vec.y, z);
     }
 
-    public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> payloadType(String name)
-    {
+    public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> payloadType(String name) {
         return new CustomPacketPayload.Type<>(Utils.rl(name));
     }
 
-    public static int getMaxStackSize(ItemResource resource)
-    {
+    public static int getMaxStackSize(ItemResource resource) {
         return resource.isEmpty() ? Item.ABSOLUTE_MAX_STACK_SIZE : resource.getMaxStackSize();
     }
 
-    public static int getMaxStackSize(ItemStack stack)
-    {
+    public static int getMaxStackSize(ItemStack stack) {
         return stack.isEmpty() ? Item.ABSOLUTE_MAX_STACK_SIZE : stack.getMaxStackSize();
     }
 
-    public static void addPlayerInvSlots(Consumer<Slot> slotConsumer, Inventory playerInv, int x, int y)
-    {
+    public static void addPlayerInvSlots(Consumer<Slot> slotConsumer, Inventory playerInv, int x, int y) {
         addPlayerInvSlots(slotConsumer, playerInv, x, y, Slot::new);
     }
 
-    public static void addPlayerInvSlots(Consumer<Slot> slotConsumer, Inventory playerInv, int x, int y, SlotFactory factory)
-    {
-        for (int row = 0; row < 3; ++row)
-        {
-            for (int col = 0; col < 9; ++col)
-            {
+    public static void addPlayerInvSlots(Consumer<Slot> slotConsumer, Inventory playerInv, int x, int y, SlotFactory factory) {
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 9; ++col) {
                 slotConsumer.accept(factory.create(playerInv, col + row * 9 + 9, x + col * 18, y));
             }
             y += 18;
         }
 
-        for (int col = 0; col < 9; ++col)
-        {
+        for (int col = 0; col < 9; ++col) {
             slotConsumer.accept(factory.create(playerInv, col, x + col * 18, y + 4));
         }
     }
 
     @FunctionalInterface
-    public interface SlotFactory
-    {
+    public interface SlotFactory {
         Slot create(Container container, int slot, int x, int y);
     }
 

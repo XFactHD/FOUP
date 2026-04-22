@@ -4,8 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
-public record OverheadCartAction(OverheadCartState state, int duration, int heightDiff)
-{
+public record OverheadCartAction(OverheadCartState state, int duration, int heightDiff) {
     public static final StreamCodec<ByteBuf, OverheadCartAction> STREAM_CODEC = StreamCodec.composite(
             OverheadCartState.STREAM_CODEC,
             OverheadCartAction::state,

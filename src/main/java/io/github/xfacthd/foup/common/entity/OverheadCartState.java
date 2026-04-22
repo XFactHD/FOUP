@@ -9,8 +9,7 @@ import net.minecraft.util.ByIdMap;
 import java.util.Locale;
 import java.util.function.IntFunction;
 
-public enum OverheadCartState
-{
+public enum OverheadCartState {
     IDLE(false),
     MOVING(false),
     PARK_AFTER_ARRIVAL(false),
@@ -28,23 +27,19 @@ public enum OverheadCartState
     private final Component translation = Component.translatable("msg.foup.overhead_cart.issue." + name);
     private final boolean movingHoist;
 
-    OverheadCartState(boolean movingHoist)
-    {
+    OverheadCartState(boolean movingHoist) {
         this.movingHoist = movingHoist;
     }
 
-    public Component getTranslation()
-    {
+    public Component getTranslation() {
         return translation;
     }
 
-    public boolean hasMovingHoist()
-    {
+    public boolean hasMovingHoist() {
         return movingHoist;
     }
 
-    public static OverheadCartState of(int idx)
-    {
+    public static OverheadCartState of(int idx) {
         return BY_ID.apply(idx);
     }
 }

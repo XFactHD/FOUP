@@ -8,8 +8,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.util.TriState;
 
-public record ClientboundAcknowledgeStationLinkPayload(BlockPos pos, TriState result) implements CustomPacketPayload
-{
+public record ClientboundAcknowledgeStationLinkPayload(BlockPos pos, TriState result) implements CustomPacketPayload {
     public static final Type<ClientboundAcknowledgeStationLinkPayload> TYPE = Utils.payloadType("ack_station_link");
     public static final StreamCodec<ByteBuf, ClientboundAcknowledgeStationLinkPayload> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC,
@@ -20,8 +19,7 @@ public record ClientboundAcknowledgeStationLinkPayload(BlockPos pos, TriState re
     );
 
     @Override
-    public Type<ClientboundAcknowledgeStationLinkPayload> type()
-    {
+    public Type<ClientboundAcknowledgeStationLinkPayload> type() {
         return TYPE;
     }
 }

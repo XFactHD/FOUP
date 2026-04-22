@@ -8,11 +8,9 @@ import io.github.xfacthd.foup.common.recipe.AddFoupToCartRecipe;
 import net.minecraft.world.item.crafting.RecipeType;
 
 @EmiEntrypoint
-public final class FoupEmiPlugin implements EmiPlugin
-{
+public final class FoupEmiPlugin implements EmiPlugin {
     @Override
-    public void register(EmiRegistry registry)
-    {
+    public void register(EmiRegistry registry) {
         registry.addDragDropHandler(OverheadCartScreen.class, new OverheadCartDragDropHandler());
 
         // FIXME: requires EMI update
