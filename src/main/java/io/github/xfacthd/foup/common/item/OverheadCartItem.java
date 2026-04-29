@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -46,6 +47,11 @@ public final class OverheadCartItem extends Item {
             cart.getSchedule().applySnapshot(stack.get(FoupContent.DC_TYPE_SCHEDULE));
 
             level.addFreshEntity(cart);
+
+            Player player = ctx.getPlayer();
+            if (player != null && !player.hasInfiniteMaterials()) {
+                stack.shrink(1);
+            }
         }
         return InteractionResult.PASS;
     }
