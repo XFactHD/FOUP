@@ -30,7 +30,7 @@ public final class FoupItem extends Item {
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (hand == InteractionHand.MAIN_HAND) {
+        if (hand == InteractionHand.MAIN_HAND && stack.getCount() == 1) {
             if (!level.isClientSide()) {
                 player.openMenu(new FoupMenuProvider(stack));
             }
