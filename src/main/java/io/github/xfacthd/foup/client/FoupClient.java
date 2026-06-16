@@ -2,7 +2,6 @@ package io.github.xfacthd.foup.client;
 
 import io.github.xfacthd.foup.Foup;
 import io.github.xfacthd.foup.client.network.ClientNetworkHandler;
-import io.github.xfacthd.foup.client.renderer.PipelineModifiers;
 import io.github.xfacthd.foup.client.renderer.block.FoupStorageInterfaceRenderer;
 import io.github.xfacthd.foup.client.renderer.debug.RailNetworkDebugRenderer;
 import io.github.xfacthd.foup.client.renderer.entity.OverheadCartModel;
@@ -13,7 +12,6 @@ import io.github.xfacthd.foup.client.screen.FoupLoaderScreen;
 import io.github.xfacthd.foup.client.screen.FoupScreen;
 import io.github.xfacthd.foup.client.screen.FoupStorageLockerScreen;
 import io.github.xfacthd.foup.client.screen.OverheadCartScreen;
-import io.github.xfacthd.foup.client.util.ClientUtils;
 import io.github.xfacthd.foup.common.FoupContent;
 import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugPayloads;
 import io.github.xfacthd.foup.common.util.Utils;
@@ -34,17 +32,14 @@ public final class FoupClient {
         modBus.addListener(FoupClient::onRegisterConditionalItemModelProperties);
         modBus.addListener(FoupClient::onRegisterMenuScreens);
         modBus.addListener(FoupStorageInterfaceRenderer::onTextureAtlasStitched);
-        modBus.addListener(ClientUtils::onRegisterRenderPipelines);
-        modBus.addListener(ClientUtils::onRegisterRenderBuffers);
-        modBus.addListener(PipelineModifiers::onRegisterPipelineModifiers);
         modBus.addListener(ClientNetworkHandler::onRegisterPayloadHandlers);
 
         NeoForge.EVENT_BUS.addListener(OverheadRailInfoRenderer::onExtractRenderState);
-        NeoForge.EVENT_BUS.addListener(OverheadRailInfoRenderer::onRenderLevelStage);
+        NeoForge.EVENT_BUS.addListener(OverheadRailInfoRenderer::onSubmitCustomGeometry);
 
         if ((!FMLEnvironment.isProduction() || RailNetworkDebugPayloads.ENABLE_IN_PROD)) {
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onExtractRenderState);
-            NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onRenderLevelStage);
+            NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onSubmitCustomGeometry);
             NeoForge.EVENT_BUS.addListener(RailNetworkDebugRenderer::onPlayerDisconnect);
         }
     }

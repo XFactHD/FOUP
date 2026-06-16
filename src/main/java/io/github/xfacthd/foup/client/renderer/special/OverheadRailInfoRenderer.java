@@ -1,11 +1,8 @@
 package io.github.xfacthd.foup.client.renderer.special;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import io.github.xfacthd.foup.client.renderer.PipelineModifiers;
-import io.github.xfacthd.foup.client.util.ClientUtils;
 import io.github.xfacthd.foup.client.util.GhostVertexConsumer;
 import io.github.xfacthd.foup.client.util.SingleBlockFakeLevel;
 import io.github.xfacthd.foup.common.FoupContent;
@@ -16,17 +13,23 @@ import io.github.xfacthd.foup.common.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.BlockQuadOutput;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.feature.CustomFeatureRenderer;
+import net.minecraft.client.renderer.feature.TextFeatureRenderer;
+import net.minecraft.client.renderer.feature.submit.SubmitNode;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.InteractionHand;
@@ -41,7 +44,8 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent;
+import net.neoforged.neoforge.client.submit.RenderPhaseKeys;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
 import org.jspecify.annotations.Nullable;
@@ -132,7 +136,7 @@ public final class OverheadRailInfoRenderer {
         return new RailNodeInfoRenderState(state, pos.immutable(), stationData);
     }
 
-    public static void onRenderLevelStage(RenderLevelStageEvent.AfterTranslucentParticles event) {
+    public static void onSubmitCustomGeometry(SubmitCustomGeometryEvent event) {
         RailInfoRenderState renderState = event.getLevelRenderState().getRenderData(DATA_KEY);
         if (renderState == null) {
             return;
@@ -141,13 +145,9 @@ public final class OverheadRailInfoRenderer {
         Minecraft minecraft = Minecraft.getInstance();
         PoseStack poseStack = event.getPoseStack();
         CameraRenderState camera = event.getLevelRenderState().cameraRenderState;
+        SubmitNodeCollector submitNodeCollector = event.getSubmitNodeCollector();
         Font font = minecraft.font;
 
-        RenderSystem.pushPipelineModifier(PipelineModifiers.NO_DEPTH_TEST);
-
-        MultiBufferSource.BufferSource buffers = minecraft.renderBuffers().bufferSource();
-
-        VertexConsumer quadBuilder = buffers.getBuffer(ClientUtils.INFO_QUADS);
         GhostBlockRenderState ghost = renderState.ghost;
         if (ghost != null) {
             Vec3 offset = Vec3.atLowerCornerOf(ghost.pos).subtract(camera.pos);
@@ -156,41 +156,26 @@ public final class OverheadRailInfoRenderer {
 
             boolean ambientOcclusion = minecraft.options.ambientOcclusion().get();
             ModelBlockRenderer blockRenderer = new ModelBlockRenderer(ambientOcclusion, false, minecraft.getBlockColors());
-            // FIXME: rewrite to not use render types at all
+            // FIXME: switch to ghost render lib once it's extracted from FramedBlocks
             RenderType bufferType = Sheets.translucentBlockItemSheet();//NeoForgeRenderTypes.TRANSLUCENT_ON_PARTICLES_TARGET.get();
-            VertexConsumer builder = new GhostVertexConsumer(buffers.getBuffer(bufferType), GHOST_OPACITY);
-            BlockQuadOutput output = (_, _, _, quad, instance) ->
-                    builder.putBakedQuad(poseStack.last(), quad, instance);
+            submitNodeCollector.submitSpecial(RenderPhaseKeys.AFTER_TERRAIN, new CustomFeatureRenderer.Submit(poseStack.last().copy(), bufferType, (pose, buffer) -> {
+                VertexConsumer builder = new GhostVertexConsumer(buffer, GHOST_OPACITY);
+                BlockQuadOutput output = (_, _, _, quad, instance) -> builder.putBakedQuad(pose, quad, instance);
 
-            ClientLevel realLevel = Objects.requireNonNull(minecraft.level);
-            BlockAndTintGetter level = new SingleBlockFakeLevel(realLevel, ghost.pos, ghost.state);
-            blockRenderer.tesselateBlock(output, 0, 0, 0, level, ghost.pos, ghost.state, ghost.model, 0);
+                ClientLevel realLevel = Objects.requireNonNull(minecraft.level);
+                BlockAndTintGetter level = new SingleBlockFakeLevel(realLevel, ghost.pos, ghost.state);
+                blockRenderer.tesselateBlock(output, 0, 0, 0, level, ghost.pos, ghost.state, ghost.model, 0);
+            }));
 
             poseStack.popPose();
         }
 
         for (RailNodeInfoRenderState node : renderState.nodes) {
-            renderRailInfo(poseStack, camera, buffers, quadBuilder, font, node);
+            renderRailInfo(poseStack, camera, submitNodeCollector, font, node);
         }
-
-        buffers.endBatch(ClientUtils.INFO_QUADS);
-        if (ghost != null) {
-            //buffers.endBatch(NeoForgeRenderTypes.TRANSLUCENT_ON_PARTICLES_TARGET.get());
-            buffers.endBatch(Sheets.translucentBlockItemSheet());
-        }
-        buffers.endLastBatch();
-
-        RenderSystem.popPipelineModifier();
     }
 
-    private static void renderRailInfo(
-            PoseStack poseStack,
-            CameraRenderState camera,
-            MultiBufferSource.BufferSource buffers,
-            VertexConsumer builder,
-            Font font,
-            RailNodeInfoRenderState node
-    ) {
+    private static void renderRailInfo(PoseStack poseStack, CameraRenderState camera, SubmitNodeCollector submitNodeCollector, Font font, RailNodeInfoRenderState node) {
         poseStack.pushPose();
 
         Vec3 offset = Vec3.atCenterOf(node.pos).add(0, .25, 0).subtract(camera.pos);
@@ -200,42 +185,43 @@ public final class OverheadRailInfoRenderer {
         for (Direction dir : HORIZONTAL_DIRECTIONS) {
             AbstractOverheadRailBlock block = (AbstractOverheadRailBlock) state.getBlock();
             if (block.isEntrySide(state, dir)) {
-                renderArrow(poseStack, builder, dir, -.05F, false);
+                renderArrow(poseStack, submitNodeCollector, dir, -.05F, false);
             } else if (block.isExitSide(state, dir)) {
-                renderArrow(poseStack, builder, dir, -.05F, true);
+                renderArrow(poseStack, submitNodeCollector, dir, -.05F, true);
             }
         }
 
         StationInfoRenderState station = node.station;
         if (station != null) {
-            renderStationInfo(poseStack, camera, buffers, font, station.name, station.linkedType, STATION_FORMATTER);
+            renderStationInfo(poseStack, camera, submitNodeCollector, font, station.name, station.linkedType, STATION_FORMATTER);
         }
 
         poseStack.popPose();
     }
 
-    public static void renderArrow(PoseStack poseStack, VertexConsumer builder, Direction dir, float start, boolean arrow) {
+    public static void renderArrow(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, Direction dir, float start, boolean arrow) {
         Quaternionf yRot = Axis.YN.rotationDegrees(dir.toYRot());
-        renderArrow(poseStack, builder, yRot, start, arrow, 0xFF0000FF);
+        renderArrow(poseStack, submitNodeCollector, yRot, start, arrow, 0xFF0000FF);
     }
 
-    public static void renderArrow(PoseStack poseStack, VertexConsumer builder, Quaternionfc yRot, float start, boolean arrow, int color) {
+    public static void renderArrow(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, Quaternionfc yRot, float start, boolean arrow, int color) {
         poseStack.pushPose();
         poseStack.mulPose(yRot);
 
-        Matrix4f pose = poseStack.last().pose();
         float end = arrow ? .4F : .5F;
-        builder.addVertex(pose, -.05F, 0, start).setColor(color);
-        builder.addVertex(pose, -.05F, 0,   end).setColor(color);
-        builder.addVertex(pose,  .05F, 0,   end).setColor(color);
-        builder.addVertex(pose,  .05F, 0, start).setColor(color);
+        submitCustom(submitNodeCollector, poseStack, RenderTypes.debugQuads(), (pose, buffer) -> {
+            buffer.addVertex(pose, -.05F, 0, start).setColor(color);
+            buffer.addVertex(pose, -.05F, 0, end).setColor(color);
+            buffer.addVertex(pose, .05F, 0, end).setColor(color);
+            buffer.addVertex(pose, .05F, 0, start).setColor(color);
 
-        if (arrow) {
-            builder.addVertex(pose, -.15F, 0, .35F).setColor(color);
-            builder.addVertex(pose,    0F, 0,  .5F).setColor(color);
-            builder.addVertex(pose,    0F, 0,  .5F).setColor(color);
-            builder.addVertex(pose,  .15F, 0, .35F).setColor(color);
-        }
+            if (arrow) {
+                buffer.addVertex(pose, -.15F, 0, .35F).setColor(color);
+                buffer.addVertex(pose, 0F, 0, .5F).setColor(color);
+                buffer.addVertex(pose, 0F, 0, .5F).setColor(color);
+                buffer.addVertex(pose, .15F, 0, .35F).setColor(color);
+            }
+        });
 
         poseStack.popPose();
     }
@@ -243,7 +229,7 @@ public final class OverheadRailInfoRenderer {
     public static void renderStationInfo(
             PoseStack poseStack,
             CameraRenderState camera,
-            MultiBufferSource.BufferSource buffers,
+            SubmitNodeCollector submitNodeCollector,
             Font font,
             String name,
             @Nullable StationType type,
@@ -259,13 +245,33 @@ public final class OverheadRailInfoRenderer {
 
         Component typeName = formatter.apply(type);
 
-        Matrix4f pose = poseStack.last().pose();
-        font.drawInBatch(name, -(font.width(name) / 2F), -9, 0xFFBB00FF, false, pose, buffers, Font.DisplayMode.NORMAL, 0, LightCoordsUtil.FULL_BRIGHT);
+        submitText(submitNodeCollector, poseStack, -(font.width(name) / 2F), -9, name, 0xFFBB00FF);
         if (typeName != null) {
-            font.drawInBatch(typeName, -(font.width(typeName) / 2F), 1, 0xFFBB00FF, false, pose, buffers, Font.DisplayMode.NORMAL, 0, LightCoordsUtil.FULL_BRIGHT);
+            submitText(submitNodeCollector, poseStack, -(font.width(typeName) / 2F), 1, typeName, 0xFFBB00FF);
         }
 
         poseStack.popPose();
+    }
+
+    public static void submitText(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float x, float y, String text, int color) {
+        submitText(submitNodeCollector, poseStack, x, y, FormattedCharSequence.forward(text, Style.EMPTY), color);
+    }
+
+    public static void submitText(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float x, float y, Component text, int color) {
+        submitText(submitNodeCollector, poseStack, x, y, text.getVisualOrderText(), color);
+    }
+
+    public static void submitText(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float x, float y, FormattedCharSequence text, int color) {
+        Matrix4f pose = new Matrix4f(poseStack.last().pose());
+        submit(submitNodeCollector, new TextFeatureRenderer.Submit(pose, x, y, text, false, Font.DisplayMode.NORMAL, LightCoordsUtil.FULL_BRIGHT, color, 0, 0));
+    }
+
+    public static void submitCustom(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, RenderType renderType, SubmitNodeCollector.CustomGeometryRenderer renderer) {
+        submit(submitNodeCollector, new CustomFeatureRenderer.Submit(poseStack.last().copy(), renderType, renderer));
+    }
+
+    public static void submit(SubmitNodeCollector submitNodeCollector, SubmitNode submitNode) {
+        submitNodeCollector.submitSpecial(RenderPhaseKeys.ALWAYS_ON_TOP, submitNode);
     }
 
     private record RailInfoRenderState(@Nullable GhostBlockRenderState ghost, List<RailNodeInfoRenderState> nodes) { }

@@ -1,12 +1,8 @@
 package io.github.xfacthd.foup.client.renderer.debug;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import io.github.xfacthd.foup.client.renderer.PipelineModifiers;
 import io.github.xfacthd.foup.client.renderer.special.OverheadRailInfoRenderer;
-import io.github.xfacthd.foup.client.util.ClientUtils;
 import io.github.xfacthd.foup.common.data.StationType;
 import io.github.xfacthd.foup.common.data.railnet.debug.RailNetworkDebugData;
 import io.github.xfacthd.foup.common.util.Utils;
@@ -14,20 +10,19 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent;
 import org.joml.Quaternionfc;
 import org.jspecify.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,58 +50,54 @@ public final class RailNetworkDebugRenderer {
         }
     }
 
-    public static void onRenderLevelStage(RenderLevelStageEvent.AfterTranslucentParticles event) {
+    public static void onSubmitCustomGeometry(SubmitCustomGeometryEvent event) {
         List<RailNetworkDebugRenderState> renderStates = event.getLevelRenderState().getRenderData(DATA_KEY);
         if (renderStates == null) {
             return;
         }
 
-        RenderSystem.pushPipelineModifier(PipelineModifiers.NO_DEPTH_TEST);
-        MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
         CameraRenderState camera = event.getLevelRenderState().cameraRenderState;
+        SubmitNodeCollector submitNodeCollector = event.getSubmitNodeCollector();
         Font font = Minecraft.getInstance().font;
         for (RailNetworkDebugRenderState renderState : renderStates) {
-            renderNetwork(renderState, buffer, event.getPoseStack(), camera, font);
+            submitNetwork(renderState, submitNodeCollector, event.getPoseStack(), camera, font);
         }
-        buffer.endBatch(ClientUtils.INFO_QUADS);
-        buffer.endLastBatch();
-        RenderSystem.popPipelineModifier();
     }
 
-    private static void renderNetwork(RailNetworkDebugRenderState renderState, MultiBufferSource.BufferSource buffer, PoseStack poseStack, CameraRenderState camera, Font font) {
-        VertexConsumer builder = buffer.getBuffer(ClientUtils.INFO_QUADS);
+    private static void submitNetwork(RailNetworkDebugRenderState renderState, SubmitNodeCollector submitNodeCollector, PoseStack poseStack, CameraRenderState camera, Font font) {
         for (RailNetworkDebugData.Node node : renderState.data.nodes()) {
             poseStack.pushPose();
 
             Vec3 offset = Vec3.atCenterOf(node.pos()).add(0, .25, 0).subtract(camera.pos);
             poseStack.translate(offset.x, offset.y, offset.z);
 
-            Matrix4f pose = poseStack.last().pose();
             int color = node.occupied() ? 0xFFFF0000 : 0xFF00FF00;
-            builder.addVertex(pose, -.15F, 0, -.15F).setColor(color);
-            builder.addVertex(pose, -.15F, 0,  .15F).setColor(color);
-            builder.addVertex(pose,  .15F, 0,  .15F).setColor(color);
-            builder.addVertex(pose,  .15F, 0, -.15F).setColor(color);
+            OverheadRailInfoRenderer.submitCustom(submitNodeCollector, poseStack, RenderTypes.debugQuads(), (pose, buffer) -> {
+                buffer.addVertex(pose, -.15F, 0, -.15F).setColor(color);
+                buffer.addVertex(pose, -.15F, 0,  .15F).setColor(color);
+                buffer.addVertex(pose,  .15F, 0,  .15F).setColor(color);
+                buffer.addVertex(pose,  .15F, 0, -.15F).setColor(color);
+            });
 
             if (renderState.showNetId) {
-                renderNetworkId(buffer, poseStack, camera, font, renderState.netId);
+                renderNetworkId(submitNodeCollector, poseStack, camera, font, renderState.netId);
             }
 
             for (BlockPos neighbour : node.neighbours()) {
                 Direction dir = Utils.getDirByNormal(node.pos(), neighbour);
                 if (dir != null) {
-                    OverheadRailInfoRenderer.renderArrow(poseStack, builder, dir, .15F, true);
+                    OverheadRailInfoRenderer.renderArrow(poseStack, submitNodeCollector, dir, .15F, true);
                 } else {
                     Vec3 diff = Vec3.atCenterOf(neighbour).subtract(Vec3.atCenterOf(node.pos())).normalize();
                     double angle = Math.atan2(diff.z, diff.x) - Math.toRadians(90F);
                     Quaternionfc yRot = Axis.YN.rotation((float) angle);
-                    OverheadRailInfoRenderer.renderArrow(poseStack, builder, yRot, 0F, true, 0xFFFF0000);
+                    OverheadRailInfoRenderer.renderArrow(poseStack, submitNodeCollector, yRot, 0F, true, 0xFFFF0000);
                 }
             }
 
             if (node.stationName().isPresent()) {
                 OverheadRailInfoRenderer.renderStationInfo(
-                        poseStack, camera, buffer, font, node.stationName().get(), node.stationType().orElse(null), STATION_FORMATTER
+                        poseStack, camera, submitNodeCollector, font, node.stationName().get(), node.stationType().orElse(null), STATION_FORMATTER
                 );
             }
 
@@ -114,7 +105,7 @@ public final class RailNetworkDebugRenderer {
         }
     }
 
-    private static void renderNetworkId(MultiBufferSource.BufferSource buffer, PoseStack poseStack, CameraRenderState camera, Font font, long netId) {
+    private static void renderNetworkId(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, CameraRenderState camera, Font font, long netId) {
         poseStack.pushPose();
 
         poseStack.translate(0, 0, 0);
@@ -124,8 +115,7 @@ public final class RailNetworkDebugRenderer {
         poseStack.scale(1F / 40F, 1F / 40F, 1);
 
         String name = Long.toString(netId);
-        Matrix4f pose = poseStack.last().pose();
-        font.drawInBatch(name, -(font.width(name) / 2F), -9, 0xFFFFFFFF, false, pose, buffer, Font.DisplayMode.NORMAL, 0, LightCoordsUtil.FULL_BRIGHT);
+        OverheadRailInfoRenderer.submitText(submitNodeCollector, poseStack, -(font.width(name) / 2F), -9, name, 0xFFFFFFFF);
 
         poseStack.popPose();
     }

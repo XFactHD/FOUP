@@ -16,7 +16,7 @@ public final class FoupEntityTypeTagsProvider extends EntityTypeTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider registries) {
-        tag(Tags.EntityTypes.CAPTURING_NOT_SUPPORTED).add(FoupContent.ENTITY_TYPE_CART.value());
-        tag(Tags.EntityTypes.TELEPORTING_NOT_SUPPORTED).add(FoupContent.ENTITY_TYPE_CART.value());
+        tag(Tags.EntityTypes.CAPTURING_NOT_SUPPORTED).add(FoupContent.ENTITY_TYPE_CART.getKey());
+        tag(Tags.EntityTypes.TELEPORTING_NOT_SUPPORTED).add(FoupContent.ENTITY_TYPE_CART.getKey());
     }
 }

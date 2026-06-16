@@ -18,21 +18,21 @@ public final class FoupBlockTagsProvider extends BlockTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider registries) {
         tag(Tags.Blocks.RELOCATION_NOT_SUPPORTED)
-                .add(FoupContent.BLOCK_RAIL.value())
-                .add(FoupContent.BLOCK_RAIL_CURVE.value())
-                .add(FoupContent.BLOCK_RAIL_SWITCH.value())
-                .add(FoupContent.BLOCK_RAIL_STATION.value())
-                .add(FoupContent.BLOCK_FOUP_LOADER.value())
-                .add(FoupContent.BLOCK_FOUP_STORAGE_INTERFACE.value())
-                .add(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value());
+                .add(FoupContent.BLOCK_RAIL.getKey())
+                .add(FoupContent.BLOCK_RAIL_CURVE.getKey())
+                .add(FoupContent.BLOCK_RAIL_SWITCH.getKey())
+                .add(FoupContent.BLOCK_RAIL_STATION.getKey())
+                .add(FoupContent.BLOCK_FOUP_LOADER.getKey())
+                .add(FoupContent.BLOCK_FOUP_STORAGE_INTERFACE.getKey())
+                .add(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.getKey());
 
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
-                .add(FoupContent.BLOCK_RAIL.value())
-                .add(FoupContent.BLOCK_RAIL_CURVE.value())
-                .add(FoupContent.BLOCK_RAIL_SWITCH.value())
-                .add(FoupContent.BLOCK_RAIL_STATION.value())
-                .add(FoupContent.BLOCK_FOUP_LOADER.value())
-                .add(FoupContent.BLOCK_FOUP_STORAGE_INTERFACE.value())
-                .add(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.value());
+                .add(FoupContent.BLOCK_RAIL.getKey())
+                .add(FoupContent.BLOCK_RAIL_CURVE.getKey())
+                .add(FoupContent.BLOCK_RAIL_SWITCH.getKey())
+                .add(FoupContent.BLOCK_RAIL_STATION.getKey())
+                .add(FoupContent.BLOCK_FOUP_LOADER.getKey())
+                .add(FoupContent.BLOCK_FOUP_STORAGE_INTERFACE.getKey())
+                .add(FoupContent.BLOCK_FOUP_STORAGE_LOCKER.getKey());
     }
 }

@@ -36,24 +36,24 @@ public final class ClientNetworkHandler {
     private static void handleOpenOverheadRailStationScreen(ClientboundOpenOverheadRailStationScreenPayload payload, IPayloadContext ctx) {
         BlockPos pos = payload.pos();
         if (ctx.player().level().getBlockEntity(pos) instanceof OverheadRailStationBlockEntity station) {
-            Minecraft.getInstance().setScreen(new OverheadRailStationScreen(pos, station));
+            Minecraft.getInstance().gui.setScreen(new OverheadRailStationScreen(pos, station));
         }
     }
 
     private static void handleStationRenameAck(ClientboundAcknowledgeStationRenamePayload payload, IPayloadContext ctx) {
-        if (Minecraft.getInstance().screen instanceof OverheadRailStationScreen screen) {
+        if (Minecraft.getInstance().gui.screen() instanceof OverheadRailStationScreen screen) {
             screen.onRenameAck(payload.pos(), payload.result());
         }
     }
 
     private static void handleStationLinkAck(ClientboundAcknowledgeStationLinkPayload payload, IPayloadContext ctx) {
-        if (Minecraft.getInstance().screen instanceof OverheadRailStationScreen screen) {
+        if (Minecraft.getInstance().gui.screen() instanceof OverheadRailStationScreen screen) {
             screen.onLinkAck(payload.pos(), payload.result());
         }
     }
 
     private static void handleRefreshStaleSchedule(ClientboundRefreshStaleSchedulePayload payload, IPayloadContext ctx) {
-        if (Minecraft.getInstance().screen instanceof OverheadCartScreen screen && screen.getCart().getId() == payload.cartId()) {
+        if (Minecraft.getInstance().gui.screen() instanceof OverheadCartScreen screen && screen.getCart().getId() == payload.cartId()) {
             screen.updateStaleSchedule(payload.scheduleEntries(), payload.rejectedAction(), payload.stations());
         }
     }
